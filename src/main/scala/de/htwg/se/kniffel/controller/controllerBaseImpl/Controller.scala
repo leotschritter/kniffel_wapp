@@ -43,10 +43,10 @@ class Controller(implicit var field: IField, var diceCup: IDiceCup, var game: IG
     game = game.next().get
 
   // doAndPublish for putOut and putIn
-  def doAndPublish(doThis: List[Int] => IDiceCup, list: List[Int]): Unit =
+  def doAndPublish(doThis: List[Int] => IDiceCup, list: List[Int]): Unit = {
     diceCup = doThis(list)
-
-  notifyObservers(Event.Move)
+    notifyObservers(Event.Move)
+  }
 
   def putOut(list: List[Int]): IDiceCup =
     diceCup.putDicesOut(list)
@@ -55,10 +55,10 @@ class Controller(implicit var field: IField, var diceCup: IDiceCup, var game: IG
     diceCup.putDicesIn(list)
 
   // doAndPublish for nextRound() and dice()
-  def doAndPublish(doThis: => IDiceCup): Unit =
+  def doAndPublish(doThis: => IDiceCup): Unit = {
     diceCup = doThis
-
-  notifyObservers(Event.Move)
+    notifyObservers(Event.Move)
+  }
 
   def dice(): IDiceCup = diceCup.dice()
 

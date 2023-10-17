@@ -32,3 +32,5 @@ null/*
 .idea_modules
 /.worksheet/
 
+*.json
+*.xml
