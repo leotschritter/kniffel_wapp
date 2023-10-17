@@ -1,9 +1,10 @@
 name := """Kniffel"""
-organization := "scala.de.htwg.wapp"
 
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+resolvers += Resolver.sonatypeRepo("snapshots")
 
 scalaVersion := "2.13.12"
 
