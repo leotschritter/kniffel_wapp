@@ -1,19 +1,16 @@
 package de.htwg.se.kniffel
 package model.fileIOComponent.fileIOJsonImpl
 
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
-import model.gameComponent.gameBaseImpl.{Game, Player}
-
-import scala.io.Source
-import model.fileIOComponent.IFileIO
-import model.dicecupComponent.IDiceCup
-import model.fieldComponent.IField
-import model.fieldComponent.IMatrix
-import model.gameComponent.IGame
+import de.htwg.se.kniffel.model.dicecupComponent.IDiceCup
+import de.htwg.se.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
+import de.htwg.se.kniffel.model.fieldComponent.{IField, IMatrix}
+import de.htwg.se.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
+import de.htwg.se.kniffel.model.fileIOComponent.IFileIO
+import de.htwg.se.kniffel.model.gameComponent.IGame
+import de.htwg.se.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
 import play.api.libs.json._
 
-import javax.management.ValueExp
+import scala.io.Source
 
 
 class FileIO extends IFileIO {

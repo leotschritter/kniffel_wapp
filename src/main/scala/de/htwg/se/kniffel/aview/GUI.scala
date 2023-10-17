@@ -1,23 +1,31 @@
 package de.htwg.se.kniffel
 package aview
 
-import controller.IController
-import model.Move
-
-import scala.swing._
-import scala.swing.event._
-import scala.swing.ListView._
-import util.Event
-import util.Observer
-import Config._
+import com.google.inject.Inject
+import de.htwg.se.kniffel.controller.IController
+import de.htwg.se.kniffel.model.Move
+import de.htwg.se.kniffel.util.{Event, Observer}
 
 import java.awt.Toolkit
-import javax.swing.{ImageIcon, SpringLayout}
-import javax.swing.border.Border
+import javax.swing.ImageIcon
+import scala.swing.ListView._
+import scala.swing._
+import scala.swing.event._
 
-class GUI(implicit controller: IController) extends Frame with UI {
-  override def controller: IController = Config.controller
-  Config.controller.add(this)
+class GUI @Inject()(controller: IController) extends Frame with Observer {
+
+  controller.add(this)
+
+  def writeDown(move: Move): Unit = {
+    controller.put(move)
+    controller.next()
+    controller.doAndPublish(controller.nextRound())
+  }
+
+  def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
+
+  def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
+
   title = "Kniffel"
   iconImage = toolkit.getImage("src/main/resources/6.png")
   val tk: Toolkit = Toolkit.getDefaultToolkit
@@ -85,10 +93,10 @@ class GUI(implicit controller: IController) extends Frame with UI {
         sys.exit(0)
       })
       contents += new MenuItem(Action("Load") {
-        Config.controller.load
+        controller.load
       })
       contents += new MenuItem(Action("Save") {
-        Config.controller.save
+        controller.save
       })
     }
   }
@@ -106,12 +114,12 @@ class GUI(implicit controller: IController) extends Frame with UI {
   centerOnScreen()
   open()
 
-  def field(numberOfPlayers: Int = Config.controller.getField.numberOfPlayers): List[Label] =
+  def field(numberOfPlayers: Int = controller.getField.numberOfPlayers): List[Label] =
     (for {
       i <- 0 until 19
       j <- 0 until numberOfPlayers
     } yield new Label {
-      text = Config.controller.getField.getMatrix.cell(j, i)
+      text = controller.getField.getMatrix.cell(j, i)
       font = field_font
       opaque = true
       if (j == getXIndex)
@@ -122,14 +130,14 @@ class GUI(implicit controller: IController) extends Frame with UI {
       border = Swing.LineBorder(new Color(0, 0, 0))
     }).toList
 
-  def getXIndex: Int = Config.controller.getGame.getPlayerID
+  def getXIndex: Int = controller.getGame.getPlayerID
 
-  def isEmpty(y: Int): Boolean = Config.controller.getField.getMatrix.isEmpty(getXIndex, y)
+  def isEmpty(y: Int): Boolean = controller.getField.getMatrix.isEmpty(getXIndex, y)
 
   def disableList: List[Int] = (for {y <- 0 until 19 if !isEmpty(y)} yield y).toList
 
-  class RightPanel(state: StateOfDices.Value, inCup: List[Int] = Config.controller.getDicecup.getInCup,
-                   locked: List[Int] = Config.controller.getDicecup.getLocked, remaining_moves: Int = Config.controller.getDicecup.getRemainingDices) extends BoxPanel(Orientation.Vertical) {
+  class RightPanel(state: StateOfDices.Value, inCup: List[Int] = controller.getDicecup.getInCup,
+                   locked: List[Int] = controller.getDicecup.getLocked, remaining_moves: Int = controller.getDicecup.getRemainingDices) extends BoxPanel(Orientation.Vertical) {
 
     contents += new RightUpperPanel
     contents += new RightBottomPanel
@@ -154,12 +162,12 @@ class GUI(implicit controller: IController) extends Frame with UI {
       val lstViewLeft: ListView[ImageIcon] = new ListView[ImageIcon]() {
         selection.intervalMode = IntervalMode.MultiInterval
         if (state.==(StateOfDices.running))
-          listData = for (s <- Config.controller.getDicecup.getInCup) yield intToImg(s)
+          listData = for (s <- controller.getDicecup.getInCup) yield intToImg(s)
         preferredSize = new Dimension(100, 500)
       }
       val lstViewRight: ListView[ImageIcon] = new ListView[ImageIcon]() {
         selection.intervalMode = IntervalMode.MultiInterval
-        listData = for (s <- Config.controller.getDicecup.getLocked) yield intToImg(s)
+        listData = for (s <- controller.getDicecup.getLocked) yield intToImg(s)
         preferredSize = new Dimension(100, 500)
       }
       add(new TopInnerPanel(), BorderPanel.Position.North)
@@ -172,7 +180,7 @@ class GUI(implicit controller: IController) extends Frame with UI {
         background = new Color(255, 255, 255)
         border = Swing.MatteBorder(1, 0, 0, 0, new Color(0, 0, 0))
         contents += new Label {
-          text = Config.controller.getGame.getPlayerName + " ist an der Reihe."
+          text = controller.getGame.getPlayerName + " ist an der Reihe."
           font = right_font
         }
       }
@@ -240,7 +248,7 @@ class GUI(implicit controller: IController) extends Frame with UI {
           if (remaining_moves >= 0)
             reactions += {
               case MouseClicked(src, pt, mod, clicks, props) =>
-                Config.controller.doAndPublish(Config.controller.dice())
+                controller.doAndPublish(controller.dice())
             }
           else
             enabled = false
@@ -335,10 +343,10 @@ class GUI(implicit controller: IController) extends Frame with UI {
     }
   }
 
-  class CenterCellPanel(numberOfPlayers: Int = Config.controller.getField.numberOfPlayers) extends GridPanel(20, numberOfPlayers) {
+  class CenterCellPanel(numberOfPlayers: Int = controller.getField.numberOfPlayers) extends GridPanel(20, numberOfPlayers) {
     background = new Color(255, 255, 255)
     for (x <- 0 until numberOfPlayers) yield contents += new Label {
-      text = Config.controller.getGame.getPlayerName(x)
+      text = controller.getGame.getPlayerName(x)
       font = field_font
       opaque = true
       foreground = new Color(255, 255, 255)
@@ -353,7 +361,7 @@ class GUI(implicit controller: IController) extends Frame with UI {
     listenTo(mouse.clicks)
     reactions += {
       case MouseClicked(src, pt, mod, clicks, props)
-      => Config.controller.undo(); update(Event.Move)
+      => controller.undo(); update(Event.Move)
     }
   }
 
@@ -362,7 +370,7 @@ class GUI(implicit controller: IController) extends Frame with UI {
     listenTo(mouse.clicks)
     reactions += {
       case MouseClicked(src, pt, mod, clicks, props)
-      => Config.controller.redo(); update(Event.Move)
+      => controller.redo(); update(Event.Move)
     }
   }
 
@@ -378,6 +386,6 @@ class GUI(implicit controller: IController) extends Frame with UI {
     }
     // def errorMessage(): Unit = Dialog.showMessage(contents.head, "Feld ist schon belegt!", title = "Falsche Eingabe", messageType = Dialog.Message.Error)
 
-    def getValue: String = Config.controller.getDicecup.getResult(y).toString
+    def getValue: String = controller.getDicecup.getResult(y).toString
   }
 }

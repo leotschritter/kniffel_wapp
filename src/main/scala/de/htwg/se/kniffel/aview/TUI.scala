@@ -1,22 +1,21 @@
 package de.htwg.se.kniffel
 package aview
 
-import controller.IController
-import model.Move
+import com.google.inject.Inject
+import de.htwg.se.kniffel.controller.IController
+import de.htwg.se.kniffel.model.Move
+import de.htwg.se.kniffel.util.{Event, Observer}
 
-import scala.util.{Failure, Success, Try}
 import scala.io.StdIn.readLine
-import util.{Event, Observer}
-import Config._
+import scala.util.{Failure, Success, Try}
 
 
-class TUI(implicit controller: IController) extends UI with Observer {
-  override def controller: IController = Config.controller
-  Config.controller.add(this)
+class TUI @Inject()(controller: IController) extends Observer {
+  controller.add(this)
   var continue = true
 
-  override def run(): Unit = {
-    println (Config.IController.getField.toString)
+  def run(): Unit = {
+    println(controller.getField.toString)
     inputLoop()
   }
 
@@ -24,9 +23,8 @@ class TUI(implicit controller: IController) extends UI with Observer {
     e match {
       case Event.Quit => continue = false
       case Event.Save => continue
-      case _ => println(Config.controller.getField.toString + "\n" + Config.controller.getDicecup.toString + Config.controller.getGame.getPlayerName + " ist an der Reihe.")
+      case _ => println(controller.getField.toString + "\n" + controller.getDicecup.toString + controller.getGame.getPlayerName + " ist an der Reihe.")
     }
-
 
   def inputLoop(): Unit = {
     analyseInput(readLine) match {
@@ -42,19 +40,20 @@ class TUI(implicit controller: IController) extends UI with Observer {
       case "q" => sys.exit(0); None
       case "po" => diceCupPutOut(list.tail.map(_.toInt)); None
       case "pi" => diceCupPutIn(list.tail.map(_.toInt)); None
-      case "d" => Config.controller.doAndPublish(Config.controller.dice()); None
-      case "u" => Config.controller.undo(); None
-      case "r" => Config.controller.redo(); None
-      case "s" => Config.controller.save; None
-      case "l" => Config.controller.load; None
+      case "d" => controller.doAndPublish(controller.dice()); None
+      case "u" => controller.undo(); None
+      case "r" => controller.redo(); None
+      case "s" => controller.save; None
+      case "l" => controller.load; None
       case "wd" =>
         invalidInput(list) match {
           case Success(f) => val posAndDesc = list.tail.head
-            val index: Option[Int] = Config.controller.getDicecup.indexOfField.get(posAndDesc)
-            if (index.isDefined && Config.controller.getField.getMatrix.isEmpty(Config.controller.getGame.getPlayerID, index.get)) {
-              Some(Move(Config.controller.getDicecup.getResult(index.get).toString, Config.controller.getGame.getPlayerID, index.get))
+            val index: Option[Int] = controller.getDicecup.indexOfField.get(posAndDesc)
+            if (index.isDefined && controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
+              Some(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
             } else {
-              println("Falsche Eingabe!"); None
+              println("Falsche Eingabe!")
+              None
             }
           case Failure(v) => println("Falsche Eingabe"); None
         }
@@ -65,5 +64,14 @@ class TUI(implicit controller: IController) extends UI with Observer {
 
   def invalidInput(list: List[String]): Try[String] = Try(list.tail.head)
 
-  def getController: IController = Config.controller
+  def writeDown(move: Move): Unit = {
+    controller.put(move)
+    controller.next()
+    controller.doAndPublish(controller.nextRound())
+  }
+
+  def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
+
+  def diceCupPutOut(po: List[Int]): Unit = controller.doAndPublish(controller.putOut, po)
+
 }

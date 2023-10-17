@@ -1,18 +1,26 @@
 package de.htwg.se.kniffel
 package controller.controllerBaseImpl
 
+import com.google.inject.Inject
 import controller.IController
 import model.Move
 import model.dicecupComponent.IDiceCup
 import model.fieldComponent.IField
 import model.gameComponent.IGame
 import util.{Event, Observable, UndoManager}
-import Config._
+import de.htwg.se.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
+import de.htwg.se.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
+import de.htwg.se.kniffel.model.fileIOComponent.fileIOJsonImpl.FileIO
+import de.htwg.se.kniffel.model.gameComponent.gameBaseImpl.Game
 import model.fileIOComponent.IFileIO
 
-class Controller(implicit var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController {
+class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController {
 
   val undoManager = new UndoManager[IGame, IField]
+
+  def this() = {
+    this(Field(new Matrix[String](2)), new DiceCup(), new Game(2), new FileIO())
+  }
 
   def undo(): Unit = {
     diceCup = diceCup.nextRound()
