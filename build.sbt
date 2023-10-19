@@ -1,14 +1,14 @@
-name          := "Kniffel"
-organization  := "de.htwg.se"
-version       := "0.1.0"
-scalaVersion  := "2.12.18"
+name := "Kniffel"
+organization := "de.htwg.se"
+version := "0.1.0"
+scalaVersion := "2.13.12"
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.15"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
 
-libraryDependencies += "org.scala-lang.modules" % "scala-swing_2.12" % "3.0.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "3.0.0"
 
-libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.12" % "2.1.0"
+libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.13" % "2.1.0"
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.4"
 

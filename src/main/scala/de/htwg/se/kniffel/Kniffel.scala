@@ -2,17 +2,15 @@ package de.htwg.se.kniffel
 
 import com.google.inject.{Guice, Injector}
 import de.htwg.se.kniffel.aview.{GUI, TUI}
-import de.htwg.se.kniffel.controller.controllerBaseImpl.Controller
-
+import de.htwg.se.kniffel.controller.IController
 object Kniffel {
-  private val injector: Injector = Guice.createInjector(new KniffelModule)
 
-  val controller: Controller = injector.getInstance(classOf[Controller])
+  private val injector: Injector = Guice.createInjector(new KniffelModule)
+  val controller: IController = injector.getInstance(classOf[IController])
   private val tui = injector.getInstance(classOf[TUI])
-  private val gui = injector.getInstance(classOf[GUI])
 
   def main(args: Array[String]): Unit = {
-
+    injector.getInstance(classOf[GUI])
     println("Welcome to Kniffel")
     tui.run()
   }
