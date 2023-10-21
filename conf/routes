@@ -4,7 +4,25 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.KniffelController.index()
+GET         /               controllers.KniffelController.index()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file   controllers.Assets.versioned(path="/public", file: Asset)
+
+GET         /field          controllers.KniffelController.field
+
+PUT         /dice           controllers.KniffelController.dice
+
+PUT         /out            controllers.KniffelController.putOut(out: String)
+
+PUT         /in             controllers.KniffelController.putIn(in: String)
+
+PUT         /write          controllers.KniffelController.write(to: String)
+
+PUT         /undo           controllers.KniffelController.undo
+
+PUT         /redo           controllers.KniffelController.redo
+
+POST        /save           controllers.KniffelController.save
+
+GET         /load           controllers.KniffelController.load
