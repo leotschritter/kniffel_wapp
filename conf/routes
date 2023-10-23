@@ -11,18 +11,25 @@ GET         /assets/*file   controllers.Assets.versioned(path="/public", file: A
 
 GET         /field          controllers.KniffelController.field
 
++nocsrf
 PUT         /dice           controllers.KniffelController.dice
 
++nocsrf
 PUT         /out            controllers.KniffelController.putOut(out: String)
 
++nocsrf
 PUT         /in             controllers.KniffelController.putIn(in: String)
 
++nocsrf
 PUT         /write          controllers.KniffelController.write(to: String)
 
++nocsrf
 PUT         /undo           controllers.KniffelController.undo
 
++nocsrf
 PUT         /redo           controllers.KniffelController.redo
 
++nocsrf
 POST        /save           controllers.KniffelController.save
 
 GET         /load           controllers.KniffelController.load
