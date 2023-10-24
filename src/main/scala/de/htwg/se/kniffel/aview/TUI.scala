@@ -12,7 +12,7 @@ import scala.util.{Failure, Success, Try}
 
 class TUI @Inject()(controller: IController) extends Observer {
   controller.add(this)
-  var continue = true
+  private var continue = true
 
   def run(): Unit = {
     println(controller.getField.toString)
@@ -26,7 +26,7 @@ class TUI @Inject()(controller: IController) extends Observer {
       case _ => println(controller.getField.toString + "\n" + controller.getDicecup.toString + controller.getGame.getPlayerName + " ist an der Reihe.")
     }
 
-  def inputLoop(): Unit = {
+  private def inputLoop(): Unit = {
     analyseInput(readLine) match {
       case None => inputLoop()
       case Some(move) => writeDown(move)
@@ -34,7 +34,7 @@ class TUI @Inject()(controller: IController) extends Observer {
     if (continue) inputLoop()
   }
 
-  def analyseInput(input: String): Option[Move] = {
+  private def analyseInput(input: String): Option[Move] = {
     val list = input.split("\\s").toList
     list.head match {
       case "q" => sys.exit(0); None
@@ -49,7 +49,7 @@ class TUI @Inject()(controller: IController) extends Observer {
         invalidInput(list) match {
           case Success(f) => val posAndDesc = list.tail.head
             val index: Option[Int] = controller.getDicecup.indexOfField.get(posAndDesc)
-            if (index.isDefined && controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
+            if (index.isDefined && controller.canWrite(controller.getGame.getPlayerID, index.get)) {
               Some(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
             } else {
               println("Falsche Eingabe!")
@@ -62,7 +62,7 @@ class TUI @Inject()(controller: IController) extends Observer {
     }
   }
 
-  def invalidInput(list: List[String]): Try[String] = Try(list.tail.head)
+  private def invalidInput(list: List[String]): Try[String] = Try(list.tail.head)
 
   def writeDown(move: Move): Unit = {
     controller.put(move)

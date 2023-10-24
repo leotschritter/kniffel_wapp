@@ -41,4 +41,7 @@ trait IController extends Observable {
   def save: Unit
 
   def load: Unit
+
+  def canWrite(col: Int, row: Int): Boolean
+  def newGame(numberOfPlayers: Int): Unit
 }

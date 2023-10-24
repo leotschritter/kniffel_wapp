@@ -54,7 +54,7 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
       this
   }
 
-  def mergeLists(list1: List[Int], list2: List[Int]): List[Int] = list1 ::: list2
+  private def mergeLists(list1: List[Int], list2: List[Int]): List[Int] = list1 ::: list2
 
   def getResult(index: Int): Int = {
     val list: List[Int] = mergeLists(inCup, locked)
@@ -75,9 +75,9 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
     ListMap("1" -> 0, "2" -> 1, "3" -> 2, "4" -> 3, "5" -> 4, "6" -> 5,
       "3X" -> 9, "4X" -> 10, "FH" -> 11, "KS" -> 12, "GS" -> 13, "KN" -> 14, "CH" -> 15)
 
-  override def toString() = ("Im Becher: " + inCup.mkString(" ")
-    +"\nRausgenommen: " + locked.mkString(" ")
-    +"\nVerbleibende Würfe: " + (remDices + 1)
-    +"\nBitte wählen Sie aus: " + indexOfField.keys.mkString(" ")
-    +"\n")
+  override def toString: String = ("Im Becher: " + inCup.mkString(" ")
+    + "\nRausgenommen: " + locked.mkString(" ")
+    + "\nVerbleibende Würfe: " + (remDices + 1)
+    + "\nBitte wählen Sie aus: " + indexOfField.keys.mkString(" ")
+    + "\n")
 }

@@ -92,5 +92,12 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
     notifyObservers(Event.Load)
   }
 
+  def canWrite(col: Int, row: Int): Boolean = field.getMatrix.isEmpty(col, row)
+
   override def toString: String = field.toString
-}
+
+  def newGame(numberOfPlayers: Int): Unit = {
+    field = new Field(numberOfPlayers)
+    diceCup = new DiceCup()
+    game = new Game(numberOfPlayers)
+  }}
