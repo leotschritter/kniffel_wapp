@@ -72,12 +72,7 @@
           });
           break;
         case "l":
-          inputResponse = await fetch("/load", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
+          inputResponse = await fetch("/load");
           break;
         case "q":
           return;
