@@ -41,5 +41,7 @@ case class Field(matrix: Matrix[String]) extends IField {
 
   def getMatrix: Matrix[String] = matrix
 
+  def getRows: Vector[Vector[String]] = matrix.rows
+
   override def toString = mesh()
 }

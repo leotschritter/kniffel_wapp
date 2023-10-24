@@ -9,6 +9,8 @@ trait IField {
   def numberOfPlayers: Int
 
   def getMatrix: IMatrix
+
+  def getRows: Vector[Vector[String]]
 }
 
 trait IMatrix {
