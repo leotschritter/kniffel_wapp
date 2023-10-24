@@ -1,0 +1,139 @@
+@(controller:de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
+
+@main("HTWG Kniffel") {
+    <head>
+        <style>
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #333;
+            }
+
+            li {
+                float: left;
+                border-right:1px solid #bbb;
+            }
+
+            li:last-child {
+                border-right: none;
+            }
+
+            li a {
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+
+            li a:hover:not(.active) {
+                background-color: #111;
+            }
+
+            .active {
+                background-color: #04AA6D;
+            }
+        </style>
+    </head>
+
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a class="active" href="/kniffel">Game</a></li>
+        <li style="float:right"><a href="/about">About</a></li>
+    </ul>
+
+
+    <h1>Welcome to Kniffel!</h1>
+    <button id="startGameButton">Start Game</button>
+
+    <script>
+        async function fetchFieldAndHandleInput() {
+            // Send an AJAX request to the server to get the field
+            let fieldResponse = await fetch("/field");
+            let field = await fieldResponse.text();
+            console.log(field);
+
+            let userInput = prompt("Enter next move:")
+            if (!userInput) {
+                await fetchFieldAndHandleInput();
+                return;
+            }
+            userInput = userInput.split(" ");
+
+            let inputResponse;
+            switch (userInput[0]) {
+                case "po":
+                    // Send user input to the server using AJAX
+                    inputResponse = await fetch("/out?out=" + encodeURIComponent(userInput.filter(input => input !== "po").toString()), {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    break;
+                case "pi":
+                    inputResponse = await fetch("/in?in=" + encodeURIComponent(userInput.filter(input => input !== "pi").toString()), {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        }
+                    });
+                    break;
+                case "d":
+                    inputResponse = await fetch("/dice", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    break;
+                case "wd":
+                    inputResponse = await fetch("/write?to=" + encodeURIComponent(userInput[1].toString()), {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        }
+                    });
+                    break;
+                case "u":
+                    inputResponse = await fetch("/undo", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    break;
+                case "r":
+                    inputResponse = await fetch("/redo", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    break;
+                case "s":
+                    inputResponse = await fetch("/save", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    break;
+                case "l":
+                    inputResponse = await fetch("/load");
+                    break;
+                case "q":
+                    return;
+            }
+
+            /*let inputResult = await inputResponse.text();*/
+            await fetchFieldAndHandleInput();
+        }
+
+        document.getElementById("startGameButton").addEventListener("click", function () {
+            fetchFieldAndHandleInput();
+        });
+    </script>
+}

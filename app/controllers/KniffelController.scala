@@ -30,8 +30,12 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
     Ok(views.html.index())
   }
 
-  def about: Action[AnyContent]= Action {
-    Ok(views.html.index())
+  def kniffel(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.kniffel(controller))
+  }
+
+  def about(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.about())
   }
 
   def field: Action[AnyContent] = Action {

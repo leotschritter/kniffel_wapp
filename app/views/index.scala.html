@@ -1,90 +1,49 @@
 @()
 @main("HTWG Kniffel") {
-  <h1>Welcome to Kniffel!</h1>
-  <button id="startGameButton">Start Game</button>
-
-  <script>
-    async function fetchFieldAndHandleInput() {
-      // Send an AJAX request to the server to get the field
-      let fieldResponse = await fetch("/field");
-      let field = await fieldResponse.text();
-      console.log(field);
-
-      let userInput = prompt("Enter next move:").split(" ");
-
-      let inputResponse;
-      switch (userInput[0]) {
-        case "po":
-          // Send user input to the server using AJAX
-          inputResponse = await fetch("/out?out=" + encodeURIComponent(userInput.filter(input => input !== "po").toString()), {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
+    <html>
+    <head>
+        <style>
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #333;
             }
-          });
-          break;
-        case "pi":
-          inputResponse = await fetch("/in?in=" + encodeURIComponent(userInput.filter(input => input !== "pi").toString()), {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
+
+            li {
+                float: left;
+                border-right:1px solid #bbb;
             }
-          });
-          break;
-        case "d":
-          inputResponse = await fetch("/dice", {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-          break;
-        case "wd":
-          inputResponse = await fetch("/write?to=" + encodeURIComponent(userInput[1].toString()), {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
+
+            li:last-child {
+                border-right: none;
             }
-          });
-          break;
-        case "u":
-          inputResponse = await fetch("/undo", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          break;
-        case "r":
-          inputResponse = await fetch("/redo", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          break;
-        case "s":
-          inputResponse = await fetch("/save", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          break;
-        case "l":
-          inputResponse = await fetch("/load");
-          break;
-        case "q":
-          return;
-      }
 
-      /*let inputResult = await inputResponse.text();*/
-      await fetchFieldAndHandleInput();
-    }
+            li a {
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
 
-    document.getElementById("startGameButton").addEventListener("click", function() {
-      fetchFieldAndHandleInput();
-    });
+            li a:hover:not(.active) {
+                background-color: #111;
+            }
 
-</script>
+            .active {
+                background-color: #04AA6D;
+            }
+        </style>
+    </head>
+    <body>
+
+    <ul>
+        <li><a class="active" href="/">Home</a></li>
+        <li><a href="/kniffel">Game</a></li>
+        <li style="float:right"><a href="/about">About</a></li>
+    </ul>
+    </body>
+    </html>
 }
