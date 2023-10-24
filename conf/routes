@@ -37,3 +37,6 @@ PUT         /redo           controllers.KniffelController.redo
 POST        /save           controllers.KniffelController.save
 
 GET         /load           controllers.KniffelController.load
+
++nocsrf
+POST        /new            controllers.KniffelController.newGame(players: Int)

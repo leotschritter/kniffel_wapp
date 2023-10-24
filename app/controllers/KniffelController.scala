@@ -95,4 +95,9 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
     controller.next()
     controller.doAndPublish(controller.nextRound())
   }
+
+  def newGame(players: Int): Action[AnyContent] = Action {
+    controller.newGame(players)
+    Ok(gameAsText)
+  }
 }
