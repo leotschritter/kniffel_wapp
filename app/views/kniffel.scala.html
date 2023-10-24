@@ -1,5 +1,6 @@
 @(controller:de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
 
+@matrix = @{controller.field.getMatrix}
 @main("HTWG Kniffel") {
     <head>
         <style>
@@ -47,8 +48,7 @@
 
     <h1>Welcome to Kniffel!</h1>
     <button id="startGameButton">Start Game</button>
-
-    <script>
+    <!--script>
         async function fetchFieldAndHandleInput() {
             // Send an AJAX request to the server to get the field
             let fieldResponse = await fetch("/field");
@@ -135,5 +135,5 @@
         document.getElementById("startGameButton").addEventListener("click", function () {
             fetchFieldAndHandleInput();
         });
-    </script>
+    </script-->
 }
