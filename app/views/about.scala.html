@@ -2,47 +2,49 @@
 
 @main("HTWG Sudoku") {
 
-    <h1 id="kniffel">Kniffel</h1>
-    <h2 id="game-summary">Game Summary</h2>
-    <p>On each turn, roll the dice up to 3 times to get the highest scoring combination for one of 13 categories.
-        After you finish rolling, you must place a score or a zero in one of the 13 category boxes on your score column.
-        The game ends when all players have filled in their 13 boxes.
-        Scores are totaled, including any bonus points. The player with the highest total wins.</p>
-    <h2 id="taking-a-turn">Taking a turn</h2>
-    <p>On your turn, you may roll the dice up to 3 times, although you may stop and score after your first or second roll.
-        To roll the dice, you have to click the dice Button in the GUI or type in &#39;d&#39; in the TUI.</br></br>
-    </p>
-    <h3 id="keep-dice-aside">Keep dice aside</h3>
-    <p>After each roll you may want to set any &quot;keepers&quot; aside.
-        To do so you can select multiple dice on the left-hand side by holding down the Ctrl key while you click the left
-        mouse button.
-        Another possibility to select multiple dice is to hold down the Shift key and select an area you want to add to the
-        &quot;keepers&quot;.
-        After that you can commit the dice/die you want to keep by clicking the right arrow Button.
-        </br></br>
-        If you&#39;re playing in the TUI you can put out your &quot;keepers&quot; by writing down the following command:
-    </p>
-    <pre><code>po <span class="hljs-number">6</span> <span class="hljs-number">6</span>
-        </code></pre><p>In this example our decision was to put two sixes aside.</p>
-    <h3 id="put-dice-back-into-the-cup">Put dice back into the cup</h3>
-    <p>You may change your mind after any roll.
-        At any time you can decide if you want to put dice back into the Cup.
-        To do so you can select a single or multiple dice from the right-hand side just like you did before where you put
-        them aside.
-        If you&#39;re playing in the TUI you can re-add the dice just like before but with this command:</p>
-    <pre><code>pi <span class="hljs-number">6</span> <span class="hljs-number">6</span>
-        </code></pre><h2 id="scoring">Scoring</h2>
-    <p>When you&#39;re finished rolling, decide which box to fill in on your score column.
-        You must fill in a box on each turn; if you can&#39;t (or don&#39;t want to) enter a score, you must enter a zero.
-        To enter any score to your column you have to select one option on the left side of the GUI.</br></br>
-
-        If you decide to click the &#39;Chance&#39;-Button then this Button will be disabled in your next round.</br></br>
-
-        In the TUI you can decide to what you want to do with the following command using the shorthand symbols:</p>
-    <pre><code><span class="hljs-attribute">wd CH</span>
+<h1 id="kniffel">Kniffel</h1>
+<h2 id="game-summary">Game Summary</h2>
+<p>On each turn, roll the dice up to 3 times to get the highest scoring combination for one of 13 categories.
+    After you finish rolling, you must place a score or a zero in one of the 13 category boxes on your score column.
+    The game ends when all players have filled in their 13 boxes.
+    Scores are totaled, including any bonus points. The player with the highest total wins.</p>
+<h2 id="taking-a-turn">Taking a turn</h2>
+<p>On your turn, you may roll the dice up to 3 times, although you may stop and score after your first or second roll.
+    To roll the dice, you have to click the dice Button in the GUI or type in &#39;d&#39; in the TUI.</br></br>
+</p>
+<h3 id="keep-dice-aside">Keep dice aside</h3>
+<p>After each roll you may want to set any &quot;keepers&quot; aside.
+    To do so you can select multiple dice on the left-hand side by holding down the Ctrl key while you click the left
+    mouse button.
+    Another possibility to select multiple dice is to hold down the Shift key and select an area you want to add to the
+    &quot;keepers&quot;.
+    After that you can commit the dice/die you want to keep by clicking the right arrow Button.
+    </br></br>
+    If you&#39;re playing in the TUI you can put out your &quot;keepers&quot; by writing down the following command:
+</p>
+<pre><code>po <span class="hljs-number">6</span> <span class="hljs-number">6</span>
         </code></pre>
-    <table>
-        <thead>
+<p>In this example our decision was to put two sixes aside.</p>
+<h3 id="put-dice-back-into-the-cup">Put dice back into the cup</h3>
+<p>You may change your mind after any roll.
+    At any time you can decide if you want to put dice back into the Cup.
+    To do so you can select a single or multiple dice from the right-hand side just like you did before where you put
+    them aside.
+    If you&#39;re playing in the TUI you can re-add the dice just like before but with this command:</p>
+<pre><code>pi <span class="hljs-number">6</span> <span class="hljs-number">6</span>
+        </code></pre>
+<h2 id="scoring">Scoring</h2>
+<p>When you&#39;re finished rolling, decide which box to fill in on your score column.
+    You must fill in a box on each turn; if you can&#39;t (or don&#39;t want to) enter a score, you must enter a zero.
+    To enter any score to your column you have to select one option on the left side of the GUI.</br></br>
+
+    If you decide to click the &#39;Chance&#39;-Button then this Button will be disabled in your next round.</br></br>
+
+    In the TUI you can decide to what you want to do with the following command using the shorthand symbols:</p>
+<pre><code><span class="hljs-attribute">wd CH</span>
+        </code></pre>
+<table>
+    <thead>
         <tr>
             <th>shorthand symbol</th>
             <th>1</th>
@@ -59,8 +61,8 @@
             <th>KN</th>
             <th>CH</th>
         </tr>
-        </thead>
-        <tbody>
+    </thead>
+    <tbody>
         <tr>
             <td>Meaning</td>
             <td>Total of Ones only</td>
@@ -78,59 +80,60 @@
             <td>Chance</td>
             <td></td>
         </tr>
-        </tbody>
-    </table>
-    <h3 id="scoring-combinations">Scoring Combinations</h3>
-    <p>To score in the Upper Section, only dice with the same number will count.
-        For example with the dice shown below you should score 9 in the Threes box, 2 in the Twos box or 4 in the Fours
-        box.</br></br>
-        Your goal in the Upper Section is to score a total of at least 63 points, to earn a 35-point bonus.
-        The bonus points are based on scoring of each number;
-        however, you may earn the bonus with any combination of scores totaling 63 points or more.
-        Each of the Lower Section scoring combinations is explained in detail in the next second column of the GUI.</p>
-    <h4 id="3-of-a-kind-">3 of a Kind:</h4>
-    <p>Score in this box only if the dice include 3 or more of the same number.
-        For example, with the dice shown below you could score 18 points in the 3 of a Kind box.</br></br>
-        Other Scoring Options: You could instead score 18 in the Chance box, or you could score in the Upper Section: 15 in
-        the Fives box, 2 in the Twos box or 1 in the Ones box.</p>
-    <h4 id="4-of-a-kind-">4 of a Kind:</h4>
-    <p>Score in this box only if the dice include 4 or more of the same number.
-        For example, with the dice shown below you could score 14 points in the 4 of a Kind box.</br></br>
-    </p>
-    <h4 id="full-house-">Full House:</h4>
-    <p>Score in this box only if the dice show three of one number and two of another. Any Full House is worth 25 points.
-        For example, with the dice shown below you could score 25 points in the Full House box.</br></br>
-    </p>
-    <h4 id="small-straight-">Small Straight:</h4>
-    <p>Score in this box only if the dice show any sequence of four numbers. Any Small Straight is worth 30 points.
-        You could score 30 points in the Small Straight box with any of the three dice combinations shown below.</br></br>
-    </p>
-    <h4 id="large-straight">Large Straight</h4>
-    <p>Score in this box only if the dice show any sequence of four numbers. Any Large Straight is worth 40 points.
-        You could score 40 points in the Small Straight box with any of the three dice combinations shown below.</br></br>
-    </p>
-    <h4 id="kniffel">Kniffel</h4>
-    <p>Score in this box only if the dice show five of the same number (5 of a kind).
-        You can score 50 points in the Kniffel box.
-        A Kniffel example is shown below.</br></br>
-    </p>
-    <h4 id="chance">Chance</h4>
-    <p>Score the total of any 5 dice in this box. This catch-all category comes handy when you can&#39;t (or don&#39;t want
-        to) score in another category, and don&#39;t want to enter a zero.
-        For example, you could score 22 points in the Chance box with the dice shown below.</br></br>
-    </p>
-    <h3 id="ending-a-game">Ending a Game</h3>
-    <p>Once each player has filled in all 13 category boxes, the game ends.</p>
-    <h3 id="how-to-win">How to Win</h3>
-    <p>After the scores are tallied, the player with the highest &#39;Endsumme&#39; wins the game!</p>
-    <h2 id="save-a-game">Save a game</h2>
-    <p>If you decide to continue playing your game of &#39;Kniffel&#39; later you are also able to save the current status
-        of the game.
-        To do so you can select the &#39;Save&#39; option in the Menu Bar.</br>
-    </p>
-    </code></pre><h2 id="load-a-game">Load a game</h2>
-    <p>When you want to load your saved game and continue where you left off you can load the saved game by selecting the
-        &#39;Load&#39; option in the Menu Bar.</br></br>
-    </p>
+    </tbody>
+</table>
+<h3 id="scoring-combinations">Scoring Combinations</h3>
+<p>To score in the Upper Section, only dice with the same number will count.
+    For example with the dice shown below you should score 9 in the Threes box, 2 in the Twos box or 4 in the Fours
+    box.</br></br>
+    Your goal in the Upper Section is to score a total of at least 63 points, to earn a 35-point bonus.
+    The bonus points are based on scoring of each number;
+    however, you may earn the bonus with any combination of scores totaling 63 points or more.
+    Each of the Lower Section scoring combinations is explained in detail in the next second column of the GUI.</p>
+<h4 id="3-of-a-kind-">3 of a Kind:</h4>
+<p>Score in this box only if the dice include 3 or more of the same number.
+    For example, with the dice shown below you could score 18 points in the 3 of a Kind box.</br></br>
+    Other Scoring Options: You could instead score 18 in the Chance box, or you could score in the Upper Section: 15 in
+    the Fives box, 2 in the Twos box or 1 in the Ones box.</p>
+<h4 id="4-of-a-kind-">4 of a Kind:</h4>
+<p>Score in this box only if the dice include 4 or more of the same number.
+    For example, with the dice shown below you could score 14 points in the 4 of a Kind box.</br></br>
+</p>
+<h4 id="full-house-">Full House:</h4>
+<p>Score in this box only if the dice show three of one number and two of another. Any Full House is worth 25 points.
+    For example, with the dice shown below you could score 25 points in the Full House box.</br></br>
+</p>
+<h4 id="small-straight-">Small Straight:</h4>
+<p>Score in this box only if the dice show any sequence of four numbers. Any Small Straight is worth 30 points.
+    You could score 30 points in the Small Straight box with any of the three dice combinations shown below.</br></br>
+</p>
+<h4 id="large-straight">Large Straight</h4>
+<p>Score in this box only if the dice show any sequence of four numbers. Any Large Straight is worth 40 points.
+    You could score 40 points in the Small Straight box with any of the three dice combinations shown below.</br></br>
+</p>
+<h4 id="kniffel">Kniffel</h4>
+<p>Score in this box only if the dice show five of the same number (5 of a kind).
+    You can score 50 points in the Kniffel box.
+    A Kniffel example is shown below.</br></br>
+</p>
+<h4 id="chance">Chance</h4>
+<p>Score the total of any 5 dice in this box. This catch-all category comes handy when you can&#39;t (or don&#39;t want
+    to) score in another category, and don&#39;t want to enter a zero.
+    For example, you could score 22 points in the Chance box with the dice shown below.</br></br>
+</p>
+<h3 id="ending-a-game">Ending a Game</h3>
+<p>Once each player has filled in all 13 category boxes, the game ends.</p>
+<h3 id="how-to-win">How to Win</h3>
+<p>After the scores are tallied, the player with the highest &#39;Endsumme&#39; wins the game!</p>
+<h2 id="save-a-game">Save a game</h2>
+<p>If you decide to continue playing your game of &#39;Kniffel&#39; later you are also able to save the current status
+    of the game.
+    To do so you can select the &#39;Save&#39; option in the Menu Bar.</br>
+</p>
+</code></pre>
+<h2 id="load-a-game">Load a game</h2>
+<p>When you want to load your saved game and continue where you left off you can load the saved game by selecting the
+    &#39;Load&#39; option in the Menu Bar.</br></br>
+</p>
 
 }

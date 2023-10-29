@@ -15,211 +15,213 @@
 @main("HTWG Kniffel") {
 
 <style>
-            td {
-              height: 45px;
-              border: 1px solid #DCDCDC;
-              text-align: center;
-              width: 200px;
-            }
-
-            th {
-                padding: 15px;
-                border: 1px solid #DCDCDC;
-                text-align: center !important;
-                height: 45px;
-            }
-
-            table {
-              border-collapse: collapse;
-              scale: 0.9;
-            }
-
-            td:hover {
-              background-color: #e6e6e6;
-            }
-
-            tr.main-heading {
-              line-height: 10%;
-              background-color: #04AA6D;
-            }
-
-            td:first-child{
-                background-color: #04AA6D;
-                font-size: small;
-            }
-
-            td.secondColumn {
-                background-color: #04AA6D;
-                font-size: small;
-            }
-
-            button.btnAction {
-                height: 100%;
-                width: 100%;
-            }
-
-            .table-container {
-                display: flex;
-                justify-content: center;
-                margin: auto;
-            }
-            td.activeCol {
-                background-color: lightgrey;
-            }
-</style>
-<div style="@(if(controller.getDicecup.isRunning || controller.getGame.isRunning){"display: none"}else{""})" class="startGame">
-<label style="font-weight: 400" for="numberOfPlayers">Number Of Players</label>
-<input id="numberOfPlayers" type="number" min="2" max="8" value="2"/>
-    <button onclick="startGame()">Start Game</button>
-<script>
-    function startGame() {
-        const numberOfPlayers = document.getElementById("numberOfPlayers").value;
-        fetch('/new?players=' + numberOfPlayers).then(response => {
-            if (!response.ok) {
-                console.error("Failed starting new game!");
-            } else {
-                fetch('/dice').then(innerResponse => {
-                    if (!innerResponse.ok) {
-                        console.error("Failed starting new game!");
-                    } else {
-                        location.reload();
-                    }
-                });
-            }
-        });
+    td {
+        height: 45px;
+        border: 1px solid #DCDCDC;
+        text-align: center;
+        width: 200px;
     }
-</script>
+
+    th {
+        padding: 15px;
+        border: 1px solid #DCDCDC;
+        text-align: center !important;
+        height: 45px;
+    }
+
+    table {
+        border-collapse: collapse;
+        scale: 0.9;
+    }
+
+    td:hover {
+        background-color: #e6e6e6;
+    }
+
+    tr.main-heading {
+        line-height: 10%;
+        background-color: #04AA6D;
+    }
+
+    td:first-child {
+        background-color: #04AA6D;
+        font-size: small;
+    }
+
+    td.secondColumn {
+        background-color: #04AA6D;
+        font-size: small;
+    }
+
+    button.btnAction {
+        height: 100%;
+        width: 100%;
+    }
+
+    .table-container {
+        display: flex;
+        justify-content: center;
+        margin: auto;
+    }
+
+    td.activeCol {
+        background-color: lightgrey;
+    }
+</style>
+<div style="@(if(controller.getDicecup.isRunning || controller.getGame.isRunning){" display: none"}else{""})"
+    class="startGame">
+    <label style="font-weight: 400" for="numberOfPlayers">Number Of Players</label>
+    <input id="numberOfPlayers" type="number" min="2" max="8" value="2" />
+    <button onclick="startGame()">Start Game</button>
+    <script>
+        function startGame() {
+            const numberOfPlayers = document.getElementById("numberOfPlayers").value;
+            fetch('/new?players=' + numberOfPlayers).then(response => {
+                if (!response.ok) {
+                    console.error("Failed starting new game!");
+                } else {
+                    fetch('/dice').then(innerResponse => {
+                        if (!innerResponse.ok) {
+                            console.error("Failed starting new game!");
+                        } else {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        }
+    </script>
 </div>
-<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){"display: none"}else{""})">
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-<div class="container">
-    <div class="row">
-        <div class="col-xs-5">
-            <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
-                @for(i <- 0 until inCup.length) {
-                    <option value=@{i}>@{inCup(i)}</option>
-                }
-            </select>
-        </div>
+<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){" display: none"}else{""})">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-5">
+                <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
+                    @for(i <- 0 until inCup.length) { <option value=@{i}>@{inCup(i)}</option>
+                        }
+                </select>
+            </div>
 
-        <div class="col-xs-2">
-            <button onclick="putOut(@{controller.getDicecup.getInCup.mkString(",")})" type="button" id="multiselect_rightAll" class="btn btn-block"><i
-                    class="glyphicon glyphicon-forward"></i></button>
-            <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected" class="btn btn-block"><i
-                    class="glyphicon glyphicon-chevron-right"></i></button>
-            <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected" class="btn btn-block"><i
-                    class="glyphicon glyphicon-chevron-left"></i></button>
-            <button onclick="putIn(@{controller.getDicecup.getLocked.mkString(",")})" type="button" id="multiselect_leftAll" class="btn btn-block"><i
-                    class="glyphicon glyphicon-backward"></i></button>
-            <button onclick="window.location.href='dice'" id="diceButton" type="button" class="btn btn-block">
-                <img width="40px" src="assets/images/flying_dices_small.png"/></button>
-        </div>
+            <div class="col-xs-2">
+                <button onclick="putOut(@{controller.getDicecup.getInCup.mkString(" ,")})" type="button"
+                    id="multiselect_rightAll" class="btn btn-block"><i class="glyphicon glyphicon-forward"></i></button>
+                <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected"
+                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
+                <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected"
+                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
+                <button onclick="putIn(@{controller.getDicecup.getLocked.mkString(" ,")})" type="button"
+                    id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
+                <button onclick="window.location.href='dice'" id="diceButton" type="button" class="btn btn-block">
+                    <img width="40px" src="assets/images/flying_dices_small.png" /></button>
+            </div>
 
-        <div class="col-xs-5">
-            <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
-                @for(i <- 0 until locked.length) {
-                    <option value=@{i}>@{locked(i)}</option>
-                }
-            </select>
-        </div>
+            <div class="col-xs-5">
+                <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
+                    @for(i <- 0 until locked.length) { <option value=@{i}>@{locked(i)}</option>
+                        }
+                </select>
+            </div>
 
-        <div class="col-xs-5">
-            <div class="imageBox">
-                <img style="@(if(controller.getDicecup.getRemainingDices < 2){"opacity: 0.3"}else{""})" src="assets/images/dicecup_small.png"/>
-                <img style="@(if(controller.getDicecup.getRemainingDices < 1){"opacity: 0.3"}else{""})" src="assets/images/dicecup_small.png"/>
-                <img style="@(if(controller.getDicecup.getRemainingDices < 0){"opacity: 0.3"}else{""})" src="assets/images/dicecup_small.png"/>
+            <div class="col-xs-5">
+                <div class="imageBox">
+                    <img style="@(if(controller.getDicecup.getRemainingDices < 2){" opacity: 0.3"}else{""})"
+                        src="assets/images/dicecup_small.png" />
+                    <img style="@(if(controller.getDicecup.getRemainingDices < 1){" opacity: 0.3"}else{""})"
+                        src="assets/images/dicecup_small.png" />
+                    <img style="@(if(controller.getDicecup.getRemainingDices < 0){" opacity: 0.3"}else{""})"
+                        src="assets/images/dicecup_small.png" />
+                </div>
             </div>
         </div>
+
     </div>
-
-</div>
     <script>
-    $('#multiselect').multiselect();
+        $('#multiselect').multiselect();
 
-    function multiselectRightSelected() {
-        let selectedOptions = $('#multiselect').multiselect('getSelected');
-        let selectedValues = [];
-        selectedOptions.each(function(index, option) {
-          selectedValues.push($(option).val()); // Get the value of the selected option
-        });
-        let optionsArray = [...document.getElementById('multiselect').children];
-        let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
-        putOut(routeString);
-    }
+        function multiselectRightSelected() {
+            let selectedOptions = $('#multiselect').multiselect('getSelected');
+            let selectedValues = [];
+            selectedOptions.each(function (index, option) {
+                selectedValues.push($(option).val()); // Get the value of the selected option
+            });
+            let optionsArray = [...document.getElementById('multiselect').children];
+            let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
+            putOut(routeString);
+        }
 
-    function multiselectLeftSelected() {
-        const selectedOptions = $('#multiselect_to').multiselect('getSelected');
-        let selectedValues = [];
-        selectedOptions.each(function(index, option) {
-          selectedValues.push($(option).val()); // Get the value of the selected option
-        });
-        let optionsArray = [...document.getElementById('multiselect_to').children];
-        let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
-        putIn(routeString);
-    }
+        function multiselectLeftSelected() {
+            const selectedOptions = $('#multiselect_to').multiselect('getSelected');
+            let selectedValues = [];
+            selectedOptions.each(function (index, option) {
+                selectedValues.push($(option).val()); // Get the value of the selected option
+            });
+            let optionsArray = [...document.getElementById('multiselect_to').children];
+            let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
+            putIn(routeString);
+        }
 
-    function putIn(routeString) {
-        fetch('/in?in=' + encodeURIComponent(routeString)).then(response => {
-            if (!response.ok) {
-                console.error("Failed putting dices in!");
-            }
-        });
-    }
+        function putIn(routeString) {
+            fetch('/in?in=' + encodeURIComponent(routeString)).then(response => {
+                if (!response.ok) {
+                    console.error("Failed putting dices in!");
+                }
+            });
+        }
 
-    function putOut(routeString) {
-        fetch('/out?out=' + encodeURIComponent(routeString)).then(response => {
-            if (!response.ok) {
-                console.error("Failed putting dices out!");
-            }
-        });
-    }
-</script>
+        function putOut(routeString) {
+            fetch('/out?out=' + encodeURIComponent(routeString)).then(response => {
+                if (!response.ok) {
+                    console.error("Failed putting dices out!");
+                }
+            });
+        }
+    </script>
 </div>
 
-<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){"display: none"}else{""})" class="gamecontainer">
+<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){" display: none"}else{""})"
+    class="gamecontainer">
     <div class="game">
         <div class="table-container">
             <table>
                 <thead>
-                <tr class="main-heading">
-                    <th></th>
-                    <th></th>
-                    @for(col <- 0 until matrix(0).length) {
-                    <th>@{controller.game.getPlayerName(col)}</th>
-                    }
-                </tr>
+                    <tr class="main-heading">
+                        <th></th>
+                        <th></th>
+                        @for(col <- 0 until matrix(0).length) { <th>@{controller.game.getPlayerName(col)}</th>
+                            }
+                    </tr>
                 </thead>
-                @for(row <- 0 until matrix.length) {
-                @for(col <- 0 until matrix(0).length) {
-                @if(col == 0) {
-                <tr>
-                    @if(row < 6) {
-                    <td>
-                        <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID, row)){""}else{"disabled"}) onclick="window.location.href='write?to=@{row+1}'"
-                                class="btnAction"><img src=@{firstColumn(row)}/></button>
-                    </td>
-                    } else if(row > 8 && row < 16) {
-                    <td>
-                        <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID, row)){""}else{"disabled"}) onclick="window.location.href='write?to=@{controller.getField.getFirstColumn(row).toUpperCase()}'" class="btnAction">@{firstColumn(row)}</button>
-                    </td>
-                    } else {
-                    <td>@{firstColumn(row)}</td>
-                    }
-                    @if(row == 6 || row == 8 || row > 15) {
-                    <td class="secondColumn"><img src=@{secondColumn(row)}/></td>
-                    } else {
-                    <td class="secondColumn">@{secondColumn(row)}</td>
-                    }
-                    }
-                    <td class=@if(col == controller.getGame.getPlayerID){"activeCol"}else{""}>
-                        <span class="cell">@{matrix(row)(col)}</span>
-                    </td>
-                    @if(col == matrix(0).length - 1) {
-                </tr>
-                }
-                }
+                @for(row <- 0 until matrix.length) { @for(col <- 0 until matrix(0).length) { @if(col==0) { <tr>
+                    @if(row < 6) { <td>
+                        <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
+                            row)){""}else{"disabled"}) onclick="window.location.href='write?to=@{row+1}'"
+                            class="btnAction"><img src=@{firstColumn(row)} /></button>
+                        </td>
+                        } else if(row > 8 && row < 16) { <td>
+                            <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
+                                row)){""}else{"disabled"})
+                                onclick="window.location.href='write?to=@{controller.getField.getFirstColumn(row).toUpperCase()}'"
+                                class="btnAction">@{firstColumn(row)}</button>
+                            </td>
+                            } else {
+                            <td>@{firstColumn(row)}</td>
+                            }
+                            @if(row == 6 || row == 8 || row > 15) {
+                            <td class="secondColumn"><img src=@{secondColumn(row)} /></td>
+                            } else {
+                            <td class="secondColumn">@{secondColumn(row)}</td>
+                            }
+                            }
+                            <td class=@if(col==controller.getGame.getPlayerID){"activeCol"}else{""}>
+                                <span class="cell">@{matrix(row)(col)}</span>
+                            </td>
+                            @if(col == matrix(0).length - 1) {
+                            </tr>
+                            }
+                            }
 
-                }
+                            }
             </table>
         </div>
 
