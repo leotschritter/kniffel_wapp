@@ -6,40 +6,32 @@
 # An example controller showing a sample home page
 GET         /               controllers.KniffelController.index()
 
-GET         /kniffel               controllers.KniffelController.kniffel()
+GET         /kniffel        controllers.KniffelController.kniffel()
 
-GET         /about               controllers.KniffelController.about()
+GET         /about          controllers.KniffelController.about()
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file   controllers.Assets.versioned(path="/public", file: Asset)
 
 GET         /field          controllers.KniffelController.field
 
-+nocsrf
-PUT         /dice           controllers.KniffelController.dice
+GET         /dice           controllers.KniffelController.dice
 
-+nocsrf
-PUT         /out            controllers.KniffelController.putOut(out: String)
+GET         /out            controllers.KniffelController.putOut(out: String)
 
-+nocsrf
-PUT         /in             controllers.KniffelController.putIn(in: String)
+GET         /in             controllers.KniffelController.putIn(in: String)
 
-+nocsrf
-PUT         /write          controllers.KniffelController.write(to: String)
+GET         /write          controllers.KniffelController.write(to: String)
 
-+nocsrf
-PUT         /undo           controllers.KniffelController.undo
+GET         /undo           controllers.KniffelController.undo
 
-+nocsrf
-PUT         /redo           controllers.KniffelController.redo
+GET         /redo           controllers.KniffelController.redo
 
-+nocsrf
-POST        /save           controllers.KniffelController.save
+GET         /save           controllers.KniffelController.save
 
 GET         /load           controllers.KniffelController.load
 
-+nocsrf
-POST        /new            controllers.KniffelController.newGame(players: Int)
+GET         /new            controllers.KniffelController.newGame(players: Int)
 
 GET         /assets/*file   controllers.Assets.versioned(path="/public", file: Asset)
 # GET         /favicon.ico    controllers.Assets.at(path="/public/images", file="favicon.ico")

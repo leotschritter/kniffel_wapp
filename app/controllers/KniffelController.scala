@@ -39,39 +39,47 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def field: Action[AnyContent] = Action {
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def dice: Action[AnyContent] = Action {
     controller.doAndPublish(controller.dice())
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def putOut(out: String): Action[AnyContent] = Action {
-    controller.doAndPublish(controller.putOut, out.split(",").toList.map(_.toInt))
-    Ok(gameAsText)
+    if (!out.isEmpty) {
+      controller.doAndPublish(controller.putOut, out.split(",").toList.map(_.toInt))
+      Ok(views.html.kniffel(controller))
+    } else {
+      BadRequest("Something went wrong!")
+    }
   }
 
   def putIn(in: String): Action[AnyContent] = Action {
-    controller.doAndPublish(controller.putIn, in.split(",").toList.map(_.toInt))
-    Ok(gameAsText)
+    if (!in.isEmpty) {
+      controller.doAndPublish(controller.putIn, in.split(",").toList.map(_.toInt))
+      Ok(views.html.kniffel(controller))
+    } else {
+      BadRequest("Something went wrong!")
+    }
   }
 
   def redo: Action[AnyContent] = Action {
     controller.redo()
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def undo: Action[AnyContent] = Action {
     controller.undo()
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def write(to: String): Action[AnyContent] = Action {
     val index = controller.diceCup.indexOfField.get(to)
     if(index.isDefined && controller.field.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
       writeDown(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
-      Ok(gameAsText)
+      Ok(views.html.kniffel(controller))
     } else {
       BadRequest("Invalid Input.")
     }
@@ -79,12 +87,12 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
 
   def save: Action[AnyContent] = Action {
     controller.save
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def load: Action[AnyContent] = Action {
     controller.load
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   private def gameAsText = String.format("%s \n%s%s ist an der Reihe.",
@@ -98,6 +106,6 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
 
   def newGame(players: Int): Action[AnyContent] = Action {
     controller.newGame(players)
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 }
