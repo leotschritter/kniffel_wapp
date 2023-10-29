@@ -11,6 +11,8 @@ trait IField {
   def getMatrix: IMatrix
 
   def getRows: Vector[Vector[String]]
+
+  def getFirstColumn: List[String]
 }
 
 trait IMatrix {

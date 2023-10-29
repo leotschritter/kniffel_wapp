@@ -80,4 +80,6 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
     + "\nVerbleibende Würfe: " + (remDices + 1)
     + "\nBitte wählen Sie aus: " + indexOfField.keys.mkString(" ")
     + "\n")
+
+  def isRunning: Boolean = getRemainingDices < 2
 }

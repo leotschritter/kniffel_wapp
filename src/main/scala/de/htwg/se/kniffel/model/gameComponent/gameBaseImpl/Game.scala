@@ -69,4 +69,6 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
   def getRemainingMoves: Int = remainingMoves
 
   def getPlayerTuples: List[(Int, String)] = for (x <- playersList) yield (x.playerID, x.playerName)
+
+  def isRunning: Boolean = playersList.length * 13 > remainingMoves
 }

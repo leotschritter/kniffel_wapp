@@ -21,4 +21,6 @@ trait IGame {
   def getRemainingMoves: Int
 
   def getPlayerTuples: List[(Int, String)]
+
+  def isRunning: Boolean
 }

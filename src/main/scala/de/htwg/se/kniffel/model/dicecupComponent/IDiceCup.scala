@@ -21,4 +21,6 @@ trait IDiceCup {
   def dice(): IDiceCup
 
   def indexOfField: ListMap[String, Int]
+
+  def isRunning: Boolean
 }

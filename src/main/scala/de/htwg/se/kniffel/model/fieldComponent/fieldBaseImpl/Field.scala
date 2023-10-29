@@ -43,5 +43,7 @@ case class Field(matrix: Matrix[String]) extends IField {
 
   def getRows: Vector[Vector[String]] = matrix.rows
 
+  def getFirstColumn: List[String] = this.firstColumn
+
   override def toString = mesh()
 }
