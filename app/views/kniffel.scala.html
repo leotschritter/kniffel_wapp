@@ -1,139 +1,168 @@
 @(controller:de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
 
-@matrix = @{controller.field.getMatrix}
+@matrix = @{controller.field.getRows}
+@inCup = @{controller.diceCup.getInCup}
+@locked = @{controller.diceCup.getLocked}
+@firstColumn = @{List("assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
+"assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "gesamt", "Bonus ab 63",
+"gesamt oberer Teil", "Dreierpasch", "Viererpasch", "Full-House", "Kleine Straße", "Große Straße", "Kniffel", "Chance",
+"gesamt unterer Teil", "gesamt oberer Teil", "Endsumme")}
+@secondColumn = @{List("nur Einser zählen", "nur Zweier zählen", "nur Dreier zählen", "nur Vierer zählen",
+"nur Fünfer zählen", "nur Sechser zählen", "assets/images/right_arrow.png", "plus 35", "assets/images/right_arrow.png",
+"alle Augen zählen", "alle Augen zählen", "25 Punkte", "30 Punkte", "40 Punkte", "50 Punkte", "alle Augen zählen",
+"assets/images/right_arrow.png", "assets/images/right_arrow.png", "assets/images/right_arrow.png")}
+
 @main("HTWG Kniffel") {
-    <head>
-        <style>
-            ul {
-                list-style-type: none;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                background-color: #333;
+
+<style>
+            td {
+              height: 45px;
+              border: 1px solid #DCDCDC;
+              text-align: center;
+              width: 200px;
             }
 
-            li {
-                float: left;
-                border-right:1px solid #bbb;
+            th {
+                padding: 15px;
+                border: 1px solid #DCDCDC;
+                text-align: center !important;
+                height: 45px;
             }
 
-            li:last-child {
-                border-right: none;
+            table {
+              border-collapse: collapse;
+              scale: 0.9;
             }
 
-            li a {
-                display: block;
-                color: white;
-                text-align: center;
-                padding: 14px 16px;
-                text-decoration: none;
+            td:hover {
+              background-color: #e6e6e6;
             }
 
-            li a:hover:not(.active) {
-                background-color: #111;
+            tr.main-heading {
+              line-height: 10%;
+              background-color: #04AA6D;
             }
 
-            .active {
+            td:first-child{
                 background-color: #04AA6D;
-            }
-        </style>
-    </head>
-
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a class="active" href="/kniffel">Game</a></li>
-        <li style="float:right"><a href="/about">About</a></li>
-    </ul>
-
-
-    <h1>Welcome to Kniffel!</h1>
-    <button id="startGameButton">Start Game</button>
-    <!--script>
-        async function fetchFieldAndHandleInput() {
-            // Send an AJAX request to the server to get the field
-            let fieldResponse = await fetch("/field");
-            let field = await fieldResponse.text();
-            console.log(field);
-
-            let userInput = prompt("Enter next move:")
-            if (!userInput) {
-                await fetchFieldAndHandleInput();
-                return;
-            }
-            userInput = userInput.split(" ");
-
-            let inputResponse;
-            switch (userInput[0]) {
-                case "po":
-                    // Send user input to the server using AJAX
-                    inputResponse = await fetch("/out?out=" + encodeURIComponent(userInput.filter(input => input !== "po").toString()), {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json"
-                        }
-                    });
-                    break;
-                case "pi":
-                    inputResponse = await fetch("/in?in=" + encodeURIComponent(userInput.filter(input => input !== "pi").toString()), {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        }
-                    });
-                    break;
-                case "d":
-                    inputResponse = await fetch("/dice", {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    break;
-                case "wd":
-                    inputResponse = await fetch("/write?to=" + encodeURIComponent(userInput[1].toString()), {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        }
-                    });
-                    break;
-                case "u":
-                    inputResponse = await fetch("/undo", {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    break;
-                case "r":
-                    inputResponse = await fetch("/redo", {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    break;
-                case "s":
-                    inputResponse = await fetch("/save", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    break;
-                case "l":
-                    inputResponse = await fetch("/load");
-                    break;
-                case "q":
-                    return;
+                font-size: small;
             }
 
-            /*let inputResult = await inputResponse.text();*/
-            await fetchFieldAndHandleInput();
+            td.secondColumn {
+                background-color: #04AA6D;
+                font-size: small;
+            }
+
+            button.btnAction {
+                height: 100%;
+                width: 100%;
+            }
+
+            .table-container {
+                display: flex;
+                justify-content: center;
+                margin: auto;
+            }
+</style>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<div class="container">
+
+    <div class="row">
+        <div class="col-xs-5">
+            <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
+                @for(i <- 0 until inCup.length) {
+                    <option value=@{i}>@{inCup(i)}</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-xs-2">
+            <button type="button" id="multiselect_rightAll" class="btn btn-block"><i
+                    class="glyphicon glyphicon-forward"></i></button>
+            <button type="button" id="multiselect_rightSelected" class="btn btn-block"><i
+                    class="glyphicon glyphicon-chevron-right"></i></button>
+            <button type="button" id="multiselect_leftSelected" class="btn btn-block"><i
+                    class="glyphicon glyphicon-chevron-left"></i></button>
+            <button type="button" id="multiselect_leftAll" class="btn btn-block"><i
+                    class="glyphicon glyphicon-backward"></i></button>
+            <button id="diceButton" type="button" class="btn btn-block">
+                <img width="40px" src="assets/images/flying_dices_small.png"/></button>
+        </div>
+
+        <div class="col-xs-5">
+            <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
+                @for(i <- 0 until locked.length) {
+                    <option value=@{i}>@{locked(i)}</option>
+                }
+            </select>
+        </div>
+    </div>
+
+</div>
+<script>$('#multiselect').multiselect();</script>
+<script>
+    document.getElementById("diceButton").addEventListener("click", function() {
+      fetch("/dice", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
+      }).catch(error => {
+        console.error("Error during dice roll:", error);
+      });
+    });
+</script>
+<div class="gamecontainer">
+    <div class="game">
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr class="main-heading">
+                    <th></th>
+                    <th></th>
+                    @for(col <- 0 until matrix(0).length) {
+                    <th>@{controller.game.getPlayerName(col)}</th>
+                    }
+                </tr>
+                </thead>
+                @for(row <- 0 until matrix.length) {
+                @for(col <- 0 until matrix(0).length) {
+                @if(col == 0) {
+                <tr>
+                    @if(row < 6) {
+                    <td>
+                        <button class="btnAction"><img src=@{firstColumn(row)}/></button>
+                    </td>
+                    } else if(row > 8 && row < 16) {
+                    <td>
+                        <button class="btnAction">@{firstColumn(row)}</button>
+                    </td>
+                    } else {
+                    <td>@{firstColumn(row)}</td>
+                    }
+                    @if(row == 6 || row == 8 || row > 15) {
+                    <td class="secondColumn"><img src=@{secondColumn(row)}/></td>
+                    } else {
+                    <td class="secondColumn">@{secondColumn(row)}</td>
+                    }
+                    }
+                    <td>
+                        <span class="cell">@{matrix(row)(col)}</span>
+                    </td>
+                    @if(col == matrix(0).length - 1) {
+                </tr>
+                }
+                }
 
-        document.getElementById("startGameButton").addEventListener("click", function () {
-            fetchFieldAndHandleInput();
-        });
-    </script-->
+                }
+            </table>
+        </div>
+
+    </div>
+</div>
+
 }
