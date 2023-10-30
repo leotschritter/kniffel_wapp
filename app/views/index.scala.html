@@ -1,17 +1,61 @@
 @(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
 @main("HTWG Kniffel") {
+    <style>
+        .startGame {
+            height: 90vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .numberLabel {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 0;
+        }
+
+        #numberOfPlayers {
+            width: 50px;
+            height: 30px;
+            font-size: 16px;
+            margin: 0 10px;
+            text-align: center;
+            border-radius: 30px;
+        }
+
+        .startButton {
+            background-color: #04AA6D;
+            color: white;
+            border: none;
+            height: 30px;
+            border-radius: 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .startButton:hover {
+            background-color: #45a049;
+        }
+    </style>
     <div class="startGame">
-        <label style="font-weight: 400" for="numberOfPlayers">Number Of Players</label>
+        <label class="numberLabel" for="numberOfPlayers">Number Of Players</label>
         <input id="numberOfPlayers" type="number" min="2" max="8" value="2" />
-        <button onclick="startGame()">Start Game</button>
+        <button class="startButton" onclick="startGame()">Start Game</button>
         <script>
                 function startGame() {
                     const numberOfPlayers = document.getElementById("numberOfPlayers").value;
+                    if (numberOfPlayers > 8 || numberOfPlayers < 2) {
+                        alert("Please only select a value between 2 and 8!");
+                        return;
+                    }
                     fetch('/new?players=' + numberOfPlayers).then(response => {
                         if (!response.ok) {
                             console.error("Failed starting new game!");
                         } else {
-                            window.location.href = '/kniffel'
+                            window.location.href = '/kniffel';
                         }
                     });
                 }

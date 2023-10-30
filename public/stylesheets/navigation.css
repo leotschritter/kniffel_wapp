@@ -34,6 +34,7 @@ li a:hover:not(.active) {
 #navigation a {
     text-decoration: none;
 }
+
 #navigation a:hover {
     background-color: #eee;
     color: black;

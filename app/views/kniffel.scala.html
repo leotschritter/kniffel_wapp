@@ -138,6 +138,13 @@
             .actionSubnav:hover .actionSubnav-content {
                 display: block;
             }
+
+            .diceCupActionContainer {
+                display: flex;
+                margin-top: 40px;
+                flex-direction: column;
+                align-items: center;
+            }
     </style>
     <div class="actionNavbar">
         <div class="actionSubnav">
@@ -155,80 +162,76 @@
     } else {
         ""
     })">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-5">
-                    <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
-                    @for(i <- 0 until controller.diceCup.getInCup.length) {
-                        <option value=@{
-                            i
-                        }>@{
-                            controller.diceCup.getInCup(i)
-                        }</option>
+        <div class="diceCupActionContainer">
+            <div class="imageBox">
+                <img style="@(if(controller.getDicecup.getRemainingDices < 2) {
+                    " opacity: 0.3"
+                } else {
+                    ""
+                })"
+                src="assets/images/dicecup_small.png" />
+                <img style="@(if(controller.getDicecup.getRemainingDices < 1) {
+                    " opacity: 0.3"
+                } else {
+                    ""
+                })"
+                src="assets/images/dicecup_small.png" />
+                <img style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                    " opacity: 0.3"
+                } else {
+                    ""
+                })"
+                src="assets/images/dicecup_small.png" />
+            </div>
+            <div style="margin-top: 40px" class="container">
+                <div class="row">
+                    <div class="col-xs-5">
+                        <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
+                        @for(i <- 0 until controller.diceCup.getInCup.length) {
+                            <option value=@{
+                                i
+                            }>@{
+                                controller.diceCup.getInCup(i)
+                            }</option>
+                        }
+                        </select>
+                    </div>
+
+                    <div class="col-xs-2">
+                        <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected"
+                        class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
+                        <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected"
+                        class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
+                        <button onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
+                        id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
+                        <button style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                            "display: none"
+                        } else {
+                            ""
+                        })" onclick="window.location.href = 'dice'" id="diceButton" type="button" class="btn btn-block">
+                            <img width="40px" src="assets/images/flying_dices_small.png" /></button>
+                            <!--textarea can be used for debugging-->
+                            <!--<textarea>inCup: @{
+                            controller.getDicecup.getInCup.mkString(",")
+                        }; locked: @{
+                        controller.getDicecup.getLocked.mkString(",")
                     }
-                    </select>
-                </div>
+                        </textarea>-->
+                    </div>
 
-                <div class="col-xs-2">
-                    <button onclick="putOut('@{controller.diceCup.getInCup.mkString(",")}')" type="button"
-                    id="multiselect_rightAll" class="btn btn-block"><i class="glyphicon glyphicon-forward"></i></button>
-                    <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected"
-                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
-                    <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected"
-                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
-                    <button onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
-                    id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
-                    <button style="@(if(controller.getDicecup.getRemainingDices < 0) {
-                        "display: none"
-                    } else {
-                        ""
-                    })" onclick="window.location.href = 'dice'" id="diceButton" type="button" class="btn btn-block">
-                        <img width="40px" src="assets/images/flying_dices_small.png" /></button>
-                        <!--textarea can be used for debugging-->
-                        <!--<textarea>inCup: @{
-                        controller.getDicecup.getInCup.mkString(",")
-                    }; locked: @{
-                    controller.getDicecup.getLocked.mkString(",")
-                }
-                    </textarea>-->
-                </div>
-
-                <div class="col-xs-5">
-                    <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
-                    @for(i <- 0 until controller.diceCup.getLocked.length) {
-                        <option value=@{
-                            (i + 1) * 42
-                        }>@{
-                            controller.diceCup.getLocked(i)
-                        }</option>
-                    }
-                    </select>
-                </div>
-
-                <div class="col-xs-5">
-                    <div class="imageBox">
-                        <img style="@(if(controller.getDicecup.getRemainingDices < 2) {
-                            " opacity: 0.3"
-                        } else {
-                            ""
-                        })"
-                        src="assets/images/dicecup_small.png" />
-                        <img style="@(if(controller.getDicecup.getRemainingDices < 1) {
-                            " opacity: 0.3"
-                        } else {
-                            ""
-                        })"
-                        src="assets/images/dicecup_small.png" />
-                        <img style="@(if(controller.getDicecup.getRemainingDices < 0) {
-                            " opacity: 0.3"
-                        } else {
-                            ""
-                        })"
-                        src="assets/images/dicecup_small.png" />
+                    <div class="col-xs-5">
+                        <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
+                        @for(i <- 0 until controller.diceCup.getLocked.length) {
+                            <option value=@{
+                                (i + 1) * 42
+                            }>@{
+                                controller.diceCup.getLocked(i)
+                            }</option>
+                        }
+                        </select>
                     </div>
                 </div>
             </div>
-
         </div>
         <script>
                 $('#multiselect').multiselect();
