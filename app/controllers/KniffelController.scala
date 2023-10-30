@@ -23,15 +23,15 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+  def index(): Action[AnyContent] = Action {
     Ok(views.html.index(controller))
   }
 
-  def kniffel(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+  def kniffel(): Action[AnyContent] = Action {
     Ok(views.html.kniffel(controller))
   }
 
-  def about(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+  def about(): Action[AnyContent] = Action {
     Ok(views.html.about())
   }
 
@@ -45,7 +45,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def putOut(out: String): Action[AnyContent] = Action {
-    if (!out.isEmpty) {
+    if (out.nonEmpty) {
       controller.doAndPublish(controller.putOut, out.split(",").toList.map(_.toInt))
       Ok(views.html.kniffel(controller))
     } else {
@@ -54,7 +54,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def putIn(in: String): Action[AnyContent] = Action {
-    if (!in.isEmpty) {
+    if (in.nonEmpty) {
       controller.doAndPublish(controller.putIn, in.split(",").toList.map(_.toInt))
       Ok(views.html.kniffel(controller))
     } else {
@@ -91,9 +91,6 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
     controller.load
     Ok(views.html.kniffel(controller))
   }
-
-  private def gameAsText = String.format("%s \n%s%s ist an der Reihe.",
-    controller.field.toString, controller.diceCup.toString, controller.getGame.getPlayerName)
 
   private def writeDown(move: Move): Unit = {
     controller.put(move)
