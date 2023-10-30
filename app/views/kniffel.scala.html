@@ -67,6 +67,15 @@
     td.activeCol {
         background-color: lightgrey;
     }
+
+    @@font-face
+    {
+        font-family: 'glyphicon';
+        src: url("assets/fonts/glyphicons-halflings-regular.woff2");
+        font-weight: normal;
+        font-style: normal;
+    }
+
 </style>
 <div style="@(if(controller.getDicecup.isRunning || controller.getGame.isRunning){" display: none"}else{""})"
     class="startGame">
@@ -93,7 +102,8 @@
     </script>
 </div>
 <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){" display: none"}else{""})">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/stylesheets/bootstrap.min.css">
+
     <div class="container">
         <div class="row">
             <div class="col-xs-5">
@@ -179,7 +189,7 @@
     </script>
 </div>
 
-<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){" display: none"}else{""})"
+<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){"display: none"}else{""})"
     class="gamecontainer">
     <div class="game">
         <div class="table-container">
@@ -188,8 +198,7 @@
                     <tr class="main-heading">
                         <th></th>
                         <th></th>
-                        @for(col <- 0 until matrix(0).length) { <th>@{controller.game.getPlayerName(col)}</th>
-                            }
+                        @for(col <- 0 until matrix(0).length) { <th>@{controller.game.getPlayerName(col)}</th> }
                     </tr>
                 </thead>
                 @for(row <- 0 until matrix.length) { @for(col <- 0 until matrix(0).length) { @if(col==0) { <tr>
