@@ -4,11 +4,11 @@ package model.dicecupComponent
 object EvaluateStrategy {
   type Type[Int] = List[Int] => Int
 
-  def getSum(data: List[Int], exp: Boolean): Int = if (exp) data.sum else 0
+  private def getSum(data: List[Int], exp: Boolean): Int = if (exp) data.sum else 0
 
-  def mapToFrequency(data: List[Int]): List[Int] = data.map(x => data.count(_ == x))
+  private def mapToFrequency(data: List[Int]): List[Int] = data.map(x => data.count(_ == x))
 
-  def checkBigStreet(data: List[Int]) : Boolean = mapToFrequency(data).max == 1 & data.max - data.min == 4
+  private def checkBigStreet(data: List[Int]) : Boolean = mapToFrequency(data).max == 1 & data.max - data.min == 4
 
   def threeOfAKind(data: List[Int]): Int = if (data.nonEmpty) getSum(data, mapToFrequency(data).max >= 3) else 0
 

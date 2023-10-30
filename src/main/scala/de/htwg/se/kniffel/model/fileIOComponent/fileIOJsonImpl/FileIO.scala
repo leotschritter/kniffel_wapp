@@ -78,7 +78,6 @@ class FileIO extends IFileIO {
     val locked: List[Int] = if ((json \ "dicecup" \ "locked").get.toString.replace("\"", "").isEmpty) List[Int]() else (json \ "dicecup" \ "locked").get.toString.replace("\"", "").split(",").map(_.toInt).toList
     val incup: List[Int] = if ((json \ "dicecup" \ "incup").get.toString.replace("\"", "").isEmpty) List[Int]() else (json \ "dicecup" \ "incup").get.toString.replace("\"", "").split(",").map(_.toInt).toList
     val diceCup: IDiceCup = DiceCup(locked, incup, remainingDices)
-    println(diceCup)
     diceCup
   }
 
