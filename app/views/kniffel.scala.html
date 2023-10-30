@@ -74,7 +74,77 @@
         font-style: normal;
     }
 
+    .actionNavbar {
+        overflow: hidden;
+        background-color: #333;
+    }
+
+    .actionNavbar a {
+        float: left;
+        color: white;
+        text-align: center;
+        padding: 14px 15px;
+        text-decoration: none;
+    }
+
+    .actionSubnav {
+        float: left;
+        overflow: hidden;
+    }
+
+    .actionSubnav .actionSubnavbtn {
+        border: none;
+        border-right: 1px solid #bbb;
+        outline: none;
+        color: white;
+        padding: 14px 15px;
+        background-color: inherit;
+        font-family: inherit;
+        margin: 0;
+    }
+
+    .actionNavbar a:hover, .actionSubnav:hover .actionSubnavbtn {
+        background-color: #04AA6D;
+    }
+
+    .actionSubnav-content {
+        display: none;
+        position: absolute;
+        left: 0;
+        background-color: #04AA6D;
+        width: 100%;
+        z-index: 1;
+    }
+
+    .actionSubnav-content a {
+        float: left;
+        padding: 14px 18.5px;
+        border: none;
+        border-right: 1px solid #bbb;
+        color: white;
+        text-decoration: none;
+    }
+
+    .actionSubnav-content a:hover {
+        background-color: #eee;
+        color: black;
+    }
+
+    .actionSubnav:hover .actionSubnav-content {
+        display: block;
+    }
 </style>
+<div class="actionNavbar">
+    <div class="actionSubnav">
+        <button class="actionSubnavbtn">Action<i class="fa fa-caret-down"></i></button>
+        <div class="actionSubnav-content">
+            <a href="/save">Save</a>
+            <a href="/load">Load</a>
+            <a href="/undo">Undo</a>
+            <a href="/redo">Redo</a>
+        </div>
+    </div>
+</div>
 <div style="@(if(controller.getDicecup.isRunning || controller.getGame.isRunning){" display: none"}else{""})"
     class="startGame">
     <label style="font-weight: 400" for="numberOfPlayers">Number Of Players</label>
@@ -100,8 +170,6 @@
     </script>
 </div>
 <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){" display: none"}else{""})">
-    <link rel="stylesheet" href="assets/stylesheets/bootstrap.min.css">
-
     <div class="container">
         <div class="row">
             <div class="col-xs-5">
@@ -120,7 +188,7 @@
                     class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
                 <button onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
                     id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
-                <button onclick="window.location.href='dice'" id="diceButton" type="button" class="btn btn-block">
+                <button style="@(if(controller.getDicecup.getRemainingDices < 0){"display: none"}else{""})" onclick="window.location.href='dice'" id="diceButton" type="button" class="btn btn-block">
                     <img width="40px" src="assets/images/flying_dices_small.png" /></button>
                 <!--textarea can be used for debugging-->
                 <!--<textarea>inCup: @{controller.getDicecup.getInCup.mkString(",")}; locked: @{controller.getDicecup.getLocked.mkString(",")}
