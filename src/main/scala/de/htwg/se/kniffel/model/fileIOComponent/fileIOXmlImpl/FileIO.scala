@@ -61,7 +61,7 @@ class FileIO extends IFileIO {
       (for (x <- total.indices)
         yield List(total(x), bonus(x), total_of_upper_section(x),
           total_of_lower_section(x), total_of_upper_section(x), grand_total(x))).toList
-    Game(playersList, currentPlayer, remainingMoves, resultNestedList)
+    Game(playersList, currentPlayer, remainingMoves, resultNestedList, running = true)
   }
 
   override def loadField: IField = {
@@ -76,7 +76,7 @@ class FileIO extends IFileIO {
     Field(Matrix(nestedVector))
   }
 
-  def fieldToXml(field: IField, matrix: IMatrix): Elem = {
+  private def fieldToXml(field: IField, matrix: IMatrix): Elem = {
     <field numberOfPlayers={field.numberOfPlayers.toString}>
       {for {
       col <- 0 until field.numberOfPlayers
@@ -89,7 +89,7 @@ class FileIO extends IFileIO {
     </field>
   }
 
-  def diceCupToXml(diceCup: IDiceCup): Elem = {
+  private def diceCupToXml(diceCup: IDiceCup): Elem = {
     <dicecup remainingDices={diceCup.getRemainingDices.toString}>
       <locked quantity={diceCup.getLocked.length.toString}>
         {for {
@@ -112,7 +112,7 @@ class FileIO extends IFileIO {
     </dicecup>
   }
 
-  def gameToXml(game: IGame): Elem = {
+  private def gameToXml(game: IGame): Elem = {
     <game remainingMoves={game.getRemainingMoves.toString} currentPlayerID={game.getPlayerID.toString} currentPlayerName={game.getPlayerName}>
       <scores>
         {for {

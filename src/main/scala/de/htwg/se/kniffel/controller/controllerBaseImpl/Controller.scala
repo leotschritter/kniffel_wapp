@@ -7,7 +7,7 @@ import model.Move
 import model.dicecupComponent.IDiceCup
 import model.fieldComponent.IField
 import model.gameComponent.IGame
-import util.{Event, Observable, UndoManager}
+import util.{Event, UndoManager}
 import de.htwg.se.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
 import de.htwg.se.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
 import de.htwg.se.kniffel.model.fileIOComponent.fileIOJsonImpl.FileIO
@@ -16,10 +16,10 @@ import model.fileIOComponent.IFileIO
 
 class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController {
 
-  val undoManager = new UndoManager[IGame, IField]
+  private val undoManager = new UndoManager[IGame, IField]
 
   def this() = {
-    this(Field(new Matrix[String](2)), new DiceCup(), new Game(2), new FileIO())
+    this(Field(new Matrix[String](2)), new DiceCup(), new Game(2, false), new FileIO())
   }
 
   def undo(): Unit = {
@@ -99,5 +99,6 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
   def newGame(numberOfPlayers: Int): Unit = {
     field = new Field(numberOfPlayers)
     diceCup = new DiceCup()
-    game = new Game(numberOfPlayers)
-  }}
+    game = new Game(numberOfPlayers, true)
+  }
+}

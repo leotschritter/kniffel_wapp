@@ -37,7 +37,9 @@ class FileIO extends IFileIO {
   }
 
   override def loadGame: IGame = {
-    val source: String = Source.fromFile("game.json").getLines.mkString
+    val file = Source.fromFile("game.json")
+    val source: String = file.getLines.mkString
+    file.close()
     val json: JsValue = Json.parse(source)
     val remainingMoves: Int = (json \ "game" \ "remainingMoves").get.toString.toInt
     val currentPlayerId: Int = (json \ "game" \ "currentPlayerID").get.toString.toInt
@@ -46,12 +48,14 @@ class FileIO extends IFileIO {
     val ids = (json \\ "id").map(x => x.as[Int])
     val names = (json \\ "name").map(x => x.as[String].replace("\"", ""))
     val playersList: List[Player] = (for (x <- ids.indices) yield Player(ids(x), names(x))).toList
-    val game: IGame = Game(playersList, Player(currentPlayerId, currentPlayerName), remainingMoves, nestedList)
+    val game: IGame = Game(playersList, Player(currentPlayerId, currentPlayerName), remainingMoves, nestedList, running = true)
     game
   }
 
   override def loadField: IField = {
-    val source: String = Source.fromFile("field.json").getLines.mkString
+    val file = Source.fromFile("field.json")
+    val source: String = file.getLines.mkString
+    file.close()
     val json: JsValue = Json.parse(source)
     val numberOfPlayers: Int = (json \ "field" \ "numberOfPlayers").get.toString.toInt
     var matrixVector = Vector.tabulate(19, numberOfPlayers) { (cols, row_s) => "" }
@@ -66,7 +70,9 @@ class FileIO extends IFileIO {
   }
 
   override def loadDiceCup: IDiceCup = {
-    val source: String = Source.fromFile("dicecup.json").getLines.mkString
+    val file = Source.fromFile("dicecup.json")
+    val source: String = file.getLines.mkString
+    file.close()
     val json: JsValue = Json.parse(source)
     val remainingDices: Int = (json \ "dicecup" \ "remaining-dices").get.toString.toInt
     val locked: List[Int] = if ((json \ "dicecup" \ "locked").get.toString.replace("\"", "").isEmpty) List[Int]() else (json \ "dicecup" \ "locked").get.toString.replace("\"", "").split(",").map(_.toInt).toList
@@ -76,7 +82,7 @@ class FileIO extends IFileIO {
     diceCup
   }
 
-  def gameToJson(game: IGame): JsObject = {
+  private def gameToJson(game: IGame): JsObject = {
     Json.obj(
       "game" -> Json.obj(
         "nestedList" -> game.getNestedList.map(_.mkString(",")).mkString(";"),
@@ -96,7 +102,7 @@ class FileIO extends IFileIO {
     )
   }
 
-  def fieldToJson(field: IField, matrix: IMatrix): JsObject = {
+  private def fieldToJson(field: IField, matrix: IMatrix): JsObject = {
     Json.obj(
       "field" -> Json.obj(
         "numberOfPlayers" -> JsNumber(field.numberOfPlayers),
@@ -116,7 +122,7 @@ class FileIO extends IFileIO {
     )
   }
 
-  def diceCupToJson(diceCup: IDiceCup): JsObject = {
+  private def diceCupToJson(diceCup: IDiceCup): JsObject = {
     Json.obj(
       "dicecup" -> Json.obj(
         "locked" -> diceCup.getLocked.mkString(","),
@@ -126,7 +132,7 @@ class FileIO extends IFileIO {
     )
   }
 
-  def getNestedListGame(values: String): List[List[Int]] = {
+  private def getNestedListGame(values: String): List[List[Int]] = {
     val valueList: List[String] = values.split(";").toList
     (for (x <- valueList.indices) yield valueList(x).split(",").map(_.toInt).toList).toList
   }

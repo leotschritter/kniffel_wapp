@@ -4,21 +4,21 @@ package model.gameComponent.gameBaseImpl
 
 import de.htwg.se.kniffel.model.gameComponent.IGame
 
-case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves: Int, resultNestedList: List[List[Int]]) extends IGame {
-  def this(numberOfPlayers: Int)
+case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves: Int, resultNestedList: List[List[Int]], running: Boolean) extends IGame {
+  def this(numberOfPlayers: Int, running: Boolean)
   = this((for (s <- 0 until numberOfPlayers) yield Player(s, "Player " + (s + 1))).toList,
     Player(0, "Player 1"),
     numberOfPlayers * 13,
-    List.fill(numberOfPlayers, 6)(0))
+    List.fill(numberOfPlayers, 6)(0), running)
 
   def next(): Option[Game] = {
     if (remainingMoves == 0)
       None
     else
-      Some(Game(playersList, getNextPlayer, remainingMoves - 1, resultNestedList))
+      Some(Game(playersList, getNextPlayer, remainingMoves - 1, resultNestedList, running = true))
   }
 
-  def getPreviousPlayer: Player = {
+  private def getPreviousPlayer: Player = {
     if (playersList.indexOf(currentPlayer) - 1 < 0)
       playersList(playersList.last.playerID)
     else
@@ -26,10 +26,10 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
   }
 
 
-  def getNextPlayer: Player =
+  private def getNextPlayer: Player =
     playersList((playersList.indexOf(currentPlayer) + 1) % playersList.length)
 
-  def getSums(value: Int, y: Int, player: Player): (Int, Int, Int) = {
+  private def getSums(value: Int, y: Int, player: Player): (Int, Int, Int) = {
     val sumTop: Int = if (y < 6) value + resultNestedList(playersList.indexOf(player)).head else
       resultNestedList(playersList.indexOf(player)).head
     val sumBottom: Int = if (y > 8) value + resultNestedList(playersList.indexOf(player))(3) else
@@ -43,7 +43,7 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
     Game(playersList, currentPlayer, remainingMoves, resultNestedList.updated(
       playersList.indexOf(currentPlayer),
       List(sumTop) :+ bonus :+ (sumTop + bonus) :+ sumBottom :+ (sumTop + bonus) :+ (sumBottom + sumTop + bonus)
-    ))
+    ), running = true)
   }
 
   def undoMove(value: Int, y: Int): Game = {
@@ -51,7 +51,7 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
     Game(playersList, getPreviousPlayer, remainingMoves + 1, resultNestedList.updated(
       playersList.indexOf(getPreviousPlayer),
       List(sumTop) :+ bonus :+ (sumTop + bonus) :+ sumBottom :+ (sumTop + bonus) :+ (sumBottom + sumTop + bonus)
-    ))
+    ), running = true)
   }
 
   // override def toString: String = currentPlayer.playerID.toString + " " + currentPlayer.playerName + "\n" + playersList + "\n" + (for(x <- playersList.indices) yield resultNestedList(x)).mkString + "\n" + remainingMoves
@@ -70,5 +70,5 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
 
   def getPlayerTuples: List[(Int, String)] = for (x <- playersList) yield (x.playerID, x.playerName)
 
-  def isRunning: Boolean = playersList.length * 13 > remainingMoves
+  def isRunning: Boolean = running
 }

@@ -21,7 +21,7 @@ class KniffelModule extends AbstractModule with ScalaModule {
 
     bind[IMatrix].toInstance(new Matrix[String](numberOfPlayers))
     bind[IField].toInstance(new Field(numberOfPlayers))
-    bind[IGame].toInstance(new Game(numberOfPlayers))
+    bind[IGame].toInstance(new Game(numberOfPlayers, false))
     bind[IDiceCup].toInstance(new DiceCup())
     bind[IFileIO].toInstance(new FileIO())
     bind[IController].toInstance(new Controller())
