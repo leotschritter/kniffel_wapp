@@ -2,12 +2,9 @@ package controllers
 
 import de.htwg.se.kniffel.controller.controllerBaseImpl.Controller
 import de.htwg.se.kniffel.model.Move
-import play.api.Logger
 import play.api.mvc._
 
 import javax.inject._
-import scala.reflect.runtime.universe.Try
-import scala.util.Success
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -17,7 +14,7 @@ import scala.util.Success
 class KniffelController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   private val controller = new Controller()
-  private val log = Logger.apply("KniffelController")
+
 
   /**
    * Create an Action to render an HTML page.
@@ -27,7 +24,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
    * a path of `/`.
    */
   def index(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    Ok(views.html.index(controller))
   }
 
   def kniffel(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
@@ -77,7 +74,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
 
   def write(to: String): Action[AnyContent] = Action {
     val index = controller.diceCup.indexOfField.get(to)
-    if(index.isDefined && controller.field.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
+    if (index.isDefined && controller.field.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
       writeDown(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
       Ok(views.html.kniffel(controller))
     } else {

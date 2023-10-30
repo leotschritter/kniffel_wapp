@@ -1,315 +1,365 @@
-@(controller:de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
+@(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
 
-@matrix = @{controller.field.getRows}
-@firstColumn = @{List("assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
-"assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "gesamt", "Bonus ab 63",
-"gesamt oberer Teil", "Dreierpasch", "Viererpasch", "Full-House", "Kleine Straße", "Große Straße", "Kniffel", "Chance",
-"gesamt unterer Teil", "gesamt oberer Teil", "Endsumme")}
-@secondColumn = @{List("nur Einser zählen", "nur Zweier zählen", "nur Dreier zählen", "nur Vierer zählen",
-"nur Fünfer zählen", "nur Sechser zählen", "assets/images/right_arrow.png", "plus 35", "assets/images/right_arrow.png",
-"alle Augen zählen", "alle Augen zählen", "25 Punkte", "30 Punkte", "40 Punkte", "50 Punkte", "alle Augen zählen",
-"assets/images/right_arrow.png", "assets/images/right_arrow.png", "assets/images/right_arrow.png")}
+@matrix = @{
+    controller.field.getRows
+}
+@firstColumn = @{
+    List("assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
+        "assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "gesamt", "Bonus ab 63",
+        "gesamt oberer Teil", "Dreierpasch", "Viererpasch", "Full-House", "Kleine Straße", "Große Straße", "Kniffel", "Chance",
+        "gesamt unterer Teil", "gesamt oberer Teil", "Endsumme")
+}
+@secondColumn = @{
+    List("nur Einser zählen", "nur Zweier zählen", "nur Dreier zählen", "nur Vierer zählen",
+        "nur Fünfer zählen", "nur Sechser zählen", "assets/images/right_arrow.png", "plus 35", "assets/images/right_arrow.png",
+        "alle Augen zählen", "alle Augen zählen", "25 Punkte", "30 Punkte", "40 Punkte", "50 Punkte", "alle Augen zählen",
+        "assets/images/right_arrow.png", "assets/images/right_arrow.png", "assets/images/right_arrow.png")
+}
 
 @main("HTWG Kniffel") {
 
-<style>
-    td {
-        height: 45px;
-        border: 1px solid #DCDCDC;
-        text-align: center;
-        width: 200px;
-    }
+    <style>
+            td {
+                height: 45px;
+                border: 1px solid #DCDCDC;
+                text-align: center;
+                width: 200px;
+            }
 
-    th {
-        padding: 15px;
-        border: 1px solid #DCDCDC;
-        text-align: center !important;
-        height: 45px;
-    }
+            th {
+                padding: 15px;
+                border: 1px solid #DCDCDC;
+                text-align: center !important;
+                height: 45px;
+            }
 
-    table {
-        border-collapse: collapse;
-        scale: 0.9;
-    }
+            table {
+                border-collapse: collapse;
+                scale: 0.9;
+            }
 
-    td:hover {
-        background-color: #e6e6e6;
-    }
+            td:hover {
+                background-color: #e6e6e6;
+            }
 
-    tr.main-heading {
-        line-height: 10%;
-        background-color: #04AA6D;
-    }
+            tr.main-heading {
+                line-height: 10%;
+                background-color: #04AA6D;
+            }
 
-    td:first-child {
-        background-color: #04AA6D;
-        font-size: small;
-    }
+            td:first-child {
+                background-color: #04AA6D;
+                font-size: small;
+            }
 
-    td.secondColumn {
-        background-color: #04AA6D;
-        font-size: small;
-    }
+            td.secondColumn {
+                background-color: #04AA6D;
+                font-size: small;
+            }
 
-    button.btnAction {
-        height: 100%;
-        width: 100%;
-    }
+            button.btnAction {
+                height: 100%;
+                width: 100%;
+            }
 
-    .table-container {
-        display: flex;
-        justify-content: center;
-        margin: auto;
-    }
+            .table-container {
+                display: flex;
+                justify-content: center;
+                margin: auto;
+            }
 
-    td.activeCol {
-        background-color: lightgrey;
-    }
+            td.activeCol {
+                background-color: lightgrey;
+            }
 
-    @@font-face
-    {
-        font-family: 'glyphicon';
-        src: url("assets/fonts/glyphicons-halflings-regular.woff2");
-        font-weight: normal;
-        font-style: normal;
-    }
+            @@font-face {
+                font-family: 'glyphicon';
+                src: url("assets/fonts/glyphicons-halflings-regular.woff2");
+                font-weight: normal;
+                font-style: normal;
+            }
 
-    .actionNavbar {
-        overflow: hidden;
-        background: linear-gradient(180deg, #333, #000)
-    }
+            .actionNavbar {
+                overflow: hidden;
+                background: linear-gradient(180deg, #333, #000)
+            }
 
-    .actionNavbar a {
-        float: left;
-        color: white;
-        text-align: center;
-        padding: 14px 15px;
-        text-decoration: none;
-    }
+            .actionNavbar a {
+                float: left;
+                color: white;
+                text-align: center;
+                padding: 14px 15px;
+                text-decoration: none;
+            }
 
-    .actionSubnav {
-        float: left;
-        overflow: hidden;
-    }
+            .actionSubnav {
+                float: left;
+                overflow: hidden;
+            }
 
-    .actionSubnav .actionSubnavbtn {
-        border: none;
-        border-right: 1px solid #bbb;
-        outline: none;
-        color: white;
-        padding: 14px 15px;
-        background-color: inherit;
-        font-family: inherit;
-        margin: 0;
-    }
+            .actionSubnav .actionSubnavbtn {
+                border: none;
+                border-right: 1px solid #bbb;
+                outline: none;
+                color: white;
+                padding: 14px 15px;
+                background-color: inherit;
+                font-family: inherit;
+                margin: 0;
+            }
 
-    .actionNavbar a:hover, .actionSubnav:hover .actionSubnavbtn {
-        background-color: #04AA6D;
-    }
+            .actionNavbar a:hover, .actionSubnav:hover .actionSubnavbtn {
+                background-color: #04AA6D;
+            }
 
-    .actionSubnav-content {
-        display: none;
-        position: absolute;
-        left: 0;
-        background-color: #04AA6D;
-        width: 100%;
-        z-index: 1;
-    }
+            .actionSubnav-content {
+                display: none;
+                position: absolute;
+                left: 0;
+                background-color: #04AA6D;
+                width: 100%;
+                z-index: 1;
+            }
 
-    .actionSubnav-content a {
-        float: left;
-        padding: 14px 18.5px;
-        border: none;
-        border-right: 1px solid #bbb;
-        color: white;
-        text-decoration: none;
-    }
+            .actionSubnav-content a {
+                float: left;
+                padding: 14px 18.5px;
+                border: none;
+                border-right: 1px solid #bbb;
+                color: white;
+                text-decoration: none;
+            }
 
-    .actionSubnav-content a:hover {
-        background-color: #eee;
-        color: black;
-    }
+            .actionSubnav-content a:hover {
+                background-color: #eee;
+                color: black;
+            }
 
-    .actionSubnav:hover .actionSubnav-content {
-        display: block;
-    }
-</style>
-<div class="actionNavbar">
-    <div class="actionSubnav">
-        <button class="actionSubnavbtn">Action<i class="fa fa-caret-down"></i></button>
-        <div class="actionSubnav-content">
-            <a href="/save">Save</a>
-            <a href="/load">Load</a>
-            <a href="/undo">Undo</a>
-            <a href="/redo">Redo</a>
+            .actionSubnav:hover .actionSubnav-content {
+                display: block;
+            }
+    </style>
+    <div class="actionNavbar">
+        <div class="actionSubnav">
+            <button class="actionSubnavbtn">Action<i class="fa fa-caret-down"></i></button>
+            <div class="actionSubnav-content">
+                <a href="/save">Save</a>
+                <a href="/load">Load</a>
+                <a href="/undo">Undo</a>
+                <a href="/redo">Redo</a>
+            </div>
         </div>
     </div>
-</div>
-<div style="@(if(controller.getDicecup.isRunning || controller.getGame.isRunning){" display: none"}else{""})"
-    class="startGame">
-    <label style="font-weight: 400" for="numberOfPlayers">Number Of Players</label>
-    <input id="numberOfPlayers" type="number" min="2" max="8" value="2" />
-    <button onclick="startGame()">Start Game</button>
-    <script>
-        function startGame() {
-            const numberOfPlayers = document.getElementById("numberOfPlayers").value;
-            fetch('/new?players=' + numberOfPlayers).then(response => {
-                if (!response.ok) {
-                    console.error("Failed starting new game!");
-                } else {
-                    fetch('/dice').then(innerResponse => {
-                        if (!innerResponse.ok) {
-                            console.error("Failed starting new game!");
+    <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {
+        " display: none"
+    } else {
+        ""
+    })">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-5">
+                    <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
+                    @for(i <- 0 until controller.diceCup.getInCup.length) {
+                        <option value=@{
+                            i
+                        }>@{
+                            controller.diceCup.getInCup(i)
+                        }</option>
+                    }
+                    </select>
+                </div>
+
+                <div class="col-xs-2">
+                    <button onclick="putOut('@{controller.diceCup.getInCup.mkString(",")}')" type="button"
+                    id="multiselect_rightAll" class="btn btn-block"><i class="glyphicon glyphicon-forward"></i></button>
+                    <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected"
+                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
+                    <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected"
+                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
+                    <button onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
+                    id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
+                    <button style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                        "display: none"
+                    } else {
+                        ""
+                    })" onclick="window.location.href = 'dice'" id="diceButton" type="button" class="btn btn-block">
+                        <img width="40px" src="assets/images/flying_dices_small.png" /></button>
+                        <!--textarea can be used for debugging-->
+                        <!--<textarea>inCup: @{
+                        controller.getDicecup.getInCup.mkString(",")
+                    }; locked: @{
+                    controller.getDicecup.getLocked.mkString(",")
+                }
+                    </textarea>-->
+                </div>
+
+                <div class="col-xs-5">
+                    <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
+                    @for(i <- 0 until controller.diceCup.getLocked.length) {
+                        <option value=@{
+                            (i + 1) * 42
+                        }>@{
+                            controller.diceCup.getLocked(i)
+                        }</option>
+                    }
+                    </select>
+                </div>
+
+                <div class="col-xs-5">
+                    <div class="imageBox">
+                        <img style="@(if(controller.getDicecup.getRemainingDices < 2) {
+                            " opacity: 0.3"
                         } else {
-                            location.reload();
+                            ""
+                        })"
+                        src="assets/images/dicecup_small.png" />
+                        <img style="@(if(controller.getDicecup.getRemainingDices < 1) {
+                            " opacity: 0.3"
+                        } else {
+                            ""
+                        })"
+                        src="assets/images/dicecup_small.png" />
+                        <img style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                            " opacity: 0.3"
+                        } else {
+                            ""
+                        })"
+                        src="assets/images/dicecup_small.png" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <script>
+                $('#multiselect').multiselect();
+                $("#multiselect").off('dblclick');
+                $("#multiselect_to").off('dblclick');
+
+                function multiselectRightSelected() {
+                    let selectedOptions = $('#multiselect').multiselect('getSelected');
+                    let selectedValues = [];
+                    selectedOptions.each(function (index, option) {
+                        selectedValues.push($(option).val()); // Get the value of the selected option
+                    });
+                    let optionsArray = [...document.getElementById('multiselect').children];
+                    let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
+                    putOut(routeString);
+                }
+
+                function multiselectLeftSelected() {
+                    const selectedOptions = $('#multiselect_to').multiselect('getSelected');
+                    let selectedValues = [];
+                    selectedOptions.each(function (index, option) {
+                        selectedValues.push($(option).val()); // Get the value of the selected option
+                    });
+                    let optionsArray = [...document.getElementById('multiselect_to').children];
+                    let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
+                    putIn(routeString);
+                }
+
+                function putIn(routeString) {
+                    fetch('/in?in=' + encodeURIComponent(routeString)).then(response => {
+                        if (!response.ok) {
+                            console.error("Failed putting dices in!");
+                        } else {
+                            window.location.href = '/kniffel';
                         }
                     });
                 }
-            });
-        }
-    </script>
-</div>
-<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){" display: none"}else{""})">
-    <div class="container">
-        <div class="row">
-            <div class="col-xs-5">
-                <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
-                    @for(i <- 0 until controller.diceCup.getInCup.length) { <option value=@{i}>@{controller.diceCup.getInCup(i)}</option>
+
+                function putOut(routeString) {
+                    fetch('/out?out=' + encodeURIComponent(routeString)).then(response => {
+                        if (!response.ok) {
+                            console.error("Failed putting dices out!");
+                        } else {
+                            window.location.href = '/kniffel';
                         }
-                </select>
-            </div>
-
-            <div class="col-xs-2">
-                <button onclick="putOut('@{controller.diceCup.getInCup.mkString(",")}')" type="button"
-                    id="multiselect_rightAll" class="btn btn-block"><i class="glyphicon glyphicon-forward"></i></button>
-                <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected"
-                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
-                <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected"
-                    class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
-                <button onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
-                    id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
-                <button style="@(if(controller.getDicecup.getRemainingDices < 0){"display: none"}else{""})" onclick="window.location.href='dice'" id="diceButton" type="button" class="btn btn-block">
-                    <img width="40px" src="assets/images/flying_dices_small.png" /></button>
-                <!--textarea can be used for debugging-->
-                <!--<textarea>inCup: @{controller.getDicecup.getInCup.mkString(",")}; locked: @{controller.getDicecup.getLocked.mkString(",")}
-                </textarea>-->
-            </div>
-
-            <div class="col-xs-5">
-                <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
-                    @for(i <- 0 until controller.diceCup.getLocked.length) { <option value=@{(i+1)*42}>@{controller.diceCup.getLocked(i)}</option>
-                        }
-                </select>
-            </div>
-
-            <div class="col-xs-5">
-                <div class="imageBox">
-                    <img style="@(if(controller.getDicecup.getRemainingDices < 2){" opacity: 0.3"}else{""})"
-                        src="assets/images/dicecup_small.png" />
-                    <img style="@(if(controller.getDicecup.getRemainingDices < 1){" opacity: 0.3"}else{""})"
-                        src="assets/images/dicecup_small.png" />
-                    <img style="@(if(controller.getDicecup.getRemainingDices < 0){" opacity: 0.3"}else{""})"
-                        src="assets/images/dicecup_small.png" />
-                </div>
-            </div>
-        </div>
-
+                    });
+                }
+        </script>
     </div>
-    <script>
-        $('#multiselect').multiselect();
-        $("#multiselect").off('dblclick');
-        $("#multiselect_to").off('dblclick');
 
-        function multiselectRightSelected() {
-            let selectedOptions = $('#multiselect').multiselect('getSelected');
-            let selectedValues = [];
-            selectedOptions.each(function (index, option) {
-                selectedValues.push($(option).val()); // Get the value of the selected option
-            });
-            let optionsArray = [...document.getElementById('multiselect').children];
-            let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
-            putOut(routeString);
-        }
-
-        function multiselectLeftSelected() {
-            const selectedOptions = $('#multiselect_to').multiselect('getSelected');
-            let selectedValues = [];
-            selectedOptions.each(function (index, option) {
-                selectedValues.push($(option).val()); // Get the value of the selected option
-            });
-            let optionsArray = [...document.getElementById('multiselect_to').children];
-            let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
-            putIn(routeString);
-        }
-
-        function putIn(routeString) {
-            fetch('/in?in=' + encodeURIComponent(routeString)).then(response => {
-                if (!response.ok) {
-                    console.error("Failed putting dices in!");
-                } else {
-                    window.location.href = '/kniffel';
-                }
-            });
-        }
-
-        function putOut(routeString) {
-            fetch('/out?out=' + encodeURIComponent(routeString)).then(response => {
-                if (!response.ok) {
-                    console.error("Failed putting dices out!");
-                } else {
-                    window.location.href = '/kniffel';
-                }
-            });
-        }
-    </script>
-</div>
-
-<div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)){"display: none"}else{""})"
+    <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {
+        "display: none"
+    } else {
+        ""
+    })"
     class="gamecontainer">
-    <div class="game">
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr class="main-heading">
-                        <th></th>
-                        <th></th>
-                        @for(col <- 0 until matrix(0).length) { <th>@{controller.game.getPlayerName(col)}</th> }
-                    </tr>
-                </thead>
-                @for(row <- 0 until matrix.length) { @for(col <- 0 until matrix(0).length) { @if(col==0) { <tr>
-                    @if(row < 6) { <td>
-                        <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
-                            row)){""}else{"disabled"}) onclick="window.location.href='write?to=@{row+1}'"
-                            class="btnAction"><img src=@{firstColumn(row)} /></button>
-                        </td>
-                        } else if(row > 8 && row < 16) { <td>
-                            <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
-                                row)){""}else{"disabled"})
-                                onclick="window.location.href='write?to=@{controller.getField.getFirstColumn(row).toUpperCase()}'"
-                                class="btnAction">@{firstColumn(row)}</button>
-                            </td>
-                            } else {
-                            <td>@{firstColumn(row)}</td>
+        <div class="game">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr class="main-heading">
+                            <th></th>
+                            <th></th>
+                            @for(col <- 0 until matrix(0).length) {
+                                <th>@{
+                                    controller.game.getPlayerName(col)
+                                }</th>
                             }
-                            @if(row == 6 || row == 8 || row > 15) {
-                            <td class="secondColumn"><img src=@{secondColumn(row)} /></td>
-                            } else {
-                            <td class="secondColumn">@{secondColumn(row)}</td>
-                            }
-                            }
-                            <td class=@if(col==controller.getGame.getPlayerID){"activeCol"}else{""}>
-                                <span class="cell">@{matrix(row)(col)}</span>
+                        </tr>
+                    </thead>
+                    @for(row <- 0 until matrix.length) {
+                        @for(col <- 0 until matrix(0).length) {
+                            @if(col == 0) {
+                                <tr>
+                                    @if(row < 6) {
+                                        <td>
+                                            <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
+                                                row)) {
+                                                ""
+                                            } else {
+                                                "disabled"
+                                            }) onclick="window.location.href = 'write?to=@{row+1}'"
+                                            class="btnAction"><img src=@{
+                                                firstColumn(row)
+                                            } /></button>
+                                        </td>
+                                    } else if(row > 8 && row < 16) { <td>
+                                    <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
+                                        row)) {
+                                        ""
+                                    } else {
+                                        "disabled"
+                                    })
+                                    onclick="window.location.href = 'write?to=@{controller.getField.getFirstColumn(row).toUpperCase()}'"
+                                    class="btnAction">@{
+                                        firstColumn(row)
+                                    }</button>
+                                </td>
+                                    } else {
+                                    <td>@{
+                                        firstColumn(row)
+                                    }</td>
+                                    }
+                                    @if(row == 6 || row == 8 || row > 15) {
+                                        <td class="secondColumn"><img src=@{
+                                            secondColumn(row)
+                                        } /></td>
+                                    } else {
+                                        <td class="secondColumn">@{
+                                            secondColumn(row)
+                                        }</td>
+                                    }
+                                }
+                            <td class=@if(col == controller.getGame.getPlayerID) {"activeCol"
+                        } else
+                            {""}
+                            >
+                            <span class="cell">@{
+                                matrix(row)(col)
+                            }</span>
                             </td>
                             @if(col == matrix(0).length - 1) {
                             </tr>
                             }
-                            }
+                        }
 
-                            }
-            </table>
+                    }
+                </table>
+            </div>
+
         </div>
-
     </div>
-</div>
 
 }
