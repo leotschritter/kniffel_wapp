@@ -2,12 +2,9 @@ package controllers
 
 import de.htwg.se.kniffel.controller.controllerBaseImpl.Controller
 import de.htwg.se.kniffel.model.Move
-import play.api.Logger
 import play.api.mvc._
 
 import javax.inject._
-import scala.reflect.runtime.universe.Try
-import scala.util.Success
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -17,7 +14,7 @@ import scala.util.Success
 class KniffelController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   private val controller = new Controller()
-  private val log = Logger.apply("KniffelController")
+
 
   /**
    * Create an Action to render an HTML page.
@@ -26,48 +23,60 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+  def index(): Action[AnyContent] = Action {
+    Ok(views.html.index(controller))
   }
 
-  def about: Action[AnyContent]= Action {
-    Ok(views.html.index())
+  def kniffel(): Action[AnyContent] = Action {
+    Ok(views.html.kniffel(controller))
+  }
+
+  def about(): Action[AnyContent] = Action {
+    Ok(views.html.about())
   }
 
   def field: Action[AnyContent] = Action {
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def dice: Action[AnyContent] = Action {
     controller.doAndPublish(controller.dice())
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def putOut(out: String): Action[AnyContent] = Action {
-    controller.doAndPublish(controller.putOut, out.split(",").toList.map(_.toInt))
-    Ok(gameAsText)
+    if (out.nonEmpty) {
+      controller.doAndPublish(controller.putOut, out.split(",").toList.map(_.toInt))
+      Ok(views.html.kniffel(controller))
+    } else {
+      BadRequest("Something went wrong!")
+    }
   }
 
   def putIn(in: String): Action[AnyContent] = Action {
-    controller.doAndPublish(controller.putIn, in.split(",").toList.map(_.toInt))
-    Ok(gameAsText)
+    if (in.nonEmpty) {
+      controller.doAndPublish(controller.putIn, in.split(",").toList.map(_.toInt))
+      Ok(views.html.kniffel(controller))
+    } else {
+      BadRequest("Something went wrong!")
+    }
   }
 
   def redo: Action[AnyContent] = Action {
     controller.redo()
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def undo: Action[AnyContent] = Action {
     controller.undo()
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def write(to: String): Action[AnyContent] = Action {
     val index = controller.diceCup.indexOfField.get(to)
-    if(index.isDefined && controller.field.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
+    if (index.isDefined && controller.field.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
       writeDown(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
-      Ok(gameAsText)
+      Ok(views.html.kniffel(controller))
     } else {
       BadRequest("Invalid Input.")
     }
@@ -75,20 +84,23 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
 
   def save: Action[AnyContent] = Action {
     controller.save
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
 
   def load: Action[AnyContent] = Action {
     controller.load
-    Ok(gameAsText)
+    Ok(views.html.kniffel(controller))
   }
-
-  private def gameAsText = String.format("%s \n%s%s ist an der Reihe.",
-    controller.field.toString, controller.diceCup.toString, controller.getGame.getPlayerName)
 
   private def writeDown(move: Move): Unit = {
     controller.put(move)
     controller.next()
     controller.doAndPublish(controller.nextRound())
+  }
+
+  def newGame(players: Int): Action[AnyContent] = Action {
+    controller.newGame(players)
+    controller.doAndPublish(controller.diceCup.nextRound())
+    Ok(views.html.kniffel(controller))
   }
 }

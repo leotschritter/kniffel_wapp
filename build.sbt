@@ -10,6 +10,9 @@ scalaVersion := "2.13.12"
 
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0-RC2" % Test
+// WebJars Dependency for jQuery
+libraryDependencies += "org.webjars" % "jquery" % "3.6.0"
+
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "scala.de.htwg.wapp.controllers._"

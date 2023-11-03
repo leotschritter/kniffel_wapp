@@ -1,90 +1,33 @@
-@()
+@(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
 @main("HTWG Kniffel") {
-  <h1>Welcome to Kniffel!</h1>
-  <button id="startGameButton">Start Game</button>
+    <link rel="stylesheet" href="assets/stylesheets/index.css">
+    <div class="startGame">
+        <div class="col">
+            <img style="display: block; margin: auto" src="assets/images/flying_dices.png"/>
+            <h1 style="text-align: center">Welcome to Kniffel</h1>
+            <h3 style="text-align: center; margin-bottom: 20px">Let the dice roll</h3>
+            <div>
+                <label class="numberLabel" for="numberOfPlayers">Number Of Players</label>
+                <input id="numberOfPlayers" type="number" min="2" max="8" value="2" />
+                <button class="startButton">Start Game</button>
+            </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>Are you sure?</h2>
+            </div>
+            <div class="modal-body">
+                <p>If you start the game, your existing game will be overwritten.</p>
+            </div>
+            <div class="modal-start-footer">
+                <button class="confirmationButton" onclick="startGame()">Yes</button>
+                <button id="no" class="confirmationButton">No</button>
+            </div>
+        </div>
 
-  <script>
-    async function fetchFieldAndHandleInput() {
-      // Send an AJAX request to the server to get the field
-      let fieldResponse = await fetch("/field");
-      let field = await fieldResponse.text();
-      console.log(field);
-
-      let userInput = prompt("Enter next move:").split(" ");
-
-      let inputResponse;
-      switch (userInput[0]) {
-        case "po":
-          // Send user input to the server using AJAX
-          inputResponse = await fetch("/out?out=" + encodeURIComponent(userInput.filter(input => input !== "po").toString()), {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            }
-          });
-          break;
-        case "pi":
-          inputResponse = await fetch("/in?in=" + encodeURIComponent(userInput.filter(input => input !== "pi").toString()), {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            }
-          });
-          break;
-        case "d":
-          inputResponse = await fetch("/dice", {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-          break;
-        case "wd":
-          inputResponse = await fetch("/write?to=" + encodeURIComponent(userInput[1].toString()), {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            }
-          });
-          break;
-        case "u":
-          inputResponse = await fetch("/undo", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          break;
-        case "r":
-          inputResponse = await fetch("/redo", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          break;
-        case "s":
-          inputResponse = await fetch("/save", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          break;
-        case "l":
-          inputResponse = await fetch("/load");
-          break;
-        case "q":
-          return;
-      }
-
-      /*let inputResult = await inputResponse.text();*/
-      await fetchFieldAndHandleInput();
-    }
-
-    document.getElementById("startGameButton").addEventListener("click", function() {
-      fetchFieldAndHandleInput();
-    });
-
-</script>
+    </div>
+    <script src="@routes.Assets.versioned("javascripts/index.js")" type="text/javascript"></script>
 }

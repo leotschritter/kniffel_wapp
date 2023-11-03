@@ -1,0 +1,186 @@
+@(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
+
+@matrix = @{
+    controller.field.getRows
+}
+@firstColumn = @{
+    List("assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
+        "assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "gesamt", "Bonus ab 63",
+        "gesamt oberer Teil", "Dreierpasch", "Viererpasch", "Full-House", "Kleine Straße", "Große Straße", "Kniffel", "Chance",
+        "gesamt unterer Teil", "gesamt oberer Teil", "Endsumme")
+}
+@secondColumn = @{
+    List("nur Einser zählen", "nur Zweier zählen", "nur Dreier zählen", "nur Vierer zählen",
+        "nur Fünfer zählen", "nur Sechser zählen", "assets/images/right_arrow.png", "plus 35", "assets/images/right_arrow.png",
+        "alle Augen zählen", "alle Augen zählen", "25 Punkte", "30 Punkte", "40 Punkte", "50 Punkte", "alle Augen zählen",
+        "assets/images/right_arrow.png", "assets/images/right_arrow.png", "assets/images/right_arrow.png")
+}
+
+@main("HTWG Kniffel") {
+
+    <link rel="stylesheet" href="assets/stylesheets/kniffel.css">
+    <div class="actionNavbar">
+        <div class="actionSubnav">
+            <button class="actionSubnavbtn">Action<i class="fa fa-caret-down"></i></button>
+            <div class="actionSubnav-content">
+                <a href="/save">Save</a>
+                <a href="/load">Load</a>
+                <a href="/undo">Undo</a>
+                <a href="/redo">Redo</a>
+            </div>
+        </div>
+    </div>
+    <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {
+        " display: none"
+    } else {
+        ""
+    })">
+        <div class="diceCupActionContainer">
+            <div class="imageBox">
+                <img style="@(if(controller.getDicecup.getRemainingDices < 2) {
+                    " opacity: 0.3"
+                } else {
+                    ""
+                })"
+                src="assets/images/dicecup_small.png" />
+                <img style="@(if(controller.getDicecup.getRemainingDices < 1) {
+                    " opacity: 0.3"
+                } else {
+                    ""
+                })"
+                src="assets/images/dicecup_small.png" />
+                <img style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                    " opacity: 0.3"
+                } else {
+                    ""
+                })"
+                src="assets/images/dicecup_small.png" />
+            </div>
+            <div style="margin-top: 40px" class="container">
+                <div class="row">
+                    <div class="col-xs-5">
+                        <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
+                        @for(i <- 0 until controller.diceCup.getInCup.length) {
+                            <option value=@{
+                                i
+                            }>@{
+                                controller.diceCup.getInCup(i)
+                            }</option>
+                        }
+                        </select>
+                    </div>
+
+                    <div class="col-xs-2">
+                        <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected"
+                        class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
+                        <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected"
+                        class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
+                        <button onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
+                        id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
+                        <button style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                            "display: none"
+                        } else {
+                            ""
+                        })" onclick="window.location.href = 'dice'" id="diceButton" type="button" class="btn btn-block">
+                            <img width="40px" src="assets/images/flying_dices_small.png" /></button>
+                    </div>
+
+                    <div class="col-xs-5">
+                        <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
+                        @for(i <- 0 until controller.diceCup.getLocked.length) {
+                            <option value=@{
+                                (i + 1) * 42
+                            }>@{
+                                controller.diceCup.getLocked(i)
+                            }</option>
+                        }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="@routes.Assets.versioned("javascripts/kniffel.js")" type="text/javascript"></script>
+    </div>
+
+    <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {
+        "display: none"
+    } else {
+        ""
+    })"
+    class="gamecontainer">
+        <div class="game">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr class="main-heading">
+                            <th></th>
+                            <th></th>
+                            @for(col <- 0 until matrix(0).length) {
+                                <th>@{
+                                    controller.game.getPlayerName(col)
+                                }</th>
+                            }
+                        </tr>
+                    </thead>
+                    @for(row <- 0 until matrix.length) {
+                        @for(col <- 0 until matrix(0).length) {
+                            @if(col == 0) {
+                                <tr>
+                                    @if(row < 6) {
+                                        <td>
+                                            <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
+                                                row)) {
+                                                ""
+                                            } else {
+                                                "disabled"
+                                            }) onclick="window.location.href = 'write?to=@{row+1}'"
+                                            class="btnAction"><img src=@{
+                                                firstColumn(row)
+                                            } /></button>
+                                        </td>
+                                    } else if(row > 8 && row < 16) { <td>
+                                    <button @(if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID,
+                                        row)) {
+                                        ""
+                                    } else {
+                                        "disabled"
+                                    })
+                                    onclick="window.location.href = 'write?to=@{controller.getField.getFirstColumn(row).toUpperCase()}'"
+                                    class="btnAction">@{
+                                        firstColumn(row)
+                                    }</button>
+                                </td>
+                                    } else {
+                                    <td>@{
+                                        firstColumn(row)
+                                    }</td>
+                                    }
+                                    @if(row == 6 || row == 8 || row > 15) {
+                                        <td class="secondColumn"><img src=@{
+                                            secondColumn(row)
+                                        } /></td>
+                                    } else {
+                                        <td class="secondColumn">@{
+                                            secondColumn(row)
+                                        }</td>
+                                    }
+                                }
+                            <td class=@if(col == controller.getGame.getPlayerID) {"activeCol"
+                        } else
+                            {""}
+                            >
+                            <span class="cell">@{
+                                matrix(row)(col)
+                            }</span>
+                            </td>
+                            @if(col == matrix(0).length - 1) {
+                            </tr>
+                            }
+                        }
+
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+}
