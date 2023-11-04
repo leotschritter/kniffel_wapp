@@ -28,7 +28,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def kniffel(): Action[AnyContent] = Action {
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, false))
   }
 
   def about(): Action[AnyContent] = Action {
@@ -36,18 +36,18 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def field: Action[AnyContent] = Action {
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, false))
   }
 
   def dice: Action[AnyContent] = Action {
     controller.doAndPublish(controller.dice())
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, true))
   }
 
   def putOut(out: String): Action[AnyContent] = Action {
     if (out.nonEmpty) {
       controller.doAndPublish(controller.putOut, out.split(",").toList.map(_.toInt))
-      Ok(views.html.kniffel(controller))
+      Ok(views.html.kniffel(controller, false))
     } else {
       BadRequest("Something went wrong!")
     }
@@ -56,7 +56,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   def putIn(in: String): Action[AnyContent] = Action {
     if (in.nonEmpty) {
       controller.doAndPublish(controller.putIn, in.split(",").toList.map(_.toInt))
-      Ok(views.html.kniffel(controller))
+      Ok(views.html.kniffel(controller, false))
     } else {
       BadRequest("Something went wrong!")
     }
@@ -64,19 +64,19 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
 
   def redo: Action[AnyContent] = Action {
     controller.redo()
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, false))
   }
 
   def undo: Action[AnyContent] = Action {
     controller.undo()
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, false))
   }
 
   def write(to: String): Action[AnyContent] = Action {
     val index = controller.diceCup.indexOfField.get(to)
     if (index.isDefined && controller.field.getMatrix.isEmpty(controller.getGame.getPlayerID, index.get)) {
       writeDown(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
-      Ok(views.html.kniffel(controller))
+      Ok(views.html.kniffel(controller, false))
     } else {
       BadRequest("Invalid Input.")
     }
@@ -84,12 +84,12 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
 
   def save: Action[AnyContent] = Action {
     controller.save
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, false))
   }
 
   def load: Action[AnyContent] = Action {
     controller.load
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, false))
   }
 
   private def writeDown(move: Move): Unit = {
@@ -101,6 +101,6 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   def newGame(players: Int): Action[AnyContent] = Action {
     controller.newGame(players)
     controller.doAndPublish(controller.diceCup.nextRound())
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, false))
   }
 }

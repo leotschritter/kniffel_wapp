@@ -1,4 +1,4 @@
-@(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
+@(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller, dice: Boolean)
 
 @matrix = @{
     controller.field.getRows
@@ -30,77 +30,51 @@
             </div>
         </div>
     </div>
-    <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {
-        " display: none"
-    } else {
-        ""
-    })">
-        <div class="diceCupActionContainer">
-            <div class="imageBox">
-                <img style="@(if(controller.getDicecup.getRemainingDices < 2) {
-                    " opacity: 0.3"
-                } else {
-                    ""
-                })"
-                src="assets/images/dicecup_small.png" />
-                <img style="@(if(controller.getDicecup.getRemainingDices < 1) {
-                    " opacity: 0.3"
-                } else {
-                    ""
-                })"
-                src="assets/images/dicecup_small.png" />
-                <img style="@(if(controller.getDicecup.getRemainingDices < 0) {
-                    " opacity: 0.3"
-                } else {
-                    ""
-                })"
-                src="assets/images/dicecup_small.png" />
-            </div>
-            <div style="margin-top: 40px" class="container">
-                <div class="row">
-                    <div class="col-xs-5">
-                        <select name="from[]" id="multiselect" class="form-control" size="8" multiple="multiple">
-                        @for(i <- 0 until controller.diceCup.getInCup.length) {
-                            <option value=@{
-                                i
-                            }>@{
-                                controller.diceCup.getInCup(i)
-                            }</option>
-                        }
-                        </select>
-                    </div>
-
-                    <div class="col-xs-2">
-                        <button onclick="multiselectRightSelected()" type="button" id="multiselect_rightSelected"
-                        class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
-                        <button onclick="multiselectLeftSelected()" type="button" id="multiselect_leftSelected"
-                        class="btn btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
-                        <button onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
-                        id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
-                        <button style="@(if(controller.getDicecup.getRemainingDices < 0) {
-                            "display: none"
-                        } else {
-                            ""
-                        })" onclick="window.location.href = 'dice'" id="diceButton" type="button" class="btn btn-block">
-                            <img width="40px" src="assets/images/flying_dices_small.png" /></button>
-                    </div>
-
-                    <div class="col-xs-5">
-                        <select name="to[]" id="multiselect_to" class="form-control" size="8" multiple="multiple">
-                        @for(i <- 0 until controller.diceCup.getLocked.length) {
-                            <option value=@{
-                                (i + 1) * 42
-                            }>@{
-                                controller.diceCup.getLocked(i)
-                            }</option>
-                        }
-                        </select>
-                    </div>
+    <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {"display: none"} else {""})" class="board">
+        <div class="diceBoard">
+            <div class="cup" style="@(if(dice){""} else {"background: none; animation: none;"})">
+                <div class="diceInCup">
+                    @for(i <- 0 until controller.diceCup.getInCup.length) {
+                        <div style="@(if(dice){""}else{"visibility: visible"})" onclick="putOut(@{controller.diceCup.getInCup(i)})" class="dice d@{i+1} dice_@{controller.diceCup.getInCup(i)} inCup"></div>
+                    }
                 </div>
             </div>
         </div>
-        <script src="@routes.Assets.versioned("javascripts/kniffel.js")" type="text/javascript"></script>
+        <div class="actionBox">
+            <img style="@(if(controller.getDicecup.getRemainingDices < 2) {
+                " opacity: 0.3"
+            } else {
+                ""
+            })"
+            src="assets/images/dicecup_small.png" />
+            <img style="@(if(controller.getDicecup.getRemainingDices < 1) {
+                " opacity: 0.3"
+            } else {
+                ""
+            })"
+            src="assets/images/dicecup_small.png" />
+            <img style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                " opacity: 0.3"
+            } else {
+                ""
+            })"
+            src="assets/images/dicecup_small.png" />
+            <button style="margin-top: 5px" onclick="putIn('@{controller.diceCup.getLocked.mkString(",")}')" type="button"
+            id="multiselect_leftAll" class="btn btn-block"><i class="glyphicon glyphicon-backward"></i></button>
+            <button style="@(if(controller.getDicecup.getRemainingDices < 0) {
+                "display: none"
+            } else {
+                ""
+            })" onclick="window.location.href = 'dice'" id="diceButton" type="button" class="btn btn-block">
+                <img width="40px" src="assets/images/flying_dices_small.png" /></button>
+        </div>
+        <div class="diceStorage">
+            @for(i <- 0 until controller.diceCup.getLocked.length) {
+                <div onclick="putIn(@{controller.diceCup.getLocked(i)})" class="dice d@{controller.diceCup.getInCup.length + i + 1} dice_@{controller.diceCup.getLocked(i)} storage"></div>
+            }
+        </div>
     </div>
+    <script src="@routes.Assets.versioned("javascripts/kniffel.js")" type="text/javascript"></script>
 
     <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {
         "display: none"
