@@ -29,6 +29,10 @@ function waitForAnimationEnd(element) {
 }
 
 const animatedElement = document.getElementsByClassName('cup')[0];
+const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
+animatedElement.addEventListener('animationstart', (ev) => {
+    diceCupAudio.play().then();
+});
 animatedElement.classList.add('showCup');
 document.getElementById('actions').style = "";
 
