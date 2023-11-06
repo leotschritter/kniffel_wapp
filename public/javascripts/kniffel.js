@@ -1,3 +1,4 @@
+
 function putIn(routeString) {
     fetch('/in?in=' + encodeURIComponent(routeString)).then(response => {
         if (!response.ok) {
@@ -29,6 +30,7 @@ function waitForAnimationEnd(element) {
 
 const animatedElement = document.getElementsByClassName('cup')[0];
 animatedElement.classList.add('showCup');
+document.getElementById('actions').style = "";
 
 waitForAnimationEnd(animatedElement).then(() => {
     animatedElement.style.background = 'none';

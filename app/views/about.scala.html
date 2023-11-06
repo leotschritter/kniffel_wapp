@@ -1,24 +1,7 @@
-@()
+@(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller)
 
 @main("HTWG Sudoku") {
-    <style>
-            .aboutContainer {
-                position: relative;
-                font-size: larger;
-                margin-top: -0.5%;
-                margin-left: 25%;
-                margin-right: 25%;
-                color: white;
-            }
-
-            h1 {
-                margin-top: 1%;
-            }
-
-            img {
-                max-width: 100%;
-            }
-    </style>
+    <link href="assets/stylesheets/about.css" rel="stylesheet" />
     <div class="aboutContainer">
         <h1 id="kniffel"></br>Kniffel - Game Rules</h1>
         <h2 id="game-summary">Game Summary</h2>
@@ -97,4 +80,11 @@
             </br></br>
         </p>
     </div>
+    <script>
+        $(document).ready(function() {
+            if (@{controller.getGame.isRunning}) {
+                document.getElementById('actionGame').classList.remove('disabled');
+            }
+        });
+    </script>
 }

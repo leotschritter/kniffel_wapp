@@ -1,4 +1,4 @@
-ul {
+/*ul {
     list-style-type: none;
     margin: 0 !important;
     padding: 0;
@@ -38,8 +38,8 @@ li a:hover:not(.active) {
 #navigation a:hover {
     background-color: #eee;
     color: black;
-}
-
-.content {
-    background-image: radial-gradient(forestgreen, black);
-}
+}*/
+/*
+nav.navbar.navbar-expand-lg.navbar-light.bg-light {
+    padding-left: 15px;
+}*/

@@ -2,4 +2,32 @@
 
 body {
     font-family: "Ubuntu", "Verdana", "Arial", sans-serif;
+    background-image: radial-gradient(forestgreen, black);
+    /*background-repeat: no-repeat;*/
+    color: white;
+}
+
+.aboutContainer {
+    position: relative;
+    font-size: larger;
+    margin-top: -0.5%;
+    margin-left: 25%;
+    margin-right: 25%;
+    color: white;
+}
+
+.navbar-nav {
+    --bs-nav-link-color: none;
+}
+
+a.nav-link.active, a.navbar-brand.active {
+    color: #000 !important;
+}
+
+a.dropdown-item.active {
+    background-color: unset;
+    color: unset;
+}
+a.dropdown-item.active:hover {
+    --bs-link-color-rgb: var(--bs-link-hover-color-rgb);
 }

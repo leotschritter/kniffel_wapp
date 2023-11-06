@@ -32,7 +32,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def about(): Action[AnyContent] = Action {
-    Ok(views.html.about())
+    Ok(views.html.about(controller))
   }
 
   def field: Action[AnyContent] = Action {

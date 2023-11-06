@@ -20,7 +20,7 @@
     border-radius: 30px;
 }
 
-.startButton {
+/*.startButton {
     background-color: black;
     color: white;
     border: none;
@@ -32,7 +32,7 @@
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
-}
+}*/
 
 .confirmationButton {
     background-color: #000;
@@ -49,9 +49,11 @@
     background-color: darkslategrey;
 }
 
+/*
 .startButton:hover {
     background-color: #45a049;
 }
+*/
 
 .modal {
     display: none;
@@ -72,7 +74,7 @@
     background-color: #fefefe;
     margin: auto;
     padding: 0;
-    border: 1px solid #888;
+    border-radius: 15px;
     width: 30%;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     -webkit-animation-name: animatetop;
@@ -104,7 +106,7 @@
 }
 
 .close {
-    color: black;
+    color: white;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -119,9 +121,10 @@
 
 .modal-header {
     padding: 2px 16px;
-    text-align: center;
-    background-color: lightgrey;
-    color: black;
+    text-align: center !important;
+    background-color: #9f4045;
+    border-radius: 10px 10px 0 0;
+    color: white;
 }
 
 .modal-body {
@@ -129,11 +132,13 @@
     padding-top: 10px;
     text-align: center;
     font-size: large;
+    color: black;
 }
 
 .modal-start-footer {
     text-align: center;
     padding: 5px 0;
-    background-color: lightgrey;
+    background-color: #9f4045;
+    border-radius: 0 0 10px 10px;
     color: white;
 }

@@ -1,3 +1,4 @@
+/*
 document.addEventListener("DOMContentLoaded", function () {
     const currentPath = window.location.pathname;
     const baseUrl = window.location.origin;
@@ -10,4 +11,4 @@ document.addEventListener("DOMContentLoaded", function () {
             navItems[i].classList.add('active');
         }
     }
-});
+});*/
