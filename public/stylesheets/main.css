@@ -1,18 +1,7 @@
-@import url("./navigation.css");
-
 body {
     font-family: "Ubuntu", "Verdana", "Arial", sans-serif;
     background-image: radial-gradient(forestgreen, black);
     /*background-repeat: no-repeat;*/
-    color: white;
-}
-
-.aboutContainer {
-    position: relative;
-    font-size: larger;
-    margin-top: -0.5%;
-    margin-left: 25%;
-    margin-right: 25%;
     color: white;
 }
 

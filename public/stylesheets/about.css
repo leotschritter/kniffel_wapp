@@ -5,3 +5,16 @@ h1 {
 img {
     max-width: 100%;
 }
+
+body {
+    background-image: radial-gradient(forestgreen, black 140%);
+}
+
+.aboutContainer {
+    position: relative;
+    font-size: larger;
+    margin-top: -0.5%;
+    margin-left: 25%;
+    margin-right: 25%;
+    color: white;
+}

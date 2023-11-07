@@ -56,16 +56,6 @@
             </div>
         </nav>
         <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
-        <script>
-                $(function () {
-                    $('a').each(function () {
-                        if ($(this).prop('href') == window.location.href) {
-                            $(this).addClass('active');
-                            $(this).parents('li').addClass('active');
-                        }
-                    });
-                });
-        </script>
             <!--@* And here's where we render the `Html` object containing
                 * the page content. *@-->
         <div class="content">
