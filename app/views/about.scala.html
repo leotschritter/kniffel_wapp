@@ -81,10 +81,10 @@
         </p>
     </div>
     <script>
-        $(document).ready(function() {
-            if (@{controller.getGame.isRunning}) {
-                document.getElementById('actionGame').classList.remove('disabled');
-            }
-        });
+            $(document).ready(function () {
+                if (@{!controller.getGame.isRunning}) {
+                    document.getElementById('actionGame').classList.add('disabled');
+                }
+            });
     </script>
 }
