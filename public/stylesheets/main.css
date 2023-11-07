@@ -21,7 +21,8 @@ body {
 }
 
 a.nav-link.active, a.navbar-brand.active {
-    color: #000 !important;
+    color: white !important;
+    font-weight: 600;
 }
 
 a.dropdown-item.active {
