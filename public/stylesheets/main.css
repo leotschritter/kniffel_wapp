@@ -1,5 +1,23 @@
-@import url("./navigation.css");
-
 body {
     font-family: "Ubuntu", "Verdana", "Arial", sans-serif;
+    background-image: radial-gradient(forestgreen, black);
+    /*background-repeat: no-repeat;*/
+    color: white;
+}
+
+.navbar-nav {
+    --bs-nav-link-color: none;
+}
+
+a.nav-link.active, a.navbar-brand.active {
+    color: white !important;
+    font-weight: 600;
+}
+
+a.dropdown-item.active {
+    background-color: unset;
+    color: unset;
+}
+a.dropdown-item.active:hover {
+    --bs-link-color-rgb: var(--bs-link-hover-color-rgb);
 }

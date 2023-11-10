@@ -1,28 +1,3 @@
-$('#multiselect').multiselect();
-$("#multiselect").off('dblclick');
-$("#multiselect_to").off('dblclick');
-
-function multiselectRightSelected() {
-    let selectedOptions = $('#multiselect').multiselect('getSelected');
-    let selectedValues = [];
-    selectedOptions.each(function (index, option) {
-        selectedValues.push($(option).val()); // Get the value of the selected option
-    });
-    let optionsArray = [...document.getElementById('multiselect').children];
-    let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
-    putOut(routeString);
-}
-
-function multiselectLeftSelected() {
-    const selectedOptions = $('#multiselect_to').multiselect('getSelected');
-    let selectedValues = [];
-    selectedOptions.each(function (index, option) {
-        selectedValues.push($(option).val()); // Get the value of the selected option
-    });
-    let optionsArray = [...document.getElementById('multiselect_to').children];
-    let routeString = optionsArray.filter(option => selectedValues.flat().includes(option.value)).map(option => option.innerText).toString();
-    putIn(routeString);
-}
 
 function putIn(routeString) {
     fetch('/in?in=' + encodeURIComponent(routeString)).then(response => {
@@ -43,3 +18,28 @@ function putOut(routeString) {
         }
     });
 }
+
+function waitForAnimationEnd(element) {
+    return new Promise(resolve => {
+        element.addEventListener('animationend', function handler() {
+            element.removeEventListener('animationend', handler);
+            resolve();
+        });
+    });
+}
+
+const animatedElement = document.getElementsByClassName('cup')[0];
+const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
+animatedElement.addEventListener('animationstart', (ev) => {
+    diceCupAudio.play().then();
+});
+animatedElement.classList.add('showCup');
+document.getElementById('actions').style = "";
+
+waitForAnimationEnd(animatedElement).then(() => {
+    animatedElement.style.background = 'none';
+    const inCupElements = [...document.getElementsByClassName('diceInCup')[0].children];
+    for (const dice of inCupElements) {
+        dice.style.visibility = 'visible';
+    }
+});

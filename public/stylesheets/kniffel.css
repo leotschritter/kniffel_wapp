@@ -1,20 +1,37 @@
 td {
     height: 45px;
-    border: 1px solid #DCDCDC;
+    border: 1px solid black;
     text-align: center;
+    color: black;
     width: 200px;
 }
 
 th {
     padding: 15px;
-    border: 1px solid #DCDCDC;
+    border: 1px solid black;
     text-align: center !important;
     height: 45px;
 }
 
+th:last-child {
+    border-top-right-radius: 20px;
+}
+th:first-child {
+    border-top-left-radius: 20px;
+}
+tr:last-child td:first-child {
+    border-bottom-left-radius: 20px;
+}
+tr:last-child td:last-child {
+    border-bottom-right-radius: 20px;
+}
+
 table {
-    border-collapse: collapse;
+    background-color: white;
+    border-collapse: separate;
+    border-spacing: 0;
     scale: 0.9;
+    border-radius: 20px;
 }
 
 td:hover {
@@ -23,22 +40,27 @@ td:hover {
 
 tr.main-heading {
     line-height: 10%;
-    background-color: #04AA6D;
+    border: 1px solid black;
+    background-color: #9f4045;
 }
 
 td:first-child {
-    background-color: #04AA6D;
+    background-color: #9f4045;
+    color: white;
     font-size: small;
 }
 
 td.secondColumn {
-    background-color: #04AA6D;
+    border: 1px solid black;
+    background-color: #9f4045;
+    color: white;
     font-size: small;
 }
 
 button.btnAction {
     height: 100%;
     width: 100%;
+    border: none;
 }
 
 .table-container {
@@ -51,76 +73,210 @@ td.activeCol {
     background-color: lightgrey;
 }
 
+/* fallback */
 @font-face {
-    font-family: 'glyphicon';
-    src: url("assets/fonts/glyphicons-halflings-regular.woff2");
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/material_icons.woff2') format('woff2');
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
     font-weight: normal;
     font-style: normal;
+    font-size: 24px;
+    vertical-align: middle;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
 }
 
-.actionNavbar {
-    overflow: hidden;
-    background: linear-gradient(180deg, #333, #000)
-}
-
-.actionNavbar a {
-    float: left;
-    color: white;
-    text-align: center;
-    padding: 14px 15px;
-    text-decoration: none;
-}
-
-.actionSubnav {
-    float: left;
-    overflow: hidden;
-}
-
-.actionSubnav .actionSubnavbtn {
-    border: none;
-    border-right: 1px solid #bbb;
-    outline: none;
-    color: white;
-    padding: 14px 15px;
-    background-color: inherit;
-    font-family: inherit;
-    margin: 0;
-}
-
-.actionNavbar a:hover, .actionSubnav:hover .actionSubnavbtn {
-    background-color: #04AA6D;
-}
-
-.actionSubnav-content {
-    display: none;
-    position: absolute;
-    left: 0;
-    background-color: #04AA6D;
-    width: 100%;
-    z-index: 1;
-}
-
-.actionSubnav-content a {
-    float: left;
-    padding: 14px 18.5px;
-    border: none;
-    border-right: 1px solid #bbb;
-    color: white;
-    text-decoration: none;
-}
-
-.actionSubnav-content a:hover {
-    background-color: #eee;
-    color: black;
-}
-
-.actionSubnav:hover .actionSubnav-content {
-    display: block;
-}
-
-.diceCupActionContainer {
+.board {
     display: flex;
-    margin-top: 40px;
+    justify-content: center;
+    align-items: center;
+    background-image: url(../images/wood.png);
+    margin: 2% 35%;
+    border-radius: 30px;
+}
+
+.diceBoard {
+    width: 250px;
+    height: 250px;
+
+}
+
+.actionBox {
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+
+.diceStorage {
+    width: 85px;
+    height: 210px;
+    margin-left: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cup {
+    background: url('../images/cup.png') no-repeat;
+    width: 227px;
+    height: 229px;
+    margin: auto;
+}
+
+.diceInCup {
+    padding: 52px 65px;
+    width: 290px;
+    display: inline-block;
+    position: relative;
+    left: -32px;
+    top: 10px;
+    visibility: hidden;
+}
+
+.dice {
+    width: 43px;
+    height: 43px;
+    float: left;
+    margin: auto;
+}
+
+.dice:hover {
+    cursor: pointer;
+}
+
+.dice.inCup {
+    margin: 5px;
+    position: absolute;
+}
+
+.d1 {
+    -ms-transform: rotate(86deg);
+    -webkit-transform: rotate(86deg);
+    transform: rotate(86deg)
+}
+
+.d2 {
+    -ms-transform: rotate(62deg);
+    -webkit-transform: rotate(62deg);
+    transform: rotate(62deg);
+    left: 120px
+}
+
+.d3 {
+    -ms-transform: rotate(196deg);
+    -webkit-transform: rotate(196deg);
+    transform: rotate(196deg);
+    left: 170px
+}
+
+.d4 {
+    -ms-transform: rotate(345deg);
+    -webkit-transform: rotate(345deg);
+    transform: rotate(345deg);
+    top: 100px
+}
+
+.d5 {
+    -ms-transform: rotate(190deg);
+    -webkit-transform: rotate(190deg);
+    transform: rotate(190deg);
+    top: 100px;
+    left: 120px
+}
+
+.dice_1 {
+    background: url('../images/1.png') no-repeat;
+    background-size: 100%;
+}
+
+.dice_2 {
+    background: url('../images/2.png') no-repeat;
+    background-size: 100%;
+}
+
+.dice_3 {
+    background: url('../images/3.png') no-repeat;
+    background-size: 100%;
+}
+
+.dice_4 {
+    background: url('../images/4.png') no-repeat;
+    background-size: 100%;
+}
+
+.dice_5 {
+    background: url('../images/5.png') no-repeat;
+    background-size: 100%;
+}
+
+.dice_6 {
+    background: url('../images/6.png') no-repeat;
+    background-size: 100%;
+}
+
+.storage {
+    -ms-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+}
+
+.play {
+    width: 125px !important;
+    color: #fff;
+    font-size: 17px
+}
+
+.hide {
+    display: none;
+}
+
+.showCup {
+    display: block;
+    animation: shake 1s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    opacity: 1
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-4px, -4px, 0)
+    }
+    20%, 80% {
+        transform: translate3d(8px, 8px, 0)
+    }
+    30%, 50%, 70% {
+        transform: translate3d(-16px, -16px, 0)
+    }
+    40%, 60% {
+        transform: translate3d(16px, 16px, 0)
+    }
+}
+
+.actionBox {
+    display: flex;
+    flex-direction: column;
+    margin-left: 30px;
+}
+
+.actionBox img {
+    width: 50%;
+    text-align: center;
+    margin: auto;
+}
+.game {
+    display: flex;
     flex-direction: column;
     align-items: center;
 }

@@ -32,7 +32,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def about(): Action[AnyContent] = Action {
-    Ok(views.html.about())
+    Ok(views.html.about(controller))
   }
 
   def field: Action[AnyContent] = Action {
@@ -41,7 +41,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
 
   def dice: Action[AnyContent] = Action {
     controller.doAndPublish(controller.dice())
-    Ok(views.html.kniffel(controller))
+    Ok(views.html.kniffel(controller, true))
   }
 
   def putOut(out: String): Action[AnyContent] = Action {

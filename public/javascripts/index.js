@@ -7,7 +7,7 @@ btn.onclick = function() {
     modal.style.display = "block";
 }
 
-span.onclick = function() {
+span.onclick = function () {
     modal.style.display = "none";
 }
 
@@ -15,8 +15,8 @@ btnNo.onclick = function () {
     modal.style.display = "none";
 }
 
-window.onclick = function(event) {
-    if (event.target == modal) {
+window.onclick = function (event) {
+    if (event.target === modal) {
         modal.style.display = "none";
     }
 }
@@ -24,6 +24,7 @@ window.onclick = function(event) {
 function startGame() {
     const numberOfPlayers = document.getElementById("numberOfPlayers").value;
     if (numberOfPlayers > 8 || numberOfPlayers < 2) {
+        modal.style.display = "none";
         alert("Please only select a value between 2 and 8!");
         return;
     }
