@@ -16,7 +16,6 @@ a.nav-link.active, a.navbar-brand.active {
 
 a.dropdown-item.active {
     background-color: unset;
-    /*color: transparent;*/
 }
 
 a.dropdown-item.active:hover, a.dropdown-item:hover {
