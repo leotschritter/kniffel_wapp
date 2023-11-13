@@ -26,7 +26,7 @@
     border-bottom-right-radius: 20px;
 }
 
-table {
+.table-container table {
     background-color: white;
     border-collapse: separate;
     border-spacing: 0;
@@ -283,6 +283,8 @@ button.btnAction {
 
 .popover {
     --bs-popover-max-width: 500px;
+    --bs-popover-header-bg: #9f4045;
+    --bs-popover-header-color: white;
 }
 
 .popover-table td{
@@ -291,10 +293,6 @@ button.btnAction {
     text-align: center;
     color: black;
     width: 45px;
-}
-
-.popover-header {
-    color: black;
 }
 
 .popover-table img{
@@ -308,4 +306,9 @@ button.btnAction {
 .popover-table div{
     font-size: 20px;
     font-weight: bolder;
+}
+
+.popover .popover-arrow:after {
+    border-top-color: #9f4045;
+    border-bottom-color: #9f4045;
 }
