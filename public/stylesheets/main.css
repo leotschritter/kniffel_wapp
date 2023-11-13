@@ -16,8 +16,15 @@ a.nav-link.active, a.navbar-brand.active {
 
 a.dropdown-item.active {
     background-color: unset;
-    color: unset;
 }
-a.dropdown-item.active:hover {
+
+a.dropdown-item.active:hover, a.dropdown-item:hover {
     --bs-link-color-rgb: var(--bs-link-hover-color-rgb);
+    --bs-dropdown-link-active-color: var(--bs-nav-link-hover-color);
+}
+
+.dropdown-menu {
+    --bs-dropdown-link-hover-color: var(--bs-nav-link-hover-color);
+    --bs-dropdown-link-hover-bg: var(--bs-body-color);
+    --bs-dropdown-link-color: var(--bs-white);
 }
