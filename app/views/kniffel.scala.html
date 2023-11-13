@@ -1,4 +1,3 @@
-@import play.api.libs.json._
 @(controller: de.htwg.se.kniffel.controller.controllerBaseImpl.Controller, dice: Boolean = false)
 @matrix = @{
     controller.field.getRows
@@ -21,9 +20,10 @@
         "alle Augen zählen", "alle Augen zählen", "25 Punkte", "30 Punkte", "40 Punkte", "50 Punkte", "alle Augen zählen",
         "assets/images/right_arrow.png", "assets/images/right_arrow.png", "assets/images/right_arrow.png")
 }
-@configJson = @{
-    Json.obj("trigger" -> "hover")
-}
+
+@bottomPart = @{Map(9 -> "3X", 10 -> "4X", 11 -> "home", 12 -> "small_street.png", 13 -> "big_street.png", 14 -> "5X", 15 -> "support")}
+@popoverHtml = {<table class='popover-table'><tr>@for(row <- 0 until matrix.length){@if(row == 6){</tr><tr>}@if(controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID, row)){@if(row < 6){<td><img src='assets/images/@{row + 1}.png'/></td>}else if(row == 9 || row == 10 || row == 14){<td><div>@{bottomPart(row)}</div></td>}else if(row == 11 || row == 15){<td><span class='material-symbols-outlined'>@{bottomPart(row)}</span></td>}else if(row == 12 || row == 13){<td><img src='assets/images/@{bottomPart(row)}'/></td>}}}</tr></table>}
+
 @main("HTWG Kniffel") {
 
     <link rel="stylesheet" href="assets/stylesheets/kniffel.css">
@@ -102,21 +102,18 @@
     })"
     class="gamecontainer">
         <div class="game">
-            @* <button type="button" class="btn btn-secondary" data-toggle="popover" data-placement="bottom" data-trigger="hover" title="Available Options"
-            data-template="@Html(s"""<div class='popover' role='tooltip'><div class='arrow'></div><h3 class='popover-header'></h3><div class='popover-body'></div></div>""")">
-            Show Options
-            </button>*@
             <div class="table-container">
-                <table>
+                <table class="gameTable">
                     <thead>
                         <tr class="main-heading">
                             <th><button onclick="document.getElementsByClassName('table-container')[0].scrollIntoView();" type="button" id="scrollDown"
                             class="btn btn-block"><span class="material-symbols-outlined">
                                 expand_content</span></button></th>
-                            <th>@*<button type="button" class="btn btn-secondary" data-bs-container="body" data-bs-toggle="popover"
-                                data-bs-title="Available Options" data-bs-placement="bottom" data-bs-content=" " data-bs-trigger="hover">
+                            <th><button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" data-bs-toggle="popover"
+                                data-bs-title="Available Options" data-bs-placement="bottom"
+                                data-bs-trigger="hover" data-bs-content="@popoverHtml">
                                 Available Options
-                                </button>*@</th>
+                                </button></th>
                             @for(col <- 0 until matrix(0).length) {
                                 <th>@{
                                     controller.game.getPlayerName(col)
@@ -190,46 +187,16 @@
                             document.getElementById('actionRedo').classList.add('disabled');
                             document.getElementById('actionGame').classList.add('disabled');
                         }
+
+                        bootstrap.Popover.Default.allowList.table = [];
+                        bootstrap.Popover.Default.allowList.thead = [];
+                        bootstrap.Popover.Default.allowList.tbody = [];
+                        bootstrap.Popover.Default.allowList.tr = [];
+                        bootstrap.Popover.Default.allowList.td = [];
+                        $('[data-bs-toggle="popover"]').popover();
                     });
 
             </script>
-            @*<script>
-            $(document).ready(function() {
-            $('[data-bs-toggle="popover"]').popover();
-
-            $('[data-bs-toggle="popover"]').on('shown.bs.popover', function() {
-            const element = document.getElementsByClassName('popover-body')[0];
-            const table = document.createElement("table");
-            @for(row <- 0 until matrix.length) {
-            @if(!((row > 5 && row < 9) || (row > 15))) {
-            if (@{controller.getField.getMatrix.isEmpty(controller.getGame.getPlayerID, row)}) {
-            let tableElement;
-            @if(row == 9) {
-            const newRow = document.createElement("tr");
-            table.appendChild(newRow);
-            }
-            @if(row < 9) {
-            const imgElement = document.createElement("img");
-            imgElement.src = "@{firstColumnPopover(row)}";
-            tableElement = document.createElement("td");
-            tableElement.appendChild(imgElement);
-            } else {
-            tableElement = document.createElement("td");
-            tableElement.innerHTML = "@{firstColumnPopover(row)}"
-            }
-            table.appendChild(tableElement);
-            // tableElement.value = "xyz";
-            }
-            }
-            }
-            element.appendChild(table);
-            /!*console.log(element);
-            console.log("@{controller.game.getPlayerID}")
-            console.log("@{controller.field.getFirstColumn}");*!/
-            // Your custom code for when the popover is fully shown
-            });
-            });
-            </script>*@
         </div>
     </div>
 }
