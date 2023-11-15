@@ -1,4 +1,4 @@
-td {
+.gameTable td {
     height: 45px;
     border: 1px solid black;
     text-align: center;
@@ -6,27 +6,27 @@ td {
     width: 200px;
 }
 
-th {
+.gameTable th {
     padding: 15px;
     border: 1px solid black;
     text-align: center !important;
     height: 45px;
 }
 
-th:last-child {
+.gameTable th:last-child {
     border-top-right-radius: 20px;
 }
-th:first-child {
+.gameTable th:first-child {
     border-top-left-radius: 20px;
 }
-tr:last-child td:first-child {
+.gameTable tr:last-child td:first-child {
     border-bottom-left-radius: 20px;
 }
-tr:last-child td:last-child {
+.gameTable tr:last-child td:last-child {
     border-bottom-right-radius: 20px;
 }
 
-table {
+.table-container table {
     background-color: white;
     border-collapse: separate;
     border-spacing: 0;
@@ -34,23 +34,23 @@ table {
     border-radius: 20px;
 }
 
-td:hover {
+.gameTable td:hover {
     background-color: #e6e6e6;
 }
 
-tr.main-heading {
+.gameTable tr.main-heading {
     line-height: 10%;
     border: 1px solid black;
     background-color: #9f4045;
 }
 
-td:first-child {
+.gameTable td:first-child {
     background-color: #9f4045;
     color: white;
     font-size: small;
 }
 
-td.secondColumn {
+.gameTable td.secondColumn {
     border: 1px solid black;
     background-color: #9f4045;
     color: white;
@@ -69,7 +69,7 @@ button.btnAction {
     margin: auto;
 }
 
-td.activeCol {
+.gameTable td.activeCol {
     background-color: lightgrey;
 }
 
@@ -279,4 +279,36 @@ td.activeCol {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.popover {
+    --bs-popover-max-width: 500px;
+    --bs-popover-header-bg: #9f4045;
+    --bs-popover-header-color: white;
+}
+
+.popover-table td{
+    height: 45px;
+    border: 1px solid black;
+    text-align: center;
+    color: black;
+    width: 45px;
+}
+
+.popover-table img{
+    height: 100%;
+}
+
+.popover-table span{
+    font-size: 30px;
+}
+
+.popover-table div{
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.popover .popover-arrow:after {
+    border-top-color: #9f4045;
+    border-bottom-color: #9f4045;
 }
