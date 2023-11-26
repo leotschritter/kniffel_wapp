@@ -59,6 +59,35 @@
         <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
             <!--@* And here's where we render the `Html` object containing
                 * the page content. *@-->
+        <div style="display: none" class="chatContainer" id="chatContainer">
+            <div>
+                <div class="col-6">
+                    <div id="chatroom" class="rounded">
+                        <button id="chatClose" style="float: right" type="button" class="btn-close" aria-label="Close"></button>
+                        <h1>Chat-Room</h1>
+
+                        <form action="#" id="comment-form">
+                            <div class="form-group">
+                                <label for="your-message">Your comment</label>
+                                <textarea type="text" name="content" id="your-message" class="form-control" placeholder="Here is my message.."></textarea>
+                            </div>
+                            <input style="margin-top: 10px" type="submit" value="Send" class="btn btn-light" id="submit">
+                        </form>
+
+                        <div id="messages">
+                            <ul class="list-unstyled" id="list"></ul>
+                            <button class="btn btn-light" id="refresh">
+                                <span class="material-symbols-outlined">refresh</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-dark" id="chatButton">
+            <span class="material-symbols-outlined">chat</span>
+        </button>
         <div class="content">
         @content
         </div>
