@@ -77,8 +77,9 @@ a.dropdown-item.active:hover, a.dropdown-item:hover {
     -webkit-animation-duration: 0.4s;
     animation-name: animatebottom;
     animation-duration: 0.4s;
-    right: 2.5%;
-    bottom: 5%;
+    right: 20px;
+    bottom: 20px;
+    z-index: 5;
 }
 
 @-webkit-keyframes animatebottom {
@@ -105,6 +106,11 @@ a.dropdown-item.active:hover, a.dropdown-item:hover {
 
 #chatButton {
     position: fixed;
-    right: 2.5%;
-    bottom: 5%;
+    right: 20px;
+    bottom: 20px;
+    z-index: 5;
+}
+
+#your-message {
+    max-height: 350px;
 }
