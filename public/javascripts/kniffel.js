@@ -19,12 +19,26 @@ const secondColumn = [
 // Maybe use indices instead of abbreviations?
 const writeDownMappingsForLowerPart = ["3X", "4X", "FH", "KS", "GS", "KN", "CH"];
 
+const bottomPart = {
+    9: "3X",
+    10: "4X",
+    11: "home",
+    12: "small_street.png",
+    13: "big_street.png",
+    14: "5X",
+    15: "support"
+};
+
 function dice() {
+    const diceCup = document.querySelector('.cup');
+    const diceInCupElement = document.getElementById('diceInCup');
+    diceInCupElement.innerHTML = '';
     $.ajax({
         url: '/dice',
         method: 'GET',
         success: function (data) {
-            buildDiceCupElement(data.dicecup)
+            diceCup.style = `background: url('assets/images/cup.png') no-repeat;`
+            buildDiceCupElement(data.dicecup, true)
         }
     });
 }
@@ -114,8 +128,22 @@ function redo() {
     });
 }
 
-function buildDiceCupElement(diceCupJson) {
-    buildInCup(diceCupJson.incup)
+function buildDiceCupElement(diceCupJson, isDice) {
+    if (isDice === true) {
+        const animatedElement = document.querySelector('.cup');
+        const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
+        animatedElement.addEventListener('animationstart', () => {
+            diceCupAudio.play().then();
+        });
+        animatedElement.classList.add('showCup');
+        waitForAnimationEnd(animatedElement).then(() => {
+            animatedElement.style.background = 'none';
+            animatedElement.style.animation = 'none';
+            buildInCup(diceCupJson.incup)
+        });
+    } else {
+        buildInCup(diceCupJson.incup)
+    }
     buildActionBox(diceCupJson.remainingDices)
     buildDiceStorage(diceCupJson.stored)
 }
@@ -134,23 +162,6 @@ function buildActionBox(remainingDices) {
     } else {
         btnDice.removeAttribute("disabled");
     }
-    // diceCup animation
-
-    // TODO: Animation not working
-    const animatedElement = document.querySelector('.cup');
-    const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
-    animatedElement.addEventListener('animationstart', () => {
-        diceCupAudio.play().then();
-    });
-    animatedElement.classList.add('showCup');
-    waitForAnimationEnd(animatedElement).then(() => {
-        animatedElement.style.background = 'none';
-        const javaScriptSucks = [...document.getElementsByClassName('diceInCup')[0].children];
-        for (const dice of javaScriptSucks) {
-            dice.style.visibility = 'visible';
-        }
-
-    });
     btnAllIn.addEventListener('click', putAllIn)
 }
 
@@ -174,7 +185,7 @@ function buildDiceStorage(stored) {
     diceStorageElement.innerHTML = ''
     for (let i = 0; i < stored.length; i++) {
         let diceElement = document.createElement('div');
-        diceElement.className = 'dice d' + (i + 1) + ' dice_' + stored[i] + ' stored';
+        diceElement.className = 'dice dice_' + stored[i] + ' stored';
         diceElement.setAttribute('value', stored[i]);
         diceElement.style.visibility = 'visible';
         diceStorageElement.appendChild(diceElement);
@@ -197,17 +208,28 @@ function buildTableFromJson(jsonData) {
     const thScrollDown = document.createElement('th');
     const thPopoverButton = document.createElement('th');
 
-    const popoverHtml = generatePopoverHtml(matrix, currentPlayer)
-
     trHeading.className = "main-heading";
-
     thScrollDown.innerHTML = '<button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button>';
     thPopoverButton.innerHTML = '<button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" ' +
         'data-bs-toggle="popover" data-bs-title="Available Options" data-bs-placement="bottom" data-bs-trigger="hover" ' +
-        'data-bs-content=\'${popoverHtml}\'>Available Options</button>'  // TODO: Popover Not Working
+        '' + 'data-bs-content="' + ("<table class='popover-table'><tr>" + ([...(new Array(19).fill().map((_, row)  => {
+            if (row === 6) {
+                return '</tr><tr>';
+            }
+            if (matrix[row][currentPlayer] === '') {
+                if (row < 6) {
+                    return `<td><img src='assets/images/${row + 1}.png'/></td>`;
+                } else if (row === 9 || row === 10 || row === 14) {
+                    return `<td><div>${bottomPart[row]}</div></td>`;
+                } else if (row === 11 || row === 15) {
+                    return `<td><span class='material-symbols-outlined'>${bottomPart[row]}</span></td>`;
+                } else if (row === 12 || row === 13) {
+                    return `<td><img src='assets/images/${bottomPart[row]}'/></td>`;
+                }
+            }
+        }))]).toString().replaceAll(",", "") + '</tr></table>').toString() + '\"' + '>Available Options</button>'
     ;
 
-    $('[data-bs-toggle="popover"]').popover();
     thScrollDown.onclick = function () {
         document.querySelector('.table-container').scrollIntoView();
     }
@@ -279,44 +301,8 @@ function buildTableFromJson(jsonData) {
 
         gameTable.appendChild(tr);
     }
-
+    $('[data-bs-toggle="popover"]').popover();
 }
-
-function generatePopoverHtml(matrix, currentPlayer) {
-    const bottomPart = {
-        9: "3X",
-        10: "4X",
-        11: "home",
-        12: "small_street.png",
-        13: "big_street.png",
-        14: "5X",
-        15: "support"
-    };
-
-    let popoverHtml = '<table class="popover-table"><tr>';
-
-    for (let row = 0; row < matrix.length; row++) {
-        if (row === 6) {
-            popoverHtml += '</tr><tr>';
-        }
-
-        if (matrix[row][currentPlayer] === '') {
-            if (row < 6) {
-                popoverHtml += `<td><img src="assets/images/${row + 1}.png"/></td>`;
-            } else if (row === 9 || row === 10 || row === 14) {
-                popoverHtml += `<td><div>${bottomPart[row]}</div></td>`;
-            } else if (row === 11 || row === 15) {
-                popoverHtml += `<td><span class="material-symbols-outlined">${bottomPart[row]}</span></td>`;
-            } else if (row === 12 || row === 13) {
-                popoverHtml += `<td><img src="assets/images/${bottomPart[row]}"/></td>`;
-            }
-        }
-    }
-
-    popoverHtml += '</tr></table>';
-    return popoverHtml;
-}
-
 
 function waitForAnimationEnd(element) {
     return new Promise(resolve => {
@@ -351,8 +337,6 @@ $(document).ready(function () {
             buildDiceCupElement(data.dicecup)
         }
     });
-    // field
-    buildField()
     // field popover
     bootstrap.Popover.Default.allowList.table = [];
     bootstrap.Popover.Default.allowList.thead = [];
@@ -360,4 +344,6 @@ $(document).ready(function () {
     bootstrap.Popover.Default.allowList.tr = [];
     bootstrap.Popover.Default.allowList.td = [];
 
+    // field
+    buildField()
 });
