@@ -59,6 +59,8 @@ a.dropdown-item.active:hover, a.dropdown-item:hover {
     border: 1px solid lightgrey;
     width: 400px;
     background-color: rgba(var(--bs-dark-rgb));
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .date {
