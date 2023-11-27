@@ -56,7 +56,8 @@ a.dropdown-item.active:hover, a.dropdown-item:hover {
 
 #chatroom {
     padding: 30px;
-    border: 1px solid lightgrey;
+    border: 1px solid black;
+    border-radius: 15px;
     width: 400px;
     background-color: rgba(var(--bs-dark-rgb));
     max-height: 90vh;
@@ -70,7 +71,7 @@ a.dropdown-item.active:hover, a.dropdown-item:hover {
 #messages {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid lightgrey;
+    border-top: 1px solid white;
 }
 
 #chatContainer {
