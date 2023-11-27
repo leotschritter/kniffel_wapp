@@ -6,11 +6,13 @@ $(document).ready(function () {
             alert("Please only select a value between 2 and 8!");
             return;
         }
-        fetch('/new?players=' + numberOfPlayers).then(response => {
-            if (!response.ok) {
-                console.error("Failed starting new game!");
-            } else {
+        $.ajax({
+            method: "GET", url: '/new?players=' + numberOfPlayers,
+            success: function () {
                 window.location.href = '/kniffel';
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Failed starting new game!");
             }
         });
     };
