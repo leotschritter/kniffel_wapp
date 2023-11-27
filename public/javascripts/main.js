@@ -29,46 +29,53 @@ function buildChat() {
     if (getCookie("chatUrl") === undefined) {
         document.cookie = `chatUrl=http://85.215.67.144/${uuidv4()}/messages`
     }
-    // selecting the elements
+
     const refreshBtn = document.getElementById("refresh");
     const listOfMessages = document.getElementById("list");
     const comment = document.getElementById("your-message");
     const submitBtn = document.getElementById("submit");
 
-    // http GET request to refresh the list of comments
     const refreshChat = () => {
-        fetch(getCookie("chatUrl"))
-            .then(response => response.json())
-            .then((data) => {
-                // to clean the list and avoid repetition
+        // for future authorization
+        /*let username = "chatUser";
+        let password = "";
+        let credentials = username + ":" + password;
+        let authToken = "Basic " + btoa(credentials);*/
+        $.ajax({
+            method: "GET", dataType: "json", url: getCookie("chatUrl"),
+            success: function (data) {
                 listOfMessages.innerHTML = "";
-                // digging into the json
                 const messages = data.messages;
                 messages.forEach((message) => {
                     const content = message.content;
                     const author = message.author;
                     const minutesAgo = Math.round((new Date() - new Date(message.created_at)) / 60000);
-                    const fullMessage = `<li>${message.content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
+                    const fullMessage = `<li>${content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
                     listOfMessages.insertAdjacentHTML("afterbegin", fullMessage);
                 });
-            });
+            }
+        });
     };
 
     refreshBtn.addEventListener("click", refreshChat);
 
-    // http POST request to write messages, send them to the API and display them in the chat
     const postMessage = () => {
+        // for future authorization
+        /*let username = "chatUser";
+        let password = "";
+        let credentials = username + ":" + password;
+        let authToken = "Basic " + btoa(credentials);*/
+
         const myMessage = { author: getCookie("user"), content: comment.value };
-        console.log(myMessage);
-        fetch(getCookie("chatUrl"), {
-            method: "POST",
-            body: JSON.stringify(myMessage)
-        })
-            // parse response as a json
-            .then(response => response.json())
-            .then((data) => {
+        $.ajax({
+            type: "POST", url: getCookie("chatUrl"),
+            data: JSON.stringify(myMessage),
+            success: function (data) {
+                const message = document.getElementById('your-message');
+                message.value = '';
                 refreshChat();
-            });
+            }
+        });
     };
 
     submitBtn.addEventListener("click", (event) => {
