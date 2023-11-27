@@ -10,6 +10,7 @@
     padding: 15px;
     border: 1px solid black;
     text-align: center !important;
+    background-color: #9f4045;
     height: 45px;
 }
 
@@ -41,7 +42,6 @@
 .gameTable tr.main-heading {
     line-height: 10%;
     border: 1px solid black;
-    background-color: #9f4045;
 }
 
 .gameTable td:first-child {
@@ -61,6 +61,10 @@ button.btnAction {
     height: 100%;
     width: 100%;
     border: none;
+}
+
+.btnAction img {
+    height: 100%;
 }
 
 .table-container {
