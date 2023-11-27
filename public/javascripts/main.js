@@ -22,16 +22,7 @@ function getCookie(cookieName) {
 }
 
 
-$(function () {
-    $('a').each(function () {
-        if ($(this).prop('href') == window.location.href) {
-            $(this).addClass('active');
-            $(this).parents('li').addClass('active');
-        }
-    });
-});
-
-$(document).ready(function () {
+function buildChat() {
     const chatContainer = document.getElementById("chatContainer");
     const chatButton = document.getElementById("chatButton");
     const chatClose = document.getElementById("chatClose");
@@ -99,5 +90,38 @@ $(document).ready(function () {
         chatContainer.style.display = 'none';
         chatButton.style.display = 'unset';
     });
+}
+
+function isRunning() {
+    $.ajax({
+        url: '/isRunning', type: 'GET', success: function (data) {
+            const board = document.querySelector('.board');
+            if (data.isRunning) {
+                document.getElementById('actionGame').classList.remove('disabled');
+                if (board) {
+                    board.style = '';
+                }
+            } else {
+                document.getElementById('actionGame').classList.add('disabled');
+                if (board) {
+                    board.style = 'display: none';
+                }
+            }
+        }
+    });
+}
+
+$(document).ready(function () {
+    isRunning();
+
+    buildChat();
+
+    $('a').each(function () {
+        if ($(this).prop('href') == window.location.href) {
+            $(this).addClass('active');
+            $(this).parents('li').addClass('active');
+        }
+    });
+
 });
 

@@ -117,6 +117,10 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   def diceCup(): Action[AnyContent] = Action {
     Ok(diceCupToJson(controller.diceCup))
   }
+
+  def isRunning: Action[AnyContent] = Action {
+    Ok(Json.obj("isRunning" -> controller.getGame.isRunning));
+  }
   private def diceCupToJson(diceCup: IDiceCup): JsObject = {
     Json.obj(
       "dicecup" -> Json.obj(

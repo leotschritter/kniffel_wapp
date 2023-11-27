@@ -32,28 +32,5 @@
             </div>
         </div>
     </div>
-   @* <div id="myModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Are you sure?</h2>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>If you start the game, your existing game will be overwritten.</p>
-            </div>
-            <div class="modal-start-footer">
-                <button type="button" class="btn btn-dark" onclick="startGame()">Yes</button>
-                <button type="button" class="btn btn-dark" id="no">No</button>
-            </div>
-        </div>
-
-    </div>*@
     <script src="@routes.Assets.versioned("javascripts/index.js")" type="text/javascript"></script>
-    <script>
-            $(document).ready(function () {
-                if (@{!controller.getGame.isRunning}) {
-                    document.getElementById('actionGame').classList.add('disabled');
-                }
-            });
-    </script>
 }

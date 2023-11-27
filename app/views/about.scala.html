@@ -2,6 +2,7 @@
 
 @main("HTWG Kniffel") {
     <link href="assets/stylesheets/about.css" rel="stylesheet" />
+    <script src="@routes.Assets.versioned("javascripts/about.js")" type="text/javascript"></script>
     <div class="col aboutContainer">
         <h1 id="kniffel"><br>Kniffel - Game Rules</h1>
         <h2 id="game-summary">Game Summary</h2>
@@ -213,31 +214,4 @@
             <br><br>
         </p>
     </div>
-    <script>
-            $(document).ready(function () {
-                if (@{!controller.getGame.isRunning}) {
-                    document.getElementById('actionGame').classList.add('disabled');
-                }
-                var front = document.getElementsByClassName("front");
-                var back = document.getElementsByClassName("back");
-
-                var highest = 0;
-                var absoluteSide = "";
-
-                for (var i = 0; i < front.length; i++) {
-                    if (front[i].offsetHeight > back[i].offsetHeight) {
-                        if (front[i].offsetHeight > highest) {
-                            highest = front[i].offsetHeight;
-                            absoluteSide = ".front";
-                        }
-                    } else if (back[i].offsetHeight > highest) {
-                        highest = back[i].offsetHeight;
-                        absoluteSide = ".back";
-                    }
-                }
-                $(".front").css("height", highest);
-                $(".back").css("height", highest);
-                $(absoluteSide).css("position", "absolute");
-            });
-    </script>
 }

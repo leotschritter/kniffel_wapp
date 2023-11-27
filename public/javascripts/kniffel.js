@@ -1,9 +1,3 @@
-const btnDice = document.getElementById('diceButton');
-btnDice.addEventListener('click', dice)
-
-const btnAllIn = document.getElementById('allInButton');
-btnAllIn.addEventListener('click', putAllIn)
-
 const firstColumn = [
     "assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
     "assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "total", "bonus from 63",
@@ -149,6 +143,9 @@ function buildDiceCupElement(diceCupJson, isDice) {
 }
 
 function buildActionBox(remainingDices) {
+    const btnDice = document.getElementById('diceButton');
+    const btnAllIn = document.getElementById('allInButton');
+
     for (let i = 1; i <= 3; i++) {
         let remDiceElement = document.getElementById("remDice" + i)
         if (remainingDices < i - 1) {
@@ -162,6 +159,7 @@ function buildActionBox(remainingDices) {
     } else {
         btnDice.removeAttribute("disabled");
     }
+    btnDice.addEventListener('click', dice);
     btnAllIn.addEventListener('click', putAllIn)
 }
 
@@ -198,7 +196,7 @@ function buildDiceStorage(stored) {
 function buildTableFromJson(jsonData) {
     const controller = jsonData.controller;
     const matrix = jsonData.controller.field.rows;
-    const currentPlayer = jsonData.controller.game.currentPlayerID
+    const currentPlayer = jsonData.controller.game.currentPlayerID;
 
     const gameTable = document.getElementById('gameTable');
     gameTable.innerHTML = '';
@@ -212,7 +210,7 @@ function buildTableFromJson(jsonData) {
     thScrollDown.innerHTML = '<button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button>';
     thPopoverButton.innerHTML = '<button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" ' +
         'data-bs-toggle="popover" data-bs-title="Available Options" data-bs-placement="bottom" data-bs-trigger="hover" ' +
-        '' + 'data-bs-content="' + ("<table class='popover-table'><tr>" + ([...(new Array(19).fill().map((_, row)  => {
+        '' + 'data-bs-content="' + ("<table class='popover-table'><tr>" + (new Array(19).fill().map((_, row)  => {
             if (row === 6) {
                 return '</tr><tr>';
             }
@@ -227,7 +225,7 @@ function buildTableFromJson(jsonData) {
                     return `<td><img src='assets/images/${bottomPart[row]}'/></td>`;
                 }
             }
-        }))]).toString().replaceAll(",", "") + '</tr></table>').toString() + '\"' + '>Available Options</button>'
+        })).toString().replaceAll(",", "") + '</tr></table>').toString() + '\"' + '>Available Options</button>'
     ;
 
     thScrollDown.onclick = function () {
@@ -331,12 +329,14 @@ $(document).ready(function () {
     document.getElementById('actionRedo').addEventListener('click', function () {
         redo()
     });
+
     // diceCup
     $.ajax({
         url: '/dicecup', type: 'GET', success: function (data) {
             buildDiceCupElement(data.dicecup)
         }
     });
+
     // field popover
     bootstrap.Popover.Default.allowList.table = [];
     bootstrap.Popover.Default.allowList.thead = [];

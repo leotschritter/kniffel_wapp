@@ -3,11 +3,7 @@
 
     <link rel="stylesheet" href="assets/stylesheets/kniffel.css">
     <div class="d-flex justify-content-center">
-        <div style="@(if(!(controller.getDicecup.isRunning || controller.getGame.isRunning)) {
-            "display: none"
-        } else {
-            ""
-        })" class="board">
+        <div class="board">
             <div class="diceBoard">
                 <div class="cup" style="background: none; animation: none;">
                     <div class="diceInCup" id="diceInCup"></div>
