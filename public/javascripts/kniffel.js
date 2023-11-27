@@ -131,6 +131,8 @@ function buildActionBox(remainingDices) {
     }
     if (remainingDices < 0) {
         btnDice.setAttribute("disabled", "disabled");
+    } else {
+        btnDice.removeAttribute("disabled");
     }
     // diceCup animation
 
@@ -236,7 +238,7 @@ function buildTableFromJson(jsonData) {
                     button.className = 'btnAction';
                     button.innerHTML = `<img src="${firstColumn[row]}" />`;
                     if (matrix[row][currentPlayer] !== '') {
-                        button.setAttribute("disabled", "disabled")
+                        button.setAttribute("disabled", "disabled");
                     }
                     button.addEventListener('click', function () {
                         writeTo(row + 1)
@@ -246,6 +248,9 @@ function buildTableFromJson(jsonData) {
                     const button = document.createElement('button');
                     button.className = 'btnAction';
                     button.innerHTML = `${firstColumn[row]}`;
+                    if (matrix[row][currentPlayer] !== '') {
+                        button.setAttribute("disabled", "disabled");
+                    }
                     button.addEventListener('click', function () {
                         writeTo(writeDownMappingsForLowerPart[row - 9])
                     });
