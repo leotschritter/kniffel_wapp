@@ -33,6 +33,8 @@ function dice() {
         success: function (data) {
             diceCup.style = `background: url('assets/images/cup.png') no-repeat;`
             buildDiceCupElement(data.dicecup, true)
+        }, error: function () {
+            console.error('Failed to get dicecup JSON.');
         }
     });
 }
@@ -44,6 +46,8 @@ function putIn(diceElement) {
         },
         success: function (data) {
             buildDiceCupElement(data.dicecup)
+        }, error: function () {
+            console.error('Failed to get dicecup JSON.');
         }
     })
 
@@ -57,6 +61,8 @@ function putOut(diceElement) {
         },
         success: function (data) {
             buildDiceCupElement(data.dicecup)
+        }, error: function () {
+            console.error('Failed to get dicecup JSON.');
         }
     })
 }
@@ -69,6 +75,8 @@ function writeTo(index) {
         success: function (data) {
             buildTableFromJson(data)
             buildDiceCupElement(data.controller.dicecup)
+        }, error: function () {
+            console.error('Failed to write down the result from the last move.');
         }
     })
 }
@@ -77,22 +85,26 @@ function buildField() {
     $.ajax({
         url: '/field', type: 'GET', success: function (data) {
             buildTableFromJson(data)
-        }
+        }, error: function () {
+        console.error('Failed to build Table from JSON.');
+    }
     })
 }
 
 function putAllIn() {
-
     $.ajax({
         url: '/in/all', type: 'GET', success: function (data) {
             buildDiceCupElement(data.dicecup)
+        }, error: function () {
+            console.error('Failed to get dicecup JSON.');
         }
     })
-
 }
 
 function save() {
-    $.ajax({url: '/save', type: 'GET'})
+    $.ajax({url: '/save', type: 'GET', error: function () {
+        console.error('Failed to save game.');
+        }})
 }
 
 function load() {
@@ -100,6 +112,8 @@ function load() {
         url: '/load', type: 'GET', success: function (data) {
             buildTableFromJson(data);
             buildDiceCupElement(data.dicecup)
+        }, error: function () {
+            console.error('Failed to load game.');
         }
     });
 }
@@ -109,6 +123,8 @@ function undo() {
         url: '/undo', type: 'GET', success: function (data) {
             buildTableFromJson(data);
             buildDiceCupElement(data.dicecup)
+        }, error: function () {
+            console.error('Failed to undo the last move.');
         }
     });
 }
@@ -118,6 +134,8 @@ function redo() {
         url: '/redo', type: 'GET', success: function (data) {
             buildTableFromJson(data);
             buildDiceCupElement(data.dicecup)
+        }, error: function () {
+            console.error('Failed to redo the previous move.');
         }
     });
 }
@@ -334,6 +352,8 @@ $(document).ready(function () {
     $.ajax({
         url: '/dicecup', type: 'GET', success: function (data) {
             buildDiceCupElement(data.dicecup)
+        }, error: function () {
+            console.error('Failed to get dicecup JSON.');
         }
     });
 
