@@ -53,6 +53,9 @@ function buildChat() {
                     const fullMessage = `<li>${content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
                     listOfMessages.insertAdjacentHTML("afterbegin", fullMessage);
                 });
+            },
+            error: function (err) {
+                console.error("Failed reloading messages: %o", err);
             }
         });
     };
@@ -74,6 +77,9 @@ function buildChat() {
                 const message = document.getElementById('your-message');
                 message.value = '';
                 refreshChat();
+            },
+            error: function (err) {
+                console.error("Failed sending message: %o", err);
             }
         });
     };
@@ -101,7 +107,8 @@ function buildChat() {
 
 function isRunning() {
     $.ajax({
-        url: '/isRunning', type: 'GET', success: function (data) {
+        url: '/isRunning', type: 'GET',
+        success: function (data) {
             const board = document.querySelector('.board');
             if (data.isRunning) {
                 document.getElementById('actionGame').classList.remove('disabled');
@@ -114,6 +121,9 @@ function isRunning() {
                     board.style = 'display: none';
                 }
             }
+        },
+        error: function (err) {
+            console.error("Game status could not be received: %o", err);
         }
     });
 }
