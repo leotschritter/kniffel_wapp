@@ -1,6 +1,8 @@
 package de.htwg.se.kniffel
 package model.dicecupComponent
 
+import play.api.libs.json.JsObject
+
 import scala.collection.immutable.ListMap
 
 trait IDiceCup {
@@ -23,4 +25,6 @@ trait IDiceCup {
   def indexOfField: ListMap[String, Int]
 
   def isRunning: Boolean
+
+  def toJson: JsObject
 }

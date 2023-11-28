@@ -3,6 +3,7 @@ package model.gameComponent.gameBaseImpl
 
 
 import de.htwg.se.kniffel.model.gameComponent.IGame
+import play.api.libs.json.{JsNumber, JsObject, Json}
 
 case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves: Int, resultNestedList: List[List[Int]], running: Boolean) extends IGame {
   def this(numberOfPlayers: Int, running: Boolean)
@@ -71,4 +72,24 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
   def getPlayerTuples: List[(Int, String)] = for (x <- playersList) yield (x.playerID, x.playerName)
 
   def isRunning: Boolean = running
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "game" -> Json.obj(
+        "nestedList" -> getNestedList.map(_.mkString(",")).mkString(";"),
+        "remainingMoves" -> JsNumber(getRemainingMoves),
+        "currentPlayerID" -> JsNumber(getPlayerID),
+        "currentPlayerName" -> getPlayerName,
+        "players" -> Json.toJson(
+          Seq(for {
+            x <- getPlayerTuples
+          } yield {
+            Json.obj(
+              "id" -> JsNumber(x._1),
+              "name" -> x._2)
+          })
+        )
+      )
+    )
+  }
 }

@@ -6,6 +6,7 @@ import model.gameComponent.IGame
 import util.Observable
 import model.dicecupComponent.IDiceCup
 import model.Move
+import play.api.libs.json.JsObject
 
 trait IController extends Observable {
   def undo(): Unit
@@ -44,4 +45,6 @@ trait IController extends Observable {
 
   def canWrite(col: Int, row: Int): Boolean
   def newGame(numberOfPlayers: Int): Unit
+
+  def toJson: JsObject
 }

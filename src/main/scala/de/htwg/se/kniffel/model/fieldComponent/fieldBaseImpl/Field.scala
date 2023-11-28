@@ -2,6 +2,7 @@ package de.htwg.se.kniffel
 package model.fieldComponent.fieldBaseImpl
 
 import de.htwg.se.kniffel.model.fieldComponent.IField
+import play.api.libs.json.{JsNumber, JsObject, Json}
 
 
 case class Field(matrix: Matrix[String]) extends IField {
@@ -45,5 +46,14 @@ case class Field(matrix: Matrix[String]) extends IField {
 
   def getFirstColumn: List[String] = this.firstColumn
 
-  override def toString = mesh()
+  override def toString: String = mesh()
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "field" -> Json.obj(
+        "numberOfPlayers" -> JsNumber(numberOfPlayers),
+        "rows" -> getRows
+      )
+    )
+  }
 }

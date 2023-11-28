@@ -13,6 +13,7 @@ import de.htwg.se.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
 import de.htwg.se.kniffel.model.fileIOComponent.fileIOJsonImpl.FileIO
 import de.htwg.se.kniffel.model.gameComponent.gameBaseImpl.Game
 import model.fileIOComponent.IFileIO
+import play.api.libs.json.{JsObject, Json}
 
 class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController {
 
@@ -100,5 +101,14 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
     field = new Field(numberOfPlayers)
     diceCup = new DiceCup()
     game = new Game(numberOfPlayers, true)
+  }
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "controller" ->
+        diceCup.toJson
+          .deepMerge(field.toJson)
+          .deepMerge(game.toJson))
+
   }
 }
