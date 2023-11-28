@@ -115,7 +115,7 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def diceCup(): Action[AnyContent] = Action {
-    Ok(controller.diceCup.toJson
+    Ok(controller.diceCup.toJson)
   }
 
   def isRunning: Action[AnyContent] = Action {
