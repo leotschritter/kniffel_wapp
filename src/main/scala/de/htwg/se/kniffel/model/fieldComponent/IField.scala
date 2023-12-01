@@ -1,6 +1,8 @@
 package de.htwg.se.kniffel
 package model.fieldComponent
 
+import play.api.libs.json.JsObject
+
 trait IField {
   def putMulti(valueList: List[String], putInValue: String, x: Int, y: Int): IField
 
@@ -13,6 +15,8 @@ trait IField {
   def getRows: Vector[Vector[String]]
 
   def getFirstColumn: List[String]
+
+  def toJson: JsObject
 }
 
 trait IMatrix {

@@ -2,6 +2,7 @@ package de.htwg.se.kniffel
 package model.dicecupComponent.dicecupBaseImpl
 
 import model.dicecupComponent._
+import play.api.libs.json.{JsNumber, JsObject, Json}
 
 import scala.collection.immutable.ListMap
 import scala.util.Random
@@ -82,4 +83,14 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
     + "\n")
 
   def isRunning: Boolean = getRemainingDices < 2
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "dicecup" -> Json.obj(
+        "stored" -> this.getLocked,
+        "incup" -> this.getInCup,
+        "remainingDices" -> JsNumber(this.getRemainingDices)
+      )
+    )
+  }
 }

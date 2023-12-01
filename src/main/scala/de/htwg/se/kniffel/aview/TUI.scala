@@ -7,11 +7,11 @@ import de.htwg.se.kniffel.model.Move
 import de.htwg.se.kniffel.util.{Event, Observer}
 
 import scala.io.StdIn.readLine
+import scala.swing.Reactor
 import scala.util.{Failure, Success, Try}
 
 
-class TUI @Inject()(controller: IController) extends Observer {
-  controller.add(this)
+class TUI @Inject()(controller: IController) extends Reactor {
   private var continue = true
 
   def run(): Unit = {

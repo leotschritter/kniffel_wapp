@@ -12,9 +12,7 @@ import scala.swing.ListView._
 import scala.swing._
 import scala.swing.event._
 
-class GUI @Inject()(controller: IController) extends Frame with Observer {
-
-  controller.add(this)
+class GUI @Inject()(controller: IController) extends Frame with Reactor {
 
   def writeDown(move: Move): Unit = {
     controller.put(move)

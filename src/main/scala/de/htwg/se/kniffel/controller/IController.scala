@@ -6,8 +6,11 @@ import model.gameComponent.IGame
 import util.Observable
 import model.dicecupComponent.IDiceCup
 import model.Move
+import play.api.libs.json.JsObject
 
-trait IController extends Observable {
+import scala.swing.Publisher
+
+trait IController extends Publisher {
   def undo(): Unit
 
   def redo(): Unit
@@ -32,6 +35,8 @@ trait IController extends Observable {
 
   def toString: String
 
+  def toJson: JsObject
+
   def getField: IField
 
   def getDicecup: IDiceCup
@@ -45,3 +50,11 @@ trait IController extends Observable {
   def canWrite(col: Int, row: Int): Boolean
   def newGame(numberOfPlayers: Int): Unit
 }
+
+import scala.swing.event.Event
+
+class DiceCupChanged extends Event;
+
+class FieldChanged extends Event
+
+class KniffelShutdown extends Event
