@@ -49,6 +49,8 @@ trait IController extends Publisher {
 
   def canWrite(col: Int, row: Int): Boolean
   def newGame(numberOfPlayers: Int): Unit
+
+  def toJson: JsObject
 }
 
 import scala.swing.event.Event
