@@ -3,7 +3,7 @@ package controllers
 import akka.actor._
 import akka.stream.Materializer
 import de.htwg.se.kniffel.controller.controllerBaseImpl.Controller
-import de.htwg.se.kniffel.controller.{ControllerChanged, DiceCupChanged, FieldChanged, GameChanged}
+import de.htwg.se.kniffel.controller.{ControllerChanged, DiceCupChanged }
 import de.htwg.se.kniffel.model.Move
 import play.api.libs.json._
 import play.api.libs.streams.ActorFlow
