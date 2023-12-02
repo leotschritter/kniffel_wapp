@@ -40,3 +40,5 @@ GET         /assets/*file   controllers.Assets.versioned(path="/public", file: A
 # GET         /favicon.ico    controllers.Assets.at(path="/public/images", file="favicon.ico")
 
 GET         /isRunning      controllers.KniffelController.isRunning()
+
+GET         /websocket      controllers.KniffelController.socket

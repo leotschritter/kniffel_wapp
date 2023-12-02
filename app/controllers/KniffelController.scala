@@ -1,21 +1,22 @@
 package controllers
 
+import akka.actor._
+import akka.stream.Materializer
 import de.htwg.se.kniffel.controller.controllerBaseImpl.Controller
+import de.htwg.se.kniffel.controller.{ControllerChanged, DiceCupChanged, FieldChanged, GameChanged}
 import de.htwg.se.kniffel.model.Move
-import de.htwg.se.kniffel.model.dicecupComponent.IDiceCup
-import de.htwg.se.kniffel.model.fieldComponent.{IField, IMatrix}
-import de.htwg.se.kniffel.model.gameComponent.IGame
-import play.api.mvc._
 import play.api.libs.json._
+import play.api.libs.streams.ActorFlow
+import play.api.mvc._
 
 import javax.inject._
-
+import scala.swing.Reactor
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
  */
 @Singleton
-class KniffelController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class KniffelController @Inject()(cc: ControllerComponents) (implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
 
   private val controller = new Controller()
 
@@ -44,8 +45,8 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def dice: Action[AnyContent] = Action {
-    controller.doAndPublish(controller.dice())
-    //    Ok(views.html.kniffel(controller))
+    controller.dice()
+    // Ok(views.html.kniffel(controller))
     Ok(controller.diceCup.toJson)
   }
 
@@ -100,12 +101,12 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   private def writeDown(move: Move): Unit = {
     controller.put(move)
     controller.next()
-    controller.doAndPublish(controller.nextRound())
+    controller.nextRound()
   }
 
   def newGame(players: Int): Action[AnyContent] = Action {
     controller.newGame(players)
-    controller.doAndPublish(controller.diceCup.nextRound())
+    controller.diceCup.nextRound()
     Ok(views.html.kniffel(controller))
   }
 
@@ -121,5 +122,50 @@ class KniffelController @Inject()(cc: ControllerComponents) extends AbstractCont
   def isRunning: Action[AnyContent] = Action {
     Ok(Json.obj("isRunning" -> controller.getGame.isRunning));
   }
+
+  def socket = WebSocket.accept[String, String] { request =>
+    ActorFlow.actorRef { out =>
+      println("Connect received")
+      KniffelWebSocketActorFactory.create(out)
+    }
+  }
+  private object KniffelWebSocketActorFactory {
+    def create(out: ActorRef) = {
+      Props(new KniffelWebSocketActor(out))
+    }
+  }
+  private class KniffelWebSocketActor(out: ActorRef) extends Actor with Reactor{
+    listenTo(controller)
+
+    def receive = {
+      case msg: String =>
+        out ! (controller.toJson.toString)
+        println("Sent Json to Client "+ msg)
+      case _ =>
+        println("received something!")
+    }
+
+    reactions += {
+      case event: FieldChanged => sendFieldJsonToClient
+      case event: DiceCupChanged => sendDiceCupJsonToClient(event.isDice)
+      case event: GameChanged => sendGameJsonToClient
+      case event: ControllerChanged => sendControllerJsonToClient
+      case _ => println("reacted to something!")
+    }
+
+    def sendControllerJsonToClient = {
+      out ! (controller.toJson.toString)
+    }
+    def sendGameJsonToClient = {
+      out ! (controller.getGame.toJson.toString)
+    }
+    def sendFieldJsonToClient = {
+      out ! (controller.getField.toJson.toString)
+    }
+    def sendDiceCupJsonToClient(isDice: Boolean) = {
+      out ! (Json.obj("isDice" -> isDice).deepMerge(controller.getDicecup.toJson).toString())
+    }
+  }
+
 }
 

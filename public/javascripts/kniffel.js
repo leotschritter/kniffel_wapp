@@ -24,16 +24,11 @@ const bottomPart = {
 };
 
 function dice() {
-    const diceCup = document.querySelector('.cup');
-    const diceInCupElement = document.getElementById('diceInCup');
-    diceInCupElement.innerHTML = '';
+    // console.log("dice")
     $.ajax({
         url: '/dice',
         method: 'GET',
-        success: function (data) {
-            diceCup.style = `background: url('assets/images/cup.png') no-repeat;`
-            buildDiceCupElement(data.dicecup, true)
-        }, error: function () {
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     });
@@ -44,9 +39,7 @@ function putIn(diceElement) {
         url: '/in', type: 'GET', data: {
             'in': diceElement.getAttribute('value')
         },
-        success: function (data) {
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     })
@@ -56,12 +49,9 @@ function putIn(diceElement) {
 function putOut(diceElement) {
     $.ajax({
         url: '/out', type: 'GET', data: {
-
             'out': diceElement.getAttribute('value')
         },
-        success: function (data) {
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     })
@@ -72,10 +62,7 @@ function writeTo(index) {
         url: '/write', type: 'GET', data: {
             'to': index
         },
-        success: function (data) {
-            buildTableFromJson(data)
-            buildDiceCupElement(data.controller.dicecup)
-        }, error: function () {
+        error: function () {
             console.error('Failed to write down the result from the last move.');
         }
     })
@@ -93,26 +80,24 @@ function buildField() {
 
 function putAllIn() {
     $.ajax({
-        url: '/in/all', type: 'GET', success: function (data) {
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/in/all', type: 'GET',
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     })
 }
 
 function save() {
-    $.ajax({url: '/save', type: 'GET', error: function () {
-        console.error('Failed to save game.');
+    $.ajax({url: '/save', method: 'GET',
+        error: function () {
+            console.error('Failed to save game.');
         }})
 }
 
 function load() {
     $.ajax({
-        url: '/load', type: 'GET', success: function (data) {
-            buildTableFromJson(data);
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/load', method: 'GET',
+        error: function () {
             console.error('Failed to load game.');
         }
     });
@@ -120,10 +105,8 @@ function load() {
 
 function undo() {
     $.ajax({
-        url: '/undo', type: 'GET', success: function (data) {
-            buildTableFromJson(data);
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/undo', method: 'GET',
+        error: function () {
             console.error('Failed to undo the last move.');
         }
     });
@@ -131,16 +114,16 @@ function undo() {
 
 function redo() {
     $.ajax({
-        url: '/redo', type: 'GET', success: function (data) {
-            buildTableFromJson(data);
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/redo', method: 'GET',
+        error: function () {
             console.error('Failed to redo the previous move.');
         }
     });
 }
-
 function buildDiceCupElement(diceCupJson, isDice) {
+    if (diceCupJson === undefined) {
+        return
+    }
     if (isDice === true) {
         const animatedElement = document.querySelector('.cup');
         const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
@@ -329,8 +312,7 @@ function waitForAnimationEnd(element) {
     });
 }
 
-
-$(document).ready(function () {
+function onWebSocketOpen() {
     // navigation
 
     document.getElementById('actions').style.display = "unset";
@@ -351,7 +333,7 @@ $(document).ready(function () {
     // diceCup
     $.ajax({
         url: '/dicecup', type: 'GET', success: function (data) {
-            buildDiceCupElement(data.dicecup)
+            buildDiceCupElement(data.dicecup, false)
         }, error: function () {
             console.error('Failed to get dicecup JSON.');
         }
@@ -366,4 +348,55 @@ $(document).ready(function () {
 
     // field
     buildField()
+}
+
+function connectWebSocket() {
+    const diceCup = document.querySelector('.cup');
+    const diceInCupElement = document.getElementById('diceInCup');
+
+    const websocket = new WebSocket("ws://localhost:9000/websocket");
+
+    websocket.onopen = function(event) {
+        onWebSocketOpen();
+        console.log("Connected to Websocket");
+    }
+
+    websocket.onclose = function () {
+        console.log('Connection with Websocket Closed!');
+    };
+
+    websocket.onerror = function (error) {
+        console.log('Error in Websocket Occured: ' + error);
+    };
+
+    websocket.onmessage = function (e) {
+        if (typeof e.data === "string") {
+            if (JSON.parse(e.data).controller !== undefined) {
+                buildTableFromJson(JSON.parse(e.data));
+                buildDiceCupElement(JSON.parse(e.data).dicecup)
+            } else if (JSON.parse(e.data).dicecup !== undefined) {
+                console.log("DiceCup Changed");
+                if (JSON.parse(e.data).isDice) {
+                    diceInCupElement.innerHTML = '';
+                    diceCup.style = `background: url('assets/images/cup.png') no-repeat;`
+                    buildDiceCupElement(JSON.parse(e.data).dicecup, JSON.parse(e.data).isDice);
+                } else {
+                    buildDiceCupElement(JSON.parse(e.data).dicecup, JSON.parse(e.data).isDice);
+                    buildField();
+                }
+            } else if (JSON.parse(e.data).field !== undefined) {
+                buildField()
+                /*console.log("Field Changed")*/
+            } else {
+                /*console.log("Other Change")*/
+            }/* else if (JSON.parse(e.data).game !== undefined) { // not in use yet
+                console.log("Game Changed")
+            }*/
+            /*console.log(e.data)*/
+        }
+    };
+}
+
+$(document).ready(function () {
+    connectWebSocket();
 });
