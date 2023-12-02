@@ -12,6 +12,16 @@ case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves
     numberOfPlayers * 13,
     List.fill(numberOfPlayers, 6)(0), running)
 
+  def this(players: List[String]) = {
+    this(
+      (for (i <- players.indices) yield Player(i, players(i))).toList,
+      Player(0, players.head),
+      players.length * 13,
+      List.fill(players.length, 6)(0),
+      true
+    )
+  }
+
   def next(): Option[Game] = {
     if (remainingMoves == 0)
       None

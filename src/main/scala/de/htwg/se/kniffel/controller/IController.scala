@@ -27,15 +27,13 @@ trait IController extends Publisher {
 
   def putIn(list: List[Int]): IDiceCup
 
-  def doAndPublish(doThis: => IDiceCup): Unit
+  /*def doAndPublish(doThis: => IDiceCup): Unit*/
 
-  def dice(): IDiceCup
+  def dice(): Unit
 
-  def nextRound(): IDiceCup
+  def nextRound(): Unit
 
   def toString: String
-
-  def toJson: JsObject
 
   def getField: IField
 
@@ -49,14 +47,15 @@ trait IController extends Publisher {
 
   def canWrite(col: Int, row: Int): Boolean
   def newGame(numberOfPlayers: Int): Unit
+  def newGame(players: List[String]): Unit
 
   def toJson: JsObject
 }
 
 import scala.swing.event.Event
 
-class DiceCupChanged extends Event;
+case class DiceCupChanged(isDice: Boolean) extends Event
 
-class FieldChanged extends Event
+class ControllerChanged extends Event
 
 class KniffelShutdown extends Event

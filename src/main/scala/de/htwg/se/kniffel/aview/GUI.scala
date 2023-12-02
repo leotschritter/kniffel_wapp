@@ -17,7 +17,7 @@ class GUI @Inject()(controller: IController) extends Frame with Reactor {
   def writeDown(move: Move): Unit = {
     controller.put(move)
     controller.next()
-    controller.doAndPublish(controller.nextRound())
+    controller.nextRound()
   }
 
   def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
@@ -246,7 +246,7 @@ class GUI @Inject()(controller: IController) extends Frame with Reactor {
           if (remaining_moves >= 0)
             reactions += {
               case MouseClicked(src, pt, mod, clicks, props) =>
-                controller.doAndPublish(controller.dice())
+                controller.dice()
             }
           else
             enabled = false

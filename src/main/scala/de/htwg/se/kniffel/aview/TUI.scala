@@ -40,7 +40,7 @@ class TUI @Inject()(controller: IController) extends Reactor {
       case "q" => sys.exit(0); None
       case "po" => diceCupPutOut(list.tail.map(_.toInt)); None
       case "pi" => diceCupPutIn(list.tail.map(_.toInt)); None
-      case "d" => controller.doAndPublish(controller.dice()); None
+      case "d" => controller.dice(); None
       case "u" => controller.undo(); None
       case "r" => controller.redo(); None
       case "s" => controller.save; None
@@ -67,7 +67,7 @@ class TUI @Inject()(controller: IController) extends Reactor {
   def writeDown(move: Move): Unit = {
     controller.put(move)
     controller.next()
-    controller.doAndPublish(controller.nextRound())
+    controller.nextRound()
   }
 
   def diceCupPutIn(pi: List[Int]): Unit = controller.doAndPublish(controller.putIn, pi)
