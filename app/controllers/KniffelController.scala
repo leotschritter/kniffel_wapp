@@ -134,7 +134,7 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
       Props(new KniffelWebSocketActor(out))
     }
   }
-  private class KniffelWebSocketActor(out: ActorRef) extends Actor with Reactor{
+  private class KniffelWebSocketActor(out: ActorRef) extends Actor with Reactor {
     listenTo(controller)
 
     def receive = {
@@ -146,21 +146,13 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
     }
 
     reactions += {
-      case event: FieldChanged => sendFieldJsonToClient
       case event: DiceCupChanged => sendDiceCupJsonToClient(event.isDice)
-      case event: GameChanged => sendGameJsonToClient
       case event: ControllerChanged => sendControllerJsonToClient
       case _ => println("reacted to something!")
     }
 
     def sendControllerJsonToClient = {
       out ! (controller.toJson.toString)
-    }
-    def sendGameJsonToClient = {
-      out ! (controller.getGame.toJson.toString)
-    }
-    def sendFieldJsonToClient = {
-      out ! (controller.getField.toJson.toString)
     }
     def sendDiceCupJsonToClient(isDice: Boolean) = {
       out ! (Json.obj("isDice" -> isDice).deepMerge(controller.getDicecup.toJson).toString())
