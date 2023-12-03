@@ -28,6 +28,8 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
   private var readyCount: Int = 0
 
   private var players: List[String] = Nil
+
+  private var startGame: Boolean = false
   /**
    * Create an Action to render an HTML page.
    *
@@ -194,9 +196,12 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
       case msg: String =>
         if (Math.floor((System.currentTimeMillis() - timerValue)/1000.0) >= 60.0) {
           timerValue = System.currentTimeMillis()
+          if (numberOfPlayers > 1) {
+            startGame = true;
+          }
         }
         if (msg.equals("Tick")) {
-          out ! Json.obj("event" -> "updateTimeMessageEvent", "time" -> (System.currentTimeMillis() - timerValue), "numberOfPlayers" -> numberOfPlayers, "readyCount" -> readyCount).toString
+          out ! Json.obj("event" -> "updateTimeMessageEvent", "time" -> (System.currentTimeMillis() - timerValue), "numberOfPlayers" -> numberOfPlayers, "readyCount" -> readyCount, "startGame" -> startGame).toString
         } else if ((Json.parse(msg) \ "event").as[String].equals("newPlayer")) {
           out ! Json.obj("event" -> "newPlayerMessageEvent", "id" -> numberOfPlayers, "numberOfPlayers" -> (numberOfPlayers + 1), "readyCount" -> readyCount).toString
           numberOfPlayers += 1

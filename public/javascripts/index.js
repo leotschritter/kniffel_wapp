@@ -26,7 +26,7 @@ function connectWebSocket(playerName) {
             playersCount = data.numberOfPlayers;
             numberOfPlayers.innerText = playersCount;
             playersReady.innerText = data.readyCount;
-            if (data.readyCount === playersCount && playersCount > 1) {
+            if ((data.readyCount === playersCount && playersCount > 1) || data.startGame) {
                 websocket.send(JSON.stringify({event: "startGame", name: playerName, playerID: playerID}));
             }
         } else if (data.event === "newPlayerMessageEvent") {
