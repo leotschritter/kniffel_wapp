@@ -9,13 +9,53 @@
             <h3 style="text-align: center;
                 margin-bottom: 20px">Let the dice roll</h3>
             <div style="text-align: center">
-                <label class="label numberLabel" for="numberOfPlayers">Number Of Players</label>
-                <input class="input" id="numberOfPlayers" type="number" min="2" max="8" value="2" />
-                <button type="button" data-bs-toggle="modal" data-bs-target="#confirmationDialog" class="startButton btn btn-dark">Start Game</button>
+                <label class="label yourNameLabel" for="yourName">Your Name:</label>
+                <input class="input" id="yourName" type="text" placeholder="Your Name here" />
+                <button disabled type="button" data-bs-toggle="modal" data-bs-target="#confirmationDialog" class="startButton btn btn-dark">Join</button>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="confirmationDialog" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmationDialog" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Waiting for Players...</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="container centering-block">
+                        <div class="loader centered">
+                            <div class="animationRow">
+                                <div class="square square_one"></div>
+                                <div class="square square_two"></div>
+                                <div class="square square_three"></div>
+                            </div>
+                            <div class="animationRow">
+                                <div class="square square_four"></div>
+                                <div class="square square_five"></div>
+                                <div class="square square_six"></div>
+                            </div>
+                            <div class="animationRow">
+                                <div class="square square_seven"></div>
+                                <div class="square square_eight"></div>
+                                <div class="square square_nine"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p><span id="playersReady"></span><span>/<span id="numberOfPlayers"></span> Players ready</span></p>
+                        <p><span>Seconds until Start: </span><span id="countdown">60</span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" id="ready">Ready</button>
+                    <button type="button" class="btn btn-dark" id="leaveLobby">Leave <span class="material-symbols-outlined">
+                        exit_to_app
+                    </span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="leaveLobbyConfirmationDialog" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -23,10 +63,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>If you start the game, your existing game will be overwritten.</p>
+                    <p>Are you sure you want to leave?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-dark" id="startGameButton">Yes</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal" id="btnConfirm">Yes</button>
                     <button type="button" class="btn btn-dark" data-bs-dismiss="modal" id="no">No</button>
                 </div>
             </div>

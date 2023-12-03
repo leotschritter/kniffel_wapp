@@ -3,13 +3,14 @@ package controllers
 import akka.actor._
 import akka.stream.Materializer
 import de.htwg.se.kniffel.controller.controllerBaseImpl.Controller
-import de.htwg.se.kniffel.controller.{ControllerChanged, DiceCupChanged }
+import de.htwg.se.kniffel.controller.{ControllerChanged, DiceCupChanged}
 import de.htwg.se.kniffel.model.Move
 import play.api.libs.json._
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 
 import javax.inject._
+import scala.concurrent.duration.DurationInt
 import scala.swing.Reactor
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -20,7 +21,13 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
 
   private val controller = new Controller()
 
+  private var timerValue: Long = 0
 
+  private var numberOfPlayers: Int = 0
+
+  private var readyCount: Int = 0
+
+  private var players: List[String] = Nil
   /**
    * Create an Action to render an HTML page.
    *
@@ -104,8 +111,8 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
     controller.nextRound()
   }
 
-  def newGame(players: Int): Action[AnyContent] = Action {
-    controller.newGame(players)
+  def newGame(players: String): Action[AnyContent] = Action {
+    controller.newGame(players.split(",").toList)
     controller.diceCup.nextRound()
     Ok(views.html.kniffel(controller))
   }
@@ -129,9 +136,22 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
       KniffelWebSocketActorFactory.create(out)
     }
   }
+
+  def lobbySocket = WebSocket.accept[String, String] { request =>
+    ActorFlow.actorRef { out =>
+      println("Connect received")
+      LobbyWebSocketActorFactory.create(out)
+    }
+  }
   private object KniffelWebSocketActorFactory {
     def create(out: ActorRef) = {
       Props(new KniffelWebSocketActor(out))
+    }
+  }
+
+  private object LobbyWebSocketActorFactory {
+    def create(out: ActorRef) = {
+      Props(new LobbyWebSocketActor(out))
     }
   }
   private class KniffelWebSocketActor(out: ActorRef) extends Actor with Reactor {
@@ -159,5 +179,57 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
     }
   }
 
+  private class LobbyWebSocketActor(out: ActorRef) extends Actor with Reactor {
+    import context._
+
+    if (timerValue == 0) {
+      timerValue = System.currentTimeMillis()
+    }
+    private var tick: Cancellable = _
+
+    out ! Json.obj("event" -> "updateTime", "time" -> (System.currentTimeMillis() - timerValue)).toString
+    tick = context.system.scheduler.scheduleWithFixedDelay(initialDelay = 0.seconds, delay = 1.second, receiver = self, message = "Tick")
+
+    def receive = {
+      case msg: String =>
+        if (Math.floor((System.currentTimeMillis() - timerValue)/1000.0) >= 60.0) {
+          timerValue = System.currentTimeMillis()
+        }
+        if (msg.equals("Tick")) {
+          out ! Json.obj("event" -> "updateTimeMessageEvent", "time" -> (System.currentTimeMillis() - timerValue), "numberOfPlayers" -> numberOfPlayers, "readyCount" -> readyCount).toString
+        } else if ((Json.parse(msg) \ "event").as[String].equals("newPlayer")) {
+          out ! Json.obj("event" -> "newPlayerMessageEvent", "id" -> numberOfPlayers, "numberOfPlayers" -> (numberOfPlayers + 1), "readyCount" -> readyCount).toString
+          numberOfPlayers += 1
+          players = players :+ (Json.parse(msg) \ "name").as[String]
+          println((Json.parse(msg) \ "name").as[String] + " joined")
+        } else if ((Json.parse(msg) \ "event").as[String].equals("ready")) {
+          readyCount += 1
+          out ! Json.obj("event" -> "readyMessageEvent", "readyCount" -> readyCount).toString
+        } else if ((Json.parse(msg) \ "event").as[String].equals("closeConnection")) {
+          readyCount = if ((Json.parse(msg) \ "ready").as[Boolean]) (readyCount - 1) else readyCount
+          numberOfPlayers -= 1
+          /*println(players.toString)
+          println((players.zipWithIndex.filter { case (_, index) => index != (Json.parse(msg) \ "playerID").as[Int] }.map(_._1)).toString)
+          players = players.zipWithIndex.filter { case (_, index) => index != (Json.parse(msg) \ "playerID").as[Int] }.map(_._1)*/
+        } else if ((Json.parse(msg) \ "event").as[String].equals("startGame")) {
+          if ((Json.parse(msg) \ "playerID").as[Int] == 0) {
+            out ! Json.obj("event" -> "newGameMessageEvent", "players" -> players.mkString(","), "isInitiator" -> true).toString
+          } else {
+            Thread.sleep(1000)
+            out ! Json.obj("event" -> "newGameMessageEvent", "players" -> "", "isInitiator" -> false).toString
+          }
+        }
+      case Terminated =>
+        println("Connection Terminated")
+        tick.cancel()
+        context.stop(self)
+      case _ =>
+        println("received something!")
+    }
+
+    reactions += {
+      case _ => println("reacted to something!")
+    }
+  }
 }
 
