@@ -1,5 +1,6 @@
 let playerID;
 let playersCount;
+
 function connectWebSocket(playerName) {
     const countdown = document.getElementById("countdown");
     const websocket = new WebSocket("ws://localhost:9000/lobbyWebsocket");
@@ -125,21 +126,15 @@ $(document).ready(function () {
 
     function setCookie(name, value) {
         let cookiesArray = document.cookie.split(';')
-        console.log('HERE: ' + name + value)
         for (let i = 0; i < cookiesArray.length; i++) {
             let cookie = cookiesArray[i].trim();
-            console.log(cookie)
             if (cookie.startsWith(` ${name}=`)) {
                 cookiesArray[i] = `${name}=${value}`
-                const allCookies = cookiesArray.join(';')
-                console.log(allCookies)
-                document.cookie = allCookies
+                document.cookie = cookiesArray.join(';')
                 return
             }
         }
         document.cookie = `${name}=${value};${document.cookie}`;
-        console.log(document.cookie)
-
     }
 
 
