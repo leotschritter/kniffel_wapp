@@ -8,7 +8,7 @@ import scala.collection.immutable.ListMap
 import scala.util.Random
 
 case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup {
-  def this() = this(List.fill(0)(0), List.fill(5)(Random.nextInt(6) + 1), 2)
+  def this() = this(List.fill(0)(0), List.fill(0)(0), 2)
 
   var state: DiceCupState = new Start()
 
