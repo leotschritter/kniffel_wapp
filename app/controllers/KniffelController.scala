@@ -5,6 +5,7 @@ import akka.stream.Materializer
 import de.htwg.se.kniffel.controller.controllerBaseImpl.Controller
 import de.htwg.se.kniffel.controller.{ControllerChanged, DiceCupChanged}
 import de.htwg.se.kniffel.model.Move
+import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json._
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
@@ -28,7 +29,7 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
 
   private var readyCount: Int = 0
 
-  private var players: List[String] = Nil
+  private var players: List[(String, String)] = Nil
 
   private var startGame: Boolean = false
 
@@ -132,7 +133,7 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
   }
 
   def isRunning: Action[AnyContent] = Action {
-    Ok(Json.obj("isRunning" -> controller.getGame.isRunning));
+    Ok(Json.obj("isRunning" -> controller.getGame.isRunning))
   }
 
 
@@ -140,36 +141,36 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
     Ok(chatId)
   }
 
-  def socket = WebSocket.accept[String, String] { request =>
+  def socket: WebSocket = WebSocket.accept[String, String] { request =>
     ActorFlow.actorRef { out =>
       println("Connect received")
       KniffelWebSocketActorFactory.create(out)
     }
   }
 
-  def lobbySocket = WebSocket.accept[String, String] { request =>
+  def lobbySocket: WebSocket = WebSocket.accept[String, String] { request =>
     ActorFlow.actorRef { out =>
       println("Connect received")
       LobbyWebSocketActorFactory.create(out)
     }
   }
   private object KniffelWebSocketActorFactory {
-    def create(out: ActorRef) = {
+    def create(out: ActorRef): Props = {
       Props(new KniffelWebSocketActor(out))
     }
   }
 
   private object LobbyWebSocketActorFactory {
-    def create(out: ActorRef) = {
+    def create(out: ActorRef): Props = {
       Props(new LobbyWebSocketActor(out))
     }
   }
   private class KniffelWebSocketActor(out: ActorRef) extends Actor with Reactor {
     listenTo(controller)
 
-    def receive = {
+    def receive: Receive = {
       case msg: String =>
-        out ! (controller.toJson.toString)
+        out ! controller.toJson.toString
         println("Sent Json to Client " + msg)
       case _ =>
         println("received something!")
@@ -177,15 +178,15 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
 
     reactions += {
       case event: DiceCupChanged => sendDiceCupJsonToClient(event.isDice)
-      case event: ControllerChanged => sendControllerJsonToClient
+      case event: ControllerChanged => sendControllerJsonToClient()
       case _ => println("reacted to something!")
     }
 
-    def sendControllerJsonToClient = {
-      out ! (controller.toJson.toString)
+    private def sendControllerJsonToClient(): Unit = {
+      out ! controller.toJson.toString
     }
-    def sendDiceCupJsonToClient(isDice: Boolean) = {
-      out ! (Json.obj("isDice" -> isDice).deepMerge(controller.getDicecup.toJson).toString())
+    private def sendDiceCupJsonToClient(isDice: Boolean): Unit = {
+      out ! Json.obj("isDice" -> isDice).deepMerge(controller.getDicecup.toJson).toString()
     }
   }
 
@@ -200,33 +201,36 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
     out ! Json.obj("event" -> "updateTime", "time" -> (System.currentTimeMillis() - timerValue)).toString
     tick = context.system.scheduler.scheduleWithFixedDelay(initialDelay = 0.seconds, delay = 1.second, receiver = self, message = "Tick")
 
-    def receive = {
+    def receive: Receive = {
       case msg: String =>
         if (Math.floor((System.currentTimeMillis() - timerValue)/1000.0) >= 60.0) {
           timerValue = System.currentTimeMillis()
           if (numberOfPlayers > 1) {
-            startGame = true;
+            startGame = true
           }
         }
         if (msg.equals("Tick")) {
           out ! Json.obj("event" -> "updateTimeMessageEvent", "time" -> (System.currentTimeMillis() - timerValue), "numberOfPlayers" -> numberOfPlayers, "readyCount" -> readyCount, "startGame" -> startGame).toString
         } else if ((Json.parse(msg) \ "event").as[String].equals("newPlayer")) {
-          out ! Json.obj("event" -> "newPlayerMessageEvent", "id" -> numberOfPlayers, "numberOfPlayers" -> (numberOfPlayers + 1), "readyCount" -> readyCount).toString
+          val playerId = UUID.randomUUID.toString
+          out ! Json.obj("event" -> "newPlayerMessageEvent", "id" -> playerId, "numberOfPlayers" -> (numberOfPlayers + 1), "readyCount" -> readyCount).toString
           numberOfPlayers += 1
-          players = players :+ (Json.parse(msg) \ "name").as[String]
+          players = players :+ ((Json.parse(msg) \ "name").as[String], playerId)
           println((Json.parse(msg) \ "name").as[String] + " joined")
         } else if ((Json.parse(msg) \ "event").as[String].equals("ready")) {
           readyCount += 1
           out ! Json.obj("event" -> "readyMessageEvent", "readyCount" -> readyCount).toString
         } else if ((Json.parse(msg) \ "event").as[String].equals("closeConnection")) {
-          readyCount = if ((Json.parse(msg) \ "ready").as[Boolean]) (readyCount - 1) else readyCount
+          readyCount = if ((Json.parse(msg) \ "ready").as[Boolean]) readyCount - 1 else readyCount
+          System.out.println((Json.parse(msg) \ "playerID").as[String])
+          players = players.filter(p => !p._2.contains((Json.parse(msg) \ "playerID").as[String]))
           numberOfPlayers -= 1
-          /*println(players.toString)
-          println((players.zipWithIndex.filter { case (_, index) => index != (Json.parse(msg) \ "playerID").as[Int] }.map(_._1)).toString)
+          println(players.toString)
+          /*println((players.zipWithIndex.filter { case (_, index) => index != (Json.parse(msg) \ "playerID").as[Int] }.map(_._1)).toString)
           players = players.zipWithIndex.filter { case (_, index) => index != (Json.parse(msg) \ "playerID").as[Int] }.map(_._1)*/
         } else if ((Json.parse(msg) \ "event").as[String].equals("startGame")) {
-          if ((Json.parse(msg) \ "playerID").as[Int] == 0) {
-            out ! Json.obj("event" -> "newGameMessageEvent", "players" -> players.mkString(","), "isInitiator" -> true).toString
+          if (players.map(p => p._2).indexOf((Json.parse(msg) \ "playerID").as[String]) == 0) {
+            out ! Json.obj("event" -> "newGameMessageEvent", "players" -> players.map(p => p._1).mkString(","), "isInitiator" -> true).toString
           } else {
             Thread.sleep(1000)
             out ! Json.obj("event" -> "newGameMessageEvent", "players" -> "", "isInitiator" -> false).toString
