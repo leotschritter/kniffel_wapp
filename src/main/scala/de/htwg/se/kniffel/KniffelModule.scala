@@ -18,10 +18,9 @@ class KniffelModule extends AbstractModule with ScalaModule {
   val numberOfPlayers: Int = 2
 
   override def configure(): Unit = {
-
     bind[IMatrix].toInstance(new Matrix[String](numberOfPlayers))
     bind[IField].toInstance(new Field(numberOfPlayers))
-    bind[IGame].toInstance(new Game(numberOfPlayers, false))
+    bind[IGame].toInstance(new Game((for(i <- 0 until numberOfPlayers) yield "Player " + i + 1).toList))
     bind[IDiceCup].toInstance(new DiceCup())
     bind[IFileIO].toInstance(new FileIO())
     bind[IController].toInstance(new Controller())

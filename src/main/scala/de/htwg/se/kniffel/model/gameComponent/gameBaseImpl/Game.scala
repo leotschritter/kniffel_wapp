@@ -6,21 +6,18 @@ import de.htwg.se.kniffel.model.gameComponent.IGame
 import play.api.libs.json.{JsNumber, JsObject, Json}
 
 case class Game(playersList: List[Player], currentPlayer: Player, remainingMoves: Int, resultNestedList: List[List[Int]], running: Boolean) extends IGame {
+  def this(players: List[String])
+  = this((for (i <- players.indices) yield Player(i, players(i))).toList,
+    Player(0, players.head),
+    players.length * 13,
+    List.fill(players.length, 6)(0), true)
+  /*
   def this(numberOfPlayers: Int, running: Boolean)
   = this((for (s <- 0 until numberOfPlayers) yield Player(s, "Player " + (s + 1))).toList,
     Player(0, "Player 1"),
     numberOfPlayers * 13,
     List.fill(numberOfPlayers, 6)(0), running)
-
-  def this(players: List[String]) = {
-    this(
-      (for (i <- players.indices) yield Player(i, players(i))).toList,
-      Player(0, players.head),
-      players.length * 13,
-      List.fill(players.length, 6)(0),
-      true
-    )
-  }
+*/
 
   def next(): Option[Game] = {
     if (remainingMoves == 0)

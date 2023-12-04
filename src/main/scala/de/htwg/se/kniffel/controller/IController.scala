@@ -46,7 +46,7 @@ trait IController extends Publisher {
   def load: Unit
 
   def canWrite(col: Int, row: Int): Boolean
-  def newGame(numberOfPlayers: Int): Unit
+  /*def newGame(numberOfPlayers: Int): Unit*/
   def newGame(players: List[String]): Unit
 
   def toJson: JsObject

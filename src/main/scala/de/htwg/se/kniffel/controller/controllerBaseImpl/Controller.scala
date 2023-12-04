@@ -11,16 +11,17 @@ import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
 import model.fileIOComponent.IFileIO
 import model.fileIOComponent.fileIOJsonImpl.FileIO
 import model.gameComponent.IGame
-import model.gameComponent.gameBaseImpl.Game
+import model.gameComponent.gameBaseImpl.{Game, Player}
 import util.UndoManager
 import play.api.libs.json.{JsObject, Json}
 
 class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController {
 
   private val undoManager = new UndoManager[IGame, IField]
+  private val playersList: List[Player] = List(Player(0, "Player 1"), Player(0, "Player 2"))
 
   def this() = {
-    this(Field(new Matrix[String](2)), new DiceCup(), new Game(2, false), new FileIO())
+    this(Field(new Matrix[String](2)), new DiceCup(), new Game(List("Player 1", "Player 2")), new FileIO())
   }
 
   def undo(): Unit = {
@@ -101,11 +102,11 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
 
   override def toString: String = field.toString
 
-  def newGame(numberOfPlayers: Int): Unit = {
+  /*def newGame(numberOfPlayers: Int): Unit = {
     field = new Field(numberOfPlayers)
     diceCup = new DiceCup()
     game = new Game(numberOfPlayers, true)
-  }
+  }*/
 
   def newGame(players: List[String]): Unit = {
     field = new Field(players.length)
