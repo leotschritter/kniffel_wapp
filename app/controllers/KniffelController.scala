@@ -225,9 +225,6 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
           System.out.println((Json.parse(msg) \ "playerID").as[String])
           players = players.filter(p => !p._2.contains((Json.parse(msg) \ "playerID").as[String]))
           numberOfPlayers -= 1
-          println(players.toString)
-          /*println((players.zipWithIndex.filter { case (_, index) => index != (Json.parse(msg) \ "playerID").as[Int] }.map(_._1)).toString)
-          players = players.zipWithIndex.filter { case (_, index) => index != (Json.parse(msg) \ "playerID").as[Int] }.map(_._1)*/
         } else if ((Json.parse(msg) \ "event").as[String].equals("startGame")) {
           if (players.map(p => p._2).indexOf((Json.parse(msg) \ "playerID").as[String]) == 0) {
             out ! Json.obj("event" -> "newGameMessageEvent", "players" -> players.map(p => p._1).mkString(","), "isInitiator" -> true).toString
