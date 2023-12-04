@@ -66,7 +66,7 @@ function buildChat() {
         let credentials = username + ":" + password;
         let authToken = "Basic " + btoa(credentials);*/
 
-        const myMessage = {author: getCookie("user"), content: comment.value};
+        const myMessage = {author: JSON.parse(sessionStorage['player']).name, content: comment.value};
         $.ajax({
             type: "POST", url: getCookie("chatUrl"),
             data: JSON.stringify(myMessage),

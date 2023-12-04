@@ -1,6 +1,20 @@
 let playerID;
+let timestamp;
 let playersCount;
+let alreadyStarted = false;
 
+function setPlayerInSessionStorage(player, callback) {
+    sessionStorage['player'] = JSON.stringify(player);
+
+    if (sessionStorage['player'] === JSON.stringify(player)) {
+        callback();
+    } else {
+        setTimeout(() => {
+            console.log("Failed setting player %o in sessionStorage! Retrying...", player);
+            setPlayerInSessionStorage(player, callback);
+        }, 1000);
+    }
+}
 function connectWebSocket(playerName) {
     const countdown = document.getElementById("countdown");
     const websocket = new WebSocket("ws://localhost:9000/lobbyWebsocket");
@@ -32,25 +46,32 @@ function connectWebSocket(playerName) {
             }
         } else if (data.event === "newPlayerMessageEvent") {
             playerID = data.id;
+            timestamp = data.timestamp;
             playersCount = data.numberOfPlayers;
             numberOfPlayers.innerText = playersCount;
             playersReady.innerText = data.readyCount;
         } else if (data.event === "readyMessageEvent") {
             playersReady.innerText = data.readyCount
         } else if (data.event === "newGameMessageEvent") {
-            if (data.isInitiator) {
-                $.ajax({
-                    method: "GET", url: '/new?players=' + data.players,
-                    success: function () {
-                        window.location.href = '/kniffel';
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.error("Failed starting new game!");
-                    }
-                });
-            } else {
-                window.location.href = '/kniffel';
-            }
+            const playerData = { 'id': playerID, 'name': playerName, 'timestamp': timestamp };
+            setPlayerInSessionStorage(playerData, () => {
+                if (data.isInitiator) {
+                    fetch('/new?players=' + data.players).then(() => {
+                        window.location.href = '/kniffel'
+                    });
+                      /*  $.ajax({
+                            method: "GET", url: '/new?players=' + data.players,
+                            success: function () {
+                                window.location.href = '/kniffel';
+                            },
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                console.error("Failed starting new game!");
+                            }
+                        });*/
+                } else {
+                    window.location.href = '/kniffel';
+                }
+            });
         }
     };
     return websocket;
@@ -103,7 +124,6 @@ $(document).ready(function () {
 
     btnJoin.onclick = function () {
         websocket = connectWebSocket(playerName.value);
-        setCookie('user', playerName.value)
     }
 
     btnLeaveLobby.onclick = function () {
@@ -122,19 +142,6 @@ $(document).ready(function () {
             }
             closeModal();
         });
-    }
-
-    function setCookie(name, value) {
-        let cookiesArray = document.cookie.split(';')
-        for (let i = 0; i < cookiesArray.length; i++) {
-            let cookie = cookiesArray[i].trim();
-            if (cookie.startsWith(` ${name}=`)) {
-                cookiesArray[i] = `${name}=${value}`
-                document.cookie = cookiesArray.join(';')
-                return
-            }
-        }
-        document.cookie = `${name}=${value};${document.cookie}`;
     }
 
 
