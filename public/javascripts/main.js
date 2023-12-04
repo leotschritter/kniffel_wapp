@@ -1,12 +1,3 @@
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-        .replace(/[xy]/g, function (c) {
-            const r = Math.random() * 16 | 0,
-                v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-}
-
 function getCookie(cookieName) {
     const cookiesArray = document.cookie.split(';');
     for (let i = 0; i < cookiesArray.length; i++) {
@@ -26,9 +17,15 @@ function buildChat() {
     const chatContainer = document.getElementById("chatContainer");
     const chatButton = document.getElementById("chatButton");
     const chatClose = document.getElementById("chatClose");
-    if (getCookie("chatUrl") === undefined) {
-        document.cookie = `chatUrl=http://85.215.67.144/${uuidv4()}/messages`
-    }
+
+    $.ajax({
+        url: 'chatid', method: 'GET', success: function (data) {
+            document.cookie = `chatUrl=http://85.215.67.144/${data}/messages`
+        }, error: function () {
+            console.error("Error while getting chat-url from backend.")
+        }
+    });
+
 
     const refreshBtn = document.getElementById("refresh");
     const listOfMessages = document.getElementById("list");
@@ -69,7 +66,7 @@ function buildChat() {
         let credentials = username + ":" + password;
         let authToken = "Basic " + btoa(credentials);*/
 
-        const myMessage = { author: getCookie("user"), content: comment.value };
+        const myMessage = {author: getCookie("user"), content: comment.value};
         $.ajax({
             type: "POST", url: getCookie("chatUrl"),
             data: JSON.stringify(myMessage),
@@ -130,7 +127,6 @@ function isRunning() {
 
 $(document).ready(function () {
     isRunning();
-
     buildChat();
 
     $('a').each(function () {

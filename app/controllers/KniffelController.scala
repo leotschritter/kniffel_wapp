@@ -9,6 +9,7 @@ import play.api.libs.json._
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 
+import java.util.UUID
 import javax.inject._
 import scala.concurrent.duration.DurationInt
 import scala.swing.Reactor
@@ -17,7 +18,7 @@ import scala.swing.Reactor
  * application's home page.
  */
 @Singleton
-class KniffelController @Inject()(cc: ControllerComponents) (implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
+class KniffelController @Inject()(cc: ControllerComponents)(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
 
   private val controller = new Controller()
 
@@ -30,6 +31,9 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
   private var players: List[String] = Nil
 
   private var startGame: Boolean = false
+
+  private val chatId: String = UUID.randomUUID().toString
+
   /**
    * Create an Action to render an HTML page.
    *
@@ -55,7 +59,6 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
 
   def dice: Action[AnyContent] = Action {
     controller.dice()
-    // Ok(views.html.kniffel(controller))
     Ok(controller.diceCup.toJson)
   }
 
@@ -132,6 +135,11 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
     Ok(Json.obj("isRunning" -> controller.getGame.isRunning));
   }
 
+
+  def getChatId: Action[AnyContent] = Action {
+    Ok(chatId)
+  }
+
   def socket = WebSocket.accept[String, String] { request =>
     ActorFlow.actorRef { out =>
       println("Connect received")
@@ -162,7 +170,7 @@ class KniffelController @Inject()(cc: ControllerComponents) (implicit system: Ac
     def receive = {
       case msg: String =>
         out ! (controller.toJson.toString)
-        println("Sent Json to Client "+ msg)
+        println("Sent Json to Client " + msg)
       case _ =>
         println("received something!")
     }

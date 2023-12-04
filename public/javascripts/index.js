@@ -102,6 +102,7 @@ $(document).ready(function () {
 
     btnJoin.onclick = function () {
         websocket = connectWebSocket(playerName.value);
+        setCookie('user', playerName.value)
     }
 
     btnLeaveLobby.onclick = function () {
@@ -121,6 +122,26 @@ $(document).ready(function () {
             closeModal();
         });
     }
+
+    function setCookie(name, value) {
+        let cookiesArray = document.cookie.split(';')
+        console.log('HERE: ' + name + value)
+        for (let i = 0; i < cookiesArray.length; i++) {
+            let cookie = cookiesArray[i].trim();
+            console.log(cookie)
+            if (cookie.startsWith(` ${name}=`)) {
+                cookiesArray[i] = `${name}=${value}`
+                const allCookies = cookiesArray.join(';')
+                console.log(allCookies)
+                document.cookie = allCookies
+                return
+            }
+        }
+        document.cookie = `${name}=${value};${document.cookie}`;
+        console.log(document.cookie)
+
+    }
+
 
     btnReady.onclick = function () {
         ready = true;

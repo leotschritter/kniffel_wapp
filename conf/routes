@@ -41,6 +41,8 @@ GET         /assets/*file   controllers.Assets.versioned(path="/public", file: A
 
 GET         /isRunning      controllers.KniffelController.isRunning()
 
+GET         /chatid         controllers.KniffelController.getChatId
+
 GET         /websocket      controllers.KniffelController.socket
 
 GET         /lobbyWebsocket controllers.KniffelController.lobbySocket
