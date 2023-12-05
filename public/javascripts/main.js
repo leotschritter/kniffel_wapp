@@ -29,57 +29,11 @@ function buildChat() {
 
     const refreshBtn = document.getElementById("refresh");
     const listOfMessages = document.getElementById("list");
-    const comment = document.getElementById("your-message");
     const submitBtn = document.getElementById("submit");
 
-    const refreshChat = () => {
-        // for future authorization
-        /*let username = "chatUser";
-        let password = "";
-        let credentials = username + ":" + password;
-        let authToken = "Basic " + btoa(credentials);*/
-        $.ajax({
-            method: "GET", dataType: "json", url: getCookie("chatUrl"),
-            success: function (data) {
-                listOfMessages.innerHTML = "";
-                const messages = data.messages;
-                messages.forEach((message) => {
-                    const content = message.content;
-                    const author = message.author;
-                    const minutesAgo = Math.round((new Date() - new Date(message.created_at)) / 60000);
-                    const fullMessage = `<li>${content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
-                    listOfMessages.insertAdjacentHTML("afterbegin", fullMessage);
-                });
-            },
-            error: function (err) {
-                console.error("Failed reloading messages: %o", err);
-            }
-        });
-    };
+    // refreshBtn.addEventListener("click", refreshChat);
 
-    refreshBtn.addEventListener("click", refreshChat);
 
-    const postMessage = () => {
-        // for future authorization
-        /*let username = "chatUser";
-        let password = "";
-        let credentials = username + ":" + password;
-        let authToken = "Basic " + btoa(credentials);*/
-
-        const myMessage = {author: JSON.parse(sessionStorage['player']).name, content: comment.value};
-        $.ajax({
-            type: "POST", url: getCookie("chatUrl"),
-            data: JSON.stringify(myMessage),
-            success: function (data) {
-                const message = document.getElementById('your-message');
-                message.value = '';
-                refreshChat();
-            },
-            error: function (err) {
-                console.error("Failed sending message: %o", err);
-            }
-        });
-    };
 
     submitBtn.addEventListener("click", (event) => {
         // avoid the default behavior of page loading

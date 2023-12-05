@@ -193,6 +193,10 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
             println("id: " + player.id);
             player.actorRef.get ! Json.obj("event" -> "turnChangedMessageEvent", "currentTurn" -> players(playersTurn).id).toString
           }
+        } else if ((Json.parse(msg) \ "event").as[String].equals("refreshChats")) {
+          for (player <- players) {
+            player.actorRef.get ! Json.obj("event" -> "refreshChatsMessageEvent").toString
+          }
         }
       case _ =>
         println("received something!")
