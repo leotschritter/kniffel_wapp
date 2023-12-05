@@ -46,3 +46,5 @@ GET         /chatid         controllers.KniffelController.getChatId
 GET         /websocket      controllers.KniffelController.socket
 
 GET         /lobbyWebsocket controllers.KniffelController.lobbySocket
+
+GET         /restart        controllers.RestartController.restart()

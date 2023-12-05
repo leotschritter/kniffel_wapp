@@ -21,6 +21,14 @@ function connectWebSocket(playerName) {
 
     websocket.onopen = function(event) {
         websocket.send(JSON.stringify({event: "newPlayer", name: playerName}));
+        /*$.ajax({
+            method: "GET", url: '/isRunning',
+            success: function (data) {
+              if (data.isRunning) {
+                  websocket.send(JSON.stringify({"event": "clearAll"}));
+              }
+            }
+        });*/
         console.log("Connected to Websocket");
     }
 
@@ -117,9 +125,17 @@ $(document).ready(function () {
     const btnConfirmLeaveLobby = document.getElementById("btnConfirm");
     const btnReady = document.getElementById("ready");
 
-    playerName.addEventListener('keyup', () => {
-        btnJoin.disabled = playerName.value === "";
+    fetch("/isRunning").then(data => data.json()).then((data) => {
+        if (!data.isRunning) {
+            playerName.addEventListener('keyup', () => {
+                btnJoin.disabled = playerName.value === "";
+            });
+        } else {
+            playerName.disabled = true;
+            playerName.placeholder = 'Game is already running'
+        }
     });
+
     let websocket;
 
     btnJoin.onclick = function () {
@@ -143,7 +159,6 @@ $(document).ready(function () {
             closeModal();
         });
     }
-
 
     btnReady.onclick = function () {
         ready = true;

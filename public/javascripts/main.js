@@ -42,12 +42,12 @@ function buildChat() {
     });
 
     // refresh the app automatically
-    document.addEventListener("DOMContentLoaded", refreshChat);
+    // document.addEventListener("DOMContentLoaded", refreshChat);
 
     chatButton.addEventListener('click', function () {
         chatContainer.style.display = 'block';
         chatButton.style.display = 'none';
-        refreshChat();
+        // refreshChat();
     });
 
     chatClose.addEventListener('click', function () {

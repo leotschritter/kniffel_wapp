@@ -35,7 +35,7 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
 
   private val chatId: String = UUID.randomUUID().toString
 
-  var playersTurn: Int = 0
+  private var playersTurn: Int = 0
 
   /**
    * Create an Action to render an HTML page.
@@ -235,6 +235,7 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
             startGame = true
           }
         }
+        println("Message: " + msg)
         if (msg.equals("Tick")) {
           out ! Json.obj("event" -> "updateTimeMessageEvent", "time" -> (System.currentTimeMillis() - timerValue), "numberOfPlayers" -> numberOfPlayers, "readyCount" -> readyCount, "startGame" -> startGame).toString
         } else if ((Json.parse(msg) \ "event").as[String].equals("newPlayer")) {
