@@ -30,7 +30,7 @@ GET         /save           controllers.KniffelController.save
 
 GET         /load           controllers.KniffelController.load
 
-GET         /new            controllers.KniffelController.newGame(players: Int)
+GET         /new            controllers.KniffelController.newGame(players: String)
 
 GET         /in/all         controllers.KniffelController.allIn()
 
@@ -40,3 +40,11 @@ GET         /assets/*file   controllers.Assets.versioned(path="/public", file: A
 # GET         /favicon.ico    controllers.Assets.at(path="/public/images", file="favicon.ico")
 
 GET         /isRunning      controllers.KniffelController.isRunning()
+
+GET         /chatid         controllers.KniffelController.getChatId
+
+GET         /websocket      controllers.KniffelController.socket
+
+GET         /lobbyWebsocket controllers.KniffelController.lobbySocket
+
+GET         /restart        controllers.RestartController.restart()

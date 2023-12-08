@@ -1,3 +1,7 @@
+let playerID;
+let playerName;
+let websocket;
+let active = false;
 const firstColumn = [
     "assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
     "assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "total", "bonus from 63",
@@ -24,16 +28,11 @@ const bottomPart = {
 };
 
 function dice() {
-    const diceCup = document.querySelector('.cup');
-    const diceInCupElement = document.getElementById('diceInCup');
-    diceInCupElement.innerHTML = '';
+    // console.log("dice")
     $.ajax({
         url: '/dice',
         method: 'GET',
-        success: function (data) {
-            diceCup.style = `background: url('assets/images/cup.png') no-repeat;`
-            buildDiceCupElement(data.dicecup, true)
-        }, error: function () {
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     });
@@ -44,9 +43,7 @@ function putIn(diceElement) {
         url: '/in', type: 'GET', data: {
             'in': diceElement.getAttribute('value')
         },
-        success: function (data) {
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     })
@@ -56,12 +53,9 @@ function putIn(diceElement) {
 function putOut(diceElement) {
     $.ajax({
         url: '/out', type: 'GET', data: {
-
             'out': diceElement.getAttribute('value')
         },
-        success: function (data) {
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     })
@@ -72,10 +66,11 @@ function writeTo(index) {
         url: '/write', type: 'GET', data: {
             'to': index
         },
-        success: function (data) {
-            buildTableFromJson(data)
-            buildDiceCupElement(data.controller.dicecup)
-        }, error: function () {
+        success: function() {
+            console.log("call nextRound");
+            websocket.send(JSON.stringify({event: "nextRound"}));
+        },
+        error: function () {
             console.error('Failed to write down the result from the last move.');
         }
     })
@@ -93,26 +88,24 @@ function buildField() {
 
 function putAllIn() {
     $.ajax({
-        url: '/in/all', type: 'GET', success: function (data) {
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/in/all', type: 'GET',
+        error: function () {
             console.error('Failed to get dicecup JSON.');
         }
     })
 }
 
 function save() {
-    $.ajax({url: '/save', type: 'GET', error: function () {
-        console.error('Failed to save game.');
+    $.ajax({url: '/save', method: 'GET',
+        error: function () {
+            console.error('Failed to save game.');
         }})
 }
 
 function load() {
     $.ajax({
-        url: '/load', type: 'GET', success: function (data) {
-            buildTableFromJson(data);
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/load', method: 'GET',
+        error: function () {
             console.error('Failed to load game.');
         }
     });
@@ -120,10 +113,8 @@ function load() {
 
 function undo() {
     $.ajax({
-        url: '/undo', type: 'GET', success: function (data) {
-            buildTableFromJson(data);
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/undo', method: 'GET',
+        error: function () {
             console.error('Failed to undo the last move.');
         }
     });
@@ -131,16 +122,16 @@ function undo() {
 
 function redo() {
     $.ajax({
-        url: '/redo', type: 'GET', success: function (data) {
-            buildTableFromJson(data);
-            buildDiceCupElement(data.dicecup)
-        }, error: function () {
+        url: '/redo', method: 'GET',
+        error: function () {
             console.error('Failed to redo the previous move.');
         }
     });
 }
-
 function buildDiceCupElement(diceCupJson, isDice) {
+    if (diceCupJson === undefined) {
+        return
+    }
     if (isDice === true) {
         const animatedElement = document.querySelector('.cup');
         const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
@@ -178,36 +169,60 @@ function buildActionBox(remainingDices) {
         btnDice.removeAttribute("disabled");
     }
     btnDice.addEventListener('click', dice);
-    btnAllIn.addEventListener('click', putAllIn)
+    btnAllIn.addEventListener('click', putAllIn);
+    btnDice.disabled = !active;
+    btnAllIn.disabled = !active;
 }
 
 function buildInCup(inCup) {
     const diceInCupElement = document.getElementById('diceInCup');
     diceInCupElement.innerHTML = '';
-    for (let i = 0; i < inCup.length; i++) {
-        let diceElement = document.createElement('div');
-        diceElement.className = 'dice d' + (i + 1) + ' dice_' + inCup[i] + ' inCup';
-        diceElement.setAttribute('value', inCup[i]);
-        diceElement.style.visibility = 'visible';
-        diceInCupElement.appendChild(diceElement);
-        diceElement.addEventListener('click', function () {
-            putOut(diceElement);
-        });
+    if (inCup) {
+        for (let i = 0; i < inCup.length; i++) {
+            let diceElement = document.createElement('div');
+            diceElement.className = 'dice d' + (i + 1) + ' dice_' + inCup[i] + ' inCup';
+            diceElement.setAttribute('value', inCup[i]);
+            diceElement.style.visibility = 'visible';
+            diceInCupElement.appendChild(diceElement);
+            diceElement.addEventListener('click', function () {
+                putOut(diceElement);
+            });
+        }
+    }
+    if (active) {
+        for (const die of diceInCupElement.children) {
+            die.style.pointerEvents = 'unset';
+        }
+    } else {
+        for (const die of diceInCupElement.children) {
+            die.style.pointerEvents = 'none';
+        }
     }
 }
 
 function buildDiceStorage(stored) {
     const diceStorageElement = document.getElementById('diceStorage');
     diceStorageElement.innerHTML = ''
-    for (let i = 0; i < stored.length; i++) {
-        let diceElement = document.createElement('div');
-        diceElement.className = 'dice dice_' + stored[i] + ' stored';
-        diceElement.setAttribute('value', stored[i]);
-        diceElement.style.visibility = 'visible';
-        diceStorageElement.appendChild(diceElement);
-        diceElement.addEventListener('click', function () {
-            putIn(diceElement);
-        });
+    if (stored) {
+        for (let i = 0; i < stored.length; i++) {
+            let diceElement = document.createElement('div');
+            diceElement.className = 'dice dice_' + stored[i] + ' stored';
+            diceElement.setAttribute('value', stored[i]);
+            diceElement.style.visibility = 'visible';
+            diceStorageElement.appendChild(diceElement);
+            diceElement.addEventListener('click', function () {
+                putIn(diceElement);
+            });
+        }
+    }
+    if (active) {
+        for (const die of diceStorageElement.children) {
+            die.style.pointerEvents = 'unset';
+        }
+    } else {
+        for (const die of diceStorageElement.children) {
+            die.style.pointerEvents = 'none';
+        }
     }
 }
 
@@ -318,6 +333,20 @@ function buildTableFromJson(jsonData) {
         gameTable.appendChild(tr);
     }
     $('[data-bs-toggle="popover"]').popover();
+    deactivateTableButtons();
+}
+
+function deactivateTableButtons() {
+    if (active)
+        return;
+    const table = document.getElementById('gameTable');
+    const trCollection = table.getElementsByTagName('TR')
+    for (let i = 1; i < trCollection.length; i++) {
+        const btnCollection = trCollection[i].getElementsByTagName('BUTTON');
+        for (const btn of btnCollection) {
+            btn.disabled = true;
+        }
+    }
 }
 
 function waitForAnimationEnd(element) {
@@ -329,8 +358,7 @@ function waitForAnimationEnd(element) {
     });
 }
 
-
-$(document).ready(function () {
+function onWebSocketOpen() {
     // navigation
 
     document.getElementById('actions').style.display = "unset";
@@ -351,7 +379,7 @@ $(document).ready(function () {
     // diceCup
     $.ajax({
         url: '/dicecup', type: 'GET', success: function (data) {
-            buildDiceCupElement(data.dicecup)
+            buildDiceCupElement(data.dicecup, false)
         }, error: function () {
             console.error('Failed to get dicecup JSON.');
         }
@@ -366,4 +394,154 @@ $(document).ready(function () {
 
     // field
     buildField()
+}
+
+function waitForPlayer(callback) {
+    const player = sessionStorage['player'];
+
+    if (player) {
+        callback(player);
+    } else {
+        setTimeout(() => {
+            console.error("Failed reading player! Retrying...");
+            waitForPlayer(callback);
+        }, 1000);
+    }
+}
+function connectWebSocket() {
+    const diceCup = document.querySelector('.cup');
+    const diceInCupElement = document.getElementById('diceInCup');
+
+    const websocket = new WebSocket("ws://localhost:9000/websocket");
+
+    websocket.onopen = function(event) {
+        waitForPlayer((p) => {
+            const player = JSON.parse(p);
+            playerID = player.id;
+            playerName = player.name;
+            const timestamp = player.timestamp;
+            onWebSocketOpen();
+            websocket.send(JSON.stringify({event: "playerJoined", name: playerName, id: playerID, timestamp: timestamp}));
+            if (playerID === 0) {
+                active = true;
+            }
+        });
+        console.log("Connected to Websocket");
+    }
+
+    websocket.onclose = function () {
+        console.log('Connection with Websocket Closed!');
+    };
+
+    websocket.onerror = function (error) {
+        console.log('Error in Websocket Occured: ' + error);
+    };
+
+    websocket.onmessage = function (e) {
+        if (typeof e.data === "string") {
+            if (JSON.parse(e.data).controller !== undefined) {
+                buildTableFromJson(JSON.parse(e.data));
+                buildDiceCupElement(JSON.parse(e.data).dicecup)
+            } else if (JSON.parse(e.data).dicecup !== undefined) {
+                console.log("DiceCup Changed");
+                if (JSON.parse(e.data).isDice) {
+                    diceInCupElement.innerHTML = '';
+                    diceCup.style = `background: url('assets/images/cup.png') no-repeat;`
+                    buildDiceCupElement(JSON.parse(e.data).dicecup, JSON.parse(e.data).isDice);
+                } else {
+                    buildDiceCupElement(JSON.parse(e.data).dicecup, JSON.parse(e.data).isDice);
+                    buildField();
+                }
+            } else if (JSON.parse(e.data).field !== undefined) {
+                buildField()
+                /*console.log("Field Changed")*/
+            } else if (JSON.parse(e.data).event === "turnChangedMessageEvent") {
+                console.log("playerID: " + playerID + "; currentTurn: " + JSON.parse(e.data).currentTurn);
+                if (playerID !== JSON.parse(e.data).currentTurn) {
+                    active = false;
+                    console.log("deactivate");
+                    // deactivateButtons(true);
+                } else {
+                    active = true;
+                    console.log("activate");
+                    // deactivateButtons(false);
+                }
+                buildActionBox(2);
+                buildField();
+            } else if (JSON.parse(e.data).event === "refreshChatsMessageEvent") {
+                refreshChat()
+            } else {
+                /*console.log("Other Change")*/
+            }/* else if (JSON.parse(e.data).game !== undefined) { // not in use yet
+                console.log("Game Changed")
+            }*/
+            /*console.log(e.data)*/
+        }
+    };
+    return websocket;
+}
+
+function refreshChat() {
+    const listOfMessages = document.getElementById("list");
+    // for future authorization
+    /*let username = "chatUser";
+    let password = "";
+    let credentials = username + ":" + password;
+    let authToken = "Basic " + btoa(credentials);*/
+    $.ajax({
+        method: "GET", dataType: "json", url: getCookie("chatUrl"),
+        success: function (data) {
+            listOfMessages.innerHTML = "";
+            const messages = data.messages;
+            messages.forEach((message) => {
+                const content = message.content;
+                const author = message.author;
+                const minutesAgo = Math.round((new Date() - new Date(message.created_at)) / 60000);
+                const fullMessage = `<li>${content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
+                listOfMessages.insertAdjacentHTML("afterbegin", fullMessage);
+            });
+        },
+        error: function (err) {
+            console.error("Failed reloading messages: %o", err);
+        }
+    });
+}
+const postMessage = () => {
+    const comment = document.getElementById("your-message");
+    // for future authorization
+    /*let username = "chatUser";
+    let password = "";
+    let credentials = username + ":" + password;
+    let authToken = "Basic " + btoa(credentials);*/
+
+    const myMessage = {author: JSON.parse(sessionStorage['player']).name, content: comment.value};
+    $.ajax({
+        type: "POST", url: getCookie("chatUrl"),
+        data: JSON.stringify(myMessage),
+        success: function (data) {
+            const message = document.getElementById('your-message');
+            message.value = '';
+            websocket.send(JSON.stringify({event: "refreshChats"}));
+        },
+        error: function (err) {
+            console.error("Failed sending message: %o", err);
+        }
+    });
+};
+/*function setNameT(name, value) {
+    let cookiesArray = document.cookie.split(';')
+    for (let i = 0; i < cookiesArray.length; i++) {
+        let cookie = cookiesArray[i].trim();
+        if (cookie.startsWith(` ${name}=`)) {
+            cookiesArray[i] = `${name}=${value}`
+            document.cookie = cookiesArray.join(';')
+            return
+        }
+    }
+    document.cookie = `${name}=${value};${document.cookie}`;
+}*/
+$(document).ready(function () {
+    const btnChat = document.getElementById('chatButton');
+    btnChat.hidden = false;
+    websocket = connectWebSocket();
 });
