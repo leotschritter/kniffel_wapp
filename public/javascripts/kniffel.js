@@ -1,3 +1,195 @@
+const app = Vue.createApp({})
+
+app.component('diceBoard', {
+    data() {
+        return {
+            incup: [],
+            remainingDices: 2,
+            stored: [],
+            active: false,
+            websocket: new WebSocket("ws://localhost:9000/websocket"),
+            playerID: 0,
+            playerName: ""
+
+        }
+    },
+    created() {
+        this.initSocket()
+    },
+    methods: {
+        initSocket() {
+            websocket.onopen = function (event) {
+                this.waitForPlayer((p) => {
+                    const player = JSON.parse(p);
+                    this.playerID = player.id;
+                    this.playerName = player.name;
+                    const timestamp = player.timestamp;
+                    this.onWebSocketOpen();
+                    this.websocket.send(JSON.stringify({
+                        event: "playerJoined",
+                        name: this.playerName,
+                        id: this.playerID,
+                        timestamp: timestamp
+                    }));
+                    if (this.playerID === 0) {
+                        this.active = true;
+                    }
+                });
+                console.log("Connected to Websocket");
+            }
+        },
+        dice() {
+            $.ajax({
+                url: '/dice',
+                method: 'GET',
+                success: function (data) {
+                    this.incup = data.incup
+                    this.stored = data.stored
+                    this.remainingDices = data.remainingDices
+                },
+                error: function () {
+                    console.error('Failed to get dicecup JSON.');
+                }
+            });
+        },
+        putIn(diceElement) {
+            $.ajax({
+                url: '/in', type: 'GET', data: {
+                    'in': diceElement.getAttribute('value')
+                }, success: function (data) {
+                    this.incup = data.incup
+                    this.stored = data.stored
+                },
+                error: function () {
+                    console.error('Failed to get dicecup JSON.');
+                }
+            })
+
+        },
+        putOut(diceElement) {
+            $.ajax({
+                url: '/out', type: 'GET', data: {
+                    'out': diceElement.getAttribute('value')
+                }, success: function(data) {
+                    this.incup = data.incup
+                    this.stored = data.stored
+                },
+                error: function () {
+                    console.error('Failed to get dicecup JSON.');
+                }
+            })
+        },
+        putAllIn() {
+            $.ajax({
+                url: '/in/all', type: 'GET',
+                success: function(data) {
+                  this.diceCup = data.incup
+                  this.diceStorage = data.stored
+                },
+                error: function () {
+                    console.error('Failed to get dicecup JSON.');
+                }
+            })
+        },
+        onWebSocketOpen() {
+            // navigation
+
+            document.getElementById('actions').style.display = "unset";
+
+            document.getElementById('actionSave').addEventListener('click', function () {
+                save()
+            });
+            document.getElementById('actionLoad').addEventListener('click', function () {
+                load()
+            });
+            document.getElementById('actionUndo').addEventListener('click', function () {
+                undo()
+            });
+            document.getElementById('actionRedo').addEventListener('click', function () {
+                redo()
+            });
+
+            // diceCup
+            $.ajax({
+                url: '/dicecup', type: 'GET', success: function (data) {
+                }, error: function () {
+                    console.error('Failed to get dicecup JSON.');
+                }
+            });
+
+            // field popover
+            bootstrap.Popover.Default.allowList.table = [];
+            bootstrap.Popover.Default.allowList.thead = [];
+            bootstrap.Popover.Default.allowList.tbody = [];
+            bootstrap.Popover.Default.allowList.tr = [];
+            bootstrap.Popover.Default.allowList.td = [];
+
+            // field
+            buildField()
+        },
+        waitForPlayer(callback) {
+            const player = sessionStorage['player'];
+
+            if (player) {
+                callback(player);
+            } else {
+                setTimeout(() => {
+                    console.error("Failed reading player! Retrying...");
+                    this.waitForPlayer(callback);
+                }, 1000);
+            }
+        }
+
+    },
+    template:
+        `
+        <div class="diceBoard" id="diceBoard">
+            <div class="cup" style="background: none; animation: none;">
+                <div v-if="inCup" id="diceInCup">
+                    <div v-for="(diceValue, index) in incup"
+                        v-bind:key="index"
+                        class="dice"
+                        v-bind:class="'d' + (index + 1) + ' dice_' + diceValue + ' inCup'"
+                        v-bind:value="diceValue"
+                        v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}" 
+                        v-on:click="putOut(diceValue)">
+                        
+                        
+                    </div>
+                </div>
+                <div class="actionBox">
+                    <img src="assets/images/dicecup_small.png" id="remDice3"/>
+                    <img src="assets/images/dicecup_small.png" id="remDice2"/>
+                    <img src="assets/images/dicecup_small.png" id="remDice1"/>
+                    <button type="button" style="margin-top: 5px" id="allInButton" class="btn btn-dark" 
+                    v-on:click="putAllIn">
+                        <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+                    </button>
+                    <button type="button" style="margin-top: 5px;" id="diceButton" class="btn btn-dark"
+                            v-on:click="dice" v-bind:disabled="remainingDices < 0">
+                        <img style="margin-top: -5px;" width="40px" src="assets/images/flying_dices_small_white.png"/>
+                    </button>
+                </div>
+                <div class="diceStorage" id="diceStorage">
+                    <div v-if="storage" id="diceStorage">
+                        <div v-for="(diceStorage, index) in locked"
+                             v-bind:key="index"
+                             v-on:click="putIn(diceValue)"
+                             class="dice"
+                             v-bind:class="'d' + (index + 1) + ' dice_' + diceValue + ' stored'"
+                             v-bind:value="diceValue"
+                             v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}"
+                        >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `
+});
+
+app.mount('#vuecontainer')
+
 let playerID;
 let playerName;
 let websocket;
@@ -5,12 +197,14 @@ let active = false;
 const firstColumn = [
     "assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
     "assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "total", "bonus from 63",
-    "total top part", "three of a kind", "four of a kind", "Full-House", "Small Street", "Big Street", "Kniffel", "Chance",
+    "total top part", "three of a kind", "four of a kind", "Full-House", "Small Street", "Big Street",
+    "Kniffel", "Chance",
     "total bottom part", "total top part", "grand total"
 ];
 const secondColumn = [
     "only ones count", "only twos count", "only threes count", "only fours count",
-    "only fives count", "only sixes count", "assets/images/right_arrow.png", "plus 35", "assets/images/right_arrow.png",
+    "only fives count", "only sixes count", "assets/images/right_arrow.png", "plus 35",
+    "assets/images/right_arrow.png",
     "all pips count", "all pips count", "25 points", "30 points", "40 points", "50 points", "all pips count",
     "assets/images/right_arrow.png", "assets/images/right_arrow.png", "assets/images/right_arrow.png"
 ];
@@ -27,46 +221,13 @@ const bottomPart = {
     15: "support"
 };
 
-function dice() {
-    // console.log("dice")
-    $.ajax({
-        url: '/dice',
-        method: 'GET',
-        error: function () {
-            console.error('Failed to get dicecup JSON.');
-        }
-    });
-}
-
-function putIn(diceElement) {
-    $.ajax({
-        url: '/in', type: 'GET', data: {
-            'in': diceElement.getAttribute('value')
-        },
-        error: function () {
-            console.error('Failed to get dicecup JSON.');
-        }
-    })
-
-}
-
-function putOut(diceElement) {
-    $.ajax({
-        url: '/out', type: 'GET', data: {
-            'out': diceElement.getAttribute('value')
-        },
-        error: function () {
-            console.error('Failed to get dicecup JSON.');
-        }
-    })
-}
 
 function writeTo(index) {
     $.ajax({
         url: '/write', type: 'GET', data: {
             'to': index
         },
-        success: function() {
+        success: function () {
             console.log("call nextRound");
             websocket.send(JSON.stringify({event: "nextRound"}));
         },
@@ -81,25 +242,18 @@ function buildField() {
         url: '/field', type: 'GET', success: function (data) {
             buildTableFromJson(data)
         }, error: function () {
-        console.error('Failed to build Table from JSON.');
-    }
-    })
-}
-
-function putAllIn() {
-    $.ajax({
-        url: '/in/all', type: 'GET',
-        error: function () {
-            console.error('Failed to get dicecup JSON.');
+            console.error('Failed to build Table from JSON.');
         }
     })
 }
 
 function save() {
-    $.ajax({url: '/save', method: 'GET',
+    $.ajax({
+        url: '/save', method: 'GET',
         error: function () {
             console.error('Failed to save game.');
-        }})
+        }
+    })
 }
 
 function load() {
@@ -128,103 +282,7 @@ function redo() {
         }
     });
 }
-function buildDiceCupElement(diceCupJson, isDice) {
-    if (diceCupJson === undefined) {
-        return
-    }
-    if (isDice === true) {
-        const animatedElement = document.querySelector('.cup');
-        const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
-        animatedElement.addEventListener('animationstart', () => {
-            diceCupAudio.play().then();
-        });
-        animatedElement.classList.add('showCup');
-        waitForAnimationEnd(animatedElement).then(() => {
-            animatedElement.style.background = 'none';
-            animatedElement.style.animation = 'none';
-            buildInCup(diceCupJson.incup)
-        });
-    } else {
-        buildInCup(diceCupJson.incup)
-    }
-    buildActionBox(diceCupJson.remainingDices)
-    buildDiceStorage(diceCupJson.stored)
-}
 
-function buildActionBox(remainingDices) {
-    const btnDice = document.getElementById('diceButton');
-    const btnAllIn = document.getElementById('allInButton');
-
-    for (let i = 1; i <= 3; i++) {
-        let remDiceElement = document.getElementById("remDice" + i)
-        if (remainingDices < i - 1) {
-            remDiceElement.setAttribute("style", "opacity: 0.3");
-        } else {
-            remDiceElement.setAttribute("style", "");
-        }
-    }
-    if (remainingDices < 0) {
-        btnDice.setAttribute("disabled", "disabled");
-    } else {
-        btnDice.removeAttribute("disabled");
-    }
-    btnDice.addEventListener('click', dice);
-    btnAllIn.addEventListener('click', putAllIn);
-    btnDice.disabled = !active;
-    btnAllIn.disabled = !active;
-}
-
-function buildInCup(inCup) {
-    const diceInCupElement = document.getElementById('diceInCup');
-    diceInCupElement.innerHTML = '';
-    if (inCup) {
-        for (let i = 0; i < inCup.length; i++) {
-            let diceElement = document.createElement('div');
-            diceElement.className = 'dice d' + (i + 1) + ' dice_' + inCup[i] + ' inCup';
-            diceElement.setAttribute('value', inCup[i]);
-            diceElement.style.visibility = 'visible';
-            diceInCupElement.appendChild(diceElement);
-            diceElement.addEventListener('click', function () {
-                putOut(diceElement);
-            });
-        }
-    }
-    if (active) {
-        for (const die of diceInCupElement.children) {
-            die.style.pointerEvents = 'unset';
-        }
-    } else {
-        for (const die of diceInCupElement.children) {
-            die.style.pointerEvents = 'none';
-        }
-    }
-}
-
-function buildDiceStorage(stored) {
-    const diceStorageElement = document.getElementById('diceStorage');
-    diceStorageElement.innerHTML = ''
-    if (stored) {
-        for (let i = 0; i < stored.length; i++) {
-            let diceElement = document.createElement('div');
-            diceElement.className = 'dice dice_' + stored[i] + ' stored';
-            diceElement.setAttribute('value', stored[i]);
-            diceElement.style.visibility = 'visible';
-            diceStorageElement.appendChild(diceElement);
-            diceElement.addEventListener('click', function () {
-                putIn(diceElement);
-            });
-        }
-    }
-    if (active) {
-        for (const die of diceStorageElement.children) {
-            die.style.pointerEvents = 'unset';
-        }
-    } else {
-        for (const die of diceStorageElement.children) {
-            die.style.pointerEvents = 'none';
-        }
-    }
-}
 
 function buildTableFromJson(jsonData) {
     const controller = jsonData.controller;
@@ -243,7 +301,7 @@ function buildTableFromJson(jsonData) {
     thScrollDown.innerHTML = '<button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button>';
     thPopoverButton.innerHTML = '<button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" ' +
         'data-bs-toggle="popover" data-bs-title="Available Options" data-bs-placement="bottom" data-bs-trigger="hover" ' +
-        '' + 'data-bs-content="' + ("<table class='popover-table'><tr>" + (new Array(19).fill().map((_, row)  => {
+        '' + 'data-bs-content="' + ("<table class='popover-table'><tr>" + (new Array(19).fill().map((_, row) => {
             if (row === 6) {
                 return '</tr><tr>';
             }
@@ -358,76 +416,13 @@ function waitForAnimationEnd(element) {
     });
 }
 
-function onWebSocketOpen() {
-    // navigation
 
-    document.getElementById('actions').style.display = "unset";
-
-    document.getElementById('actionSave').addEventListener('click', function () {
-        save()
-    });
-    document.getElementById('actionLoad').addEventListener('click', function () {
-        load()
-    });
-    document.getElementById('actionUndo').addEventListener('click', function () {
-        undo()
-    });
-    document.getElementById('actionRedo').addEventListener('click', function () {
-        redo()
-    });
-
-    // diceCup
-    $.ajax({
-        url: '/dicecup', type: 'GET', success: function (data) {
-            buildDiceCupElement(data.dicecup, false)
-        }, error: function () {
-            console.error('Failed to get dicecup JSON.');
-        }
-    });
-
-    // field popover
-    bootstrap.Popover.Default.allowList.table = [];
-    bootstrap.Popover.Default.allowList.thead = [];
-    bootstrap.Popover.Default.allowList.tbody = [];
-    bootstrap.Popover.Default.allowList.tr = [];
-    bootstrap.Popover.Default.allowList.td = [];
-
-    // field
-    buildField()
-}
-
-function waitForPlayer(callback) {
-    const player = sessionStorage['player'];
-
-    if (player) {
-        callback(player);
-    } else {
-        setTimeout(() => {
-            console.error("Failed reading player! Retrying...");
-            waitForPlayer(callback);
-        }, 1000);
-    }
-}
 function connectWebSocket() {
     const diceCup = document.querySelector('.cup');
     const diceInCupElement = document.getElementById('diceInCup');
 
     const websocket = new WebSocket("ws://localhost:9000/websocket");
 
-    websocket.onopen = function(event) {
-        waitForPlayer((p) => {
-            const player = JSON.parse(p);
-            playerID = player.id;
-            playerName = player.name;
-            const timestamp = player.timestamp;
-            onWebSocketOpen();
-            websocket.send(JSON.stringify({event: "playerJoined", name: playerName, id: playerID, timestamp: timestamp}));
-            if (playerID === 0) {
-                active = true;
-            }
-        });
-        console.log("Connected to Websocket");
-    }
 
     websocket.onclose = function () {
         console.log('Connection with Websocket Closed!');
@@ -506,6 +501,7 @@ function refreshChat() {
         }
     });
 }
+
 const postMessage = () => {
     const comment = document.getElementById("your-message");
     // for future authorization
@@ -529,16 +525,16 @@ const postMessage = () => {
     });
 };
 /*function setNameT(name, value) {
-    let cookiesArray = document.cookie.split(';')
-    for (let i = 0; i < cookiesArray.length; i++) {
-        let cookie = cookiesArray[i].trim();
-        if (cookie.startsWith(` ${name}=`)) {
-            cookiesArray[i] = `${name}=${value}`
-            document.cookie = cookiesArray.join(';')
-            return
-        }
-    }
-    document.cookie = `${name}=${value};${document.cookie}`;
+let cookiesArray = document.cookie.split(';')
+for (let i = 0; i < cookiesArray.length; i++) {
+let cookie = cookiesArray[i].trim();
+if (cookie.startsWith(` ${name}=`)) {
+cookiesArray[i] = `${name}=${value}`
+document.cookie = cookiesArray.join(';')
+return
+}
+}
+document.cookie = `${name}=${value};${document.cookie}`;
 }*/
 $(document).ready(function () {
     const btnChat = document.getElementById('chatButton');
