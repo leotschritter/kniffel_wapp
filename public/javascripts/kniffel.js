@@ -7,7 +7,7 @@ app.component('game', {
             remainingDices: 2,
             stored: [],
             active: false,
-            websocket: new WebSocket("ws://localhost:9000/websocket"),
+            websocket: undefined,
             playerID: 0,
             playerName: "",
             isDice: false,
@@ -40,7 +40,7 @@ app.component('game', {
         }
     },
     created() {
-        this.websocket = this.connectGameSocket()
+        this.connectGameSocket()
         this.initSocket()
     },
     methods: {
@@ -125,7 +125,7 @@ app.component('game', {
                 },
                 success: function () {
                     console.log("call nextRound");
-                    websocket.send(JSON.stringify({event: "nextRound"}));
+                    this.websocket.send(JSON.stringify({event: "nextRound"}));
                 },
                 error: function () {
                     console.error('Failed to write down the result from the last move.');
@@ -190,17 +190,17 @@ app.component('game', {
         },
         connectGameSocket() {
 
-            const websocket = new WebSocket("ws://localhost:9000/websocket");
+            this.websocket = new WebSocket("ws://localhost:9000/websocket");
 
-            websocket.onclose = function () {
+            this.websocket.onclose = function () {
                 console.log('Connection with Websocket Closed!');
             };
 
-            websocket.onerror = function (error) {
+            this.websocket.onerror = function (error) {
                 console.log('Error in Websocket Occured: ' + error);
             };
 
-            websocket.onmessage = function (e) {
+            this.websocket.onmessage = function (e) {
                 if (typeof e.data === "string") {
                     if (JSON.parse(e.data).controller !== undefined) {
                         buildTableFromJson(JSON.parse(e.data));
@@ -245,7 +245,7 @@ app.component('game', {
                     /*console.log(e.data)*/
                 }
             };
-            return websocket;
+
         }
 
 
@@ -387,6 +387,7 @@ app.component('lobby', {
             playersCount: 0,
             numberOfPlayers: 0,
             playersReady: 0,
+            countdown: 60,
             ready: false,
             isRunning: false,
             yourName: ''
@@ -395,18 +396,18 @@ app.component('lobby', {
     },
     computed: {
         isJoinButtonDisabled() {
+
             return this.yourName.trim() === '';
         }
     },
     methods: {
         readyFunction() {
             this.ready = true;
-            setReadyButton();
-            websocket.send(JSON.stringify({event: "ready", playerID: playerID}));
+            this.websocket.send(JSON.stringify({event: "ready", playerID: this.playerID}));
         },
-        setPlayerInSessionStorage(callback) {
-            sessionStorage['player'] = JSON.stringify(this.player);
-            if (sessionStorage['player'] === JSON.stringify(this.player)) {
+        setPlayerInSessionStorage(player, callback) {
+            sessionStorage['player'] = JSON.stringify(player);
+            if (sessionStorage['player'] === JSON.stringify(player)) {
                 callback();
             } else {
                 setTimeout(() => {
@@ -416,12 +417,11 @@ app.component('lobby', {
             }
         },
         connectWebSocket(playerName) {
-            console.log(playerName)
             const countdown = document.getElementById("countdown");
-            const websocket = new WebSocket("ws://localhost:9000/lobbyWebsocket");
+            this.websocket = new WebSocket("ws://localhost:9000/lobbyWebsocket");
 
-            websocket.onopen = function (event) {
-                websocket.send(JSON.stringify({event: "newPlayer", name: playerName}));
+            this.websocket.onopen =  (event) => {
+                this.websocket.send(JSON.stringify({event: "newPlayer", name: playerName}));
                 /*$.ajax({
                     method: "GET", url: '/isRunning',
                     success: function (data) {
@@ -433,31 +433,32 @@ app.component('lobby', {
                 console.log("Connected to Websocket");
             }
 
-            websocket.onclose = function () {
+            this.websocket.onclose = function () {
                 console.log('Connection with Websocket Closed!');
             };
 
-            websocket.onerror = function (error) {
+            this.websocket.onerror = function (error) {
                 console.log('Error in Websocket occurred: ' + error);
             };
 
-            websocket.onmessage = (e) => {
+            this.websocket.onmessage = (e) => {
                 const data = JSON.parse(e.data);
                 if (data.event === "updateTimeMessageEvent") {
-                    countdown.innerText = (60 - Math.floor(data.time / 1000)).toString()
+                    this.countdown = (60 - Math.floor(data.time / 1000)).toString()
                     this.playersCount = data.numberOfPlayers;
                     if ((data.readyCount === this.playersCount && this.playersCount > 1) || data.startGame) {
-                        websocket.send(JSON.stringify({event: "startGame", name: playerName, playerID: this.playerID}));
+                        this.websocket.send(JSON.stringify({event: "startGame", name: this.playerName, playerID: this.playerID}));
                     }
                 } else if (data.event === "newPlayerMessageEvent") {
                     this.playerID = data.id;
                     this.timestamp = data.timestamp;
                     this.playersCount = data.numberOfPlayers;
-                    this.readyCount = data.readyCount
+                    this.playersReady = data.readyCount
                 } else if (data.event === "readyMessageEvent") {
-                    this.readyCount = data.readyCount
+                    console.log(data.readyCount)
+                    this.playersReady = data.readyCount
                 } else if (data.event === "newGameMessageEvent") {
-                    const playerData = {'id': playerID, 'name': playerName, 'timestamp': timestamp};
+                    const playerData = {'id': this.playerID, 'name': this.playerName, 'timestamp': this.timestamp};
                     this.setPlayerInSessionStorage(playerData, () => {
                         if (data.isInitiator) {
                             fetch('/new?players=' + data.players).then(() => {
@@ -478,7 +479,6 @@ app.component('lobby', {
                     });
                 }
             };
-            this.websocket =  websocket;
         },
         closeConnection() {
             this.closeSocketConnection().then(() => {
@@ -499,22 +499,22 @@ app.component('lobby', {
                     const response = JSON.parse(event.data);
                     resolve(response);
                 }
-                websocket.addEventListener('message', handleMessage);
+                this.websocket.addEventListener('message', handleMessage);
             });
         },
-        checkGameState() {
-            return $.ajax({url: '/isRunning', method: 'GET', success: function (data) {
-                return data.isRunning
+        updateGameState() {
+            $.ajax({url: '/isRunning', method: 'GET', success: function (data) {
+                this.isRunning =  data.isRunning
                 }})
         }
     },
     created() {
-        this.isRunning = this.checkGameState()
+        this.updateGameState()
         console.log(this.isRunning)
 
     },
     updated() {
-        this.isRunning = this.checkGameState()
+        this.updateGameState()
         console.log(this.isRunning)
 
     },
@@ -574,13 +574,16 @@ app.component('lobby', {
                         </div>
                     </div>
                     <div>
-                        <p><span :innerHTML="playersReady"></span><span>/<span :innerHTML="numberOfPlayers"></span> Players ready</span></p>
-                        <p><span>Seconds until Start: </span><span id="countdown">60</span></p>
+                        <p><span :innerHTML="playersReady"></span><span>/<span :innerHTML="playersCount"></span> Players ready</span></p>
+                        <p><span>Seconds until Start: </span><span :innerHTML="countdown"></span></p>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-dark" id="ready"
-                    @click="readyFunction" >Ready</button>
+                    <button type="button" class="btn btn-dark" id="ready" @click="readyFunction" :disabled="ready"
+                    :style="{ backgroundColor: ready ? 'green' : '', borderColor: ready ? 'green' : '' }" >
+                        <span v-if="ready" class="material-symbols-outlined">check</span>
+                            Ready
+                    </button>
                     <button type="button" class="btn btn-dark" id="leaveLobby">Leave <span class="material-symbols-outlined">
                         exit_to_app
                     </span></button>
@@ -820,7 +823,7 @@ const postMessage = () => {
         success: function (data) {
             const message = document.getElementById('your-message');
             message.value = '';
-            websocket.send(JSON.stringify({event: "refreshChats"}));
+            this.websocket.send(JSON.stringify({event: "refreshChats"}));
         },
         error: function (err) {
             console.error("Failed sending message: %o", err);
