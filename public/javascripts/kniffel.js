@@ -48,11 +48,13 @@ app.component('game', {
     },
     methods: {
         getCurrentDiceCup() {
-            $.ajax({url: '/dicecup', method: 'GET', success: (data) => {
+            $.ajax({
+                url: '/dicecup', method: 'GET', success: (data) => {
                     this.incup = data.dicecup.incup
                     this.stored = data.dicecup.stored
                     this.remainingDices = data.dicecup.remainingDices
-                }})
+                }
+            })
 
         },
         generatePopoverContent() {
@@ -73,6 +75,7 @@ app.component('game', {
                         id: this.playerID,
                         timestamp: timestamp
                     }));
+                    console.log(this.playerID)
                     if (this.playerID === 0) {
                         this.active = true;
                     }
@@ -547,14 +550,15 @@ app.component('lobby', {
 app.component('navbar', {
     data() {
         return {
-            isRunning: false
+            isRunning: false,
+            actionActive: false
         }
     },
     created() {
-        this.isRunning = fetch('/isRunning')
+        this.actionActive = this.isGameRoute()
     },
     updated() {
-        this.isRunning = fetch('/isRunning')
+        this.actionActive = this.isGameRoute()
     },
     methods: {
         isGameRoute() {
@@ -643,12 +647,45 @@ app.component('navbar', {
 
 app.component('chat', {
     data() {
-        return {}
+        return {
+            chatActive: false,
+            messages: []
+        }
+    },
+    updated() {
+        this.chatActive = this.isGameRoute()
     },
     methods: {
         isGameRoute() {
+            console.log("here")
             return window.location.href === '/kniffel';
+        },
+        refreshChat() {
+            const listOfMessages = document.getElementById("list");
+            // for future authorization
+            /*let username = "chatUser";
+            let password = "";
+            let credentials = username + ":" + password;
+            let authToken = "Basic " + btoa(credentials);*/
+            $.ajax({
+                method: "GET", dataType: "json", url: getCookie("chatUrl"),
+                success: function (data) {
+                    listOfMessages.innerHTML = "";
+                    this.messages = data.messages;
+                    messages.forEach((message) => {
+                        const content = message.content;
+                        const author = message.author;
+                        const minutesAgo = Math.round((new Date() - new Date(message.created_at)) / 60000);
+                        const fullMessage = `<li>${content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
+                        listOfMessages.insertAdjacentHTML("afterbegin", fullMessage);
+                    });
+                },
+                error: function (err) {
+                    console.error("Failed reloading messages: %o", err);
+                }
+            });
         }
+
     },
     template: `
         <div style="display: none" class="chatContainer" id="chatContainer">
@@ -667,17 +704,20 @@ app.component('chat', {
                         </form>
 
                         <div id="messages">
-                            <ul class="list-unstyled" id="list"></ul>
-                            <button class="btn btn-light" id="refresh">
+                            <ul class="list-unstyled" id="list">
+                                <li v-for="message in messages" :key="message.id">
+                                    {{ message.content }} (posted <span class="date">{{ calculateMinutesAgo(message.created_at) }} minutes ago</span>) by {{ message.author }}
+                                </li>
+                            </ul>
+                            <button class="btn btn-light" @click="refreshChat">
                                 <span class="material-symbols-outlined">refresh</span>
                             </button>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
-        <button hidden class="btn btn-dark" id="chatButton" v-if="isGameRoute">
+        <button class="btn btn-dark" id="chatButton" @click="">
             <span class="material-symbols-outlined">chat</span>
         </button>
    
@@ -721,31 +761,7 @@ function waitForAnimationEnd(element) {
 }
 
 
-function refreshChat() {
-    const listOfMessages = document.getElementById("list");
-    // for future authorization
-    /*let username = "chatUser";
-    let password = "";
-    let credentials = username + ":" + password;
-    let authToken = "Basic " + btoa(credentials);*/
-    $.ajax({
-        method: "GET", dataType: "json", url: getCookie("chatUrl"),
-        success: function (data) {
-            listOfMessages.innerHTML = "";
-            const messages = data.messages;
-            messages.forEach((message) => {
-                const content = message.content;
-                const author = message.author;
-                const minutesAgo = Math.round((new Date() - new Date(message.created_at)) / 60000);
-                const fullMessage = `<li>${content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
-                listOfMessages.insertAdjacentHTML("afterbegin", fullMessage);
-            });
-        },
-        error: function (err) {
-            console.error("Failed reloading messages: %o", err);
-        }
-    });
-}
+
 
 const postMessage = () => {
     const comment = document.getElementById("your-message");
