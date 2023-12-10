@@ -12,6 +12,10 @@ app.component('game', {
             playerName: "",
             isDice: false,
             matrix: [],
+            controller: {},
+            currentPlayer: 0,
+            numberOfPlayers: 0,
+            players: [],
             firstColumn: [
                 "assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
                 "assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "total", "bonus from 63",
@@ -44,7 +48,8 @@ app.component('game', {
         this.initSocket()
     },
     updated() {
-        this.getCurrentDiceCup()
+        // this.getCurrentDiceCup()
+        // this.getCurrentField()
     },
     methods: {
         getCurrentDiceCup() {
@@ -57,8 +62,16 @@ app.component('game', {
             })
 
         },
-        generatePopoverContent() {
-            "BUUH"
+        getCurrentField() {
+          $.ajax({
+              url: '/field', type: 'GET', success: (data) => {
+                  this.matrix = data.controller.field.rows;
+                  this.controller = data.controller;
+                  this.currentPlayer = data.controller.game.currentPlayerID;
+                  this.numberOfPlayers = this.matrix[0].length;
+                  this.players = this.controller.game.players;
+              }
+          })
         },
         initSocket() {
             this.gameSocket.onopen = (event) => {
@@ -193,6 +206,15 @@ app.component('game', {
             bootstrap.Popover.Default.allowList.td = [];
 
             // field
+            $.ajax({
+                url: '/field', type: 'GET', success: (data) => {
+                    this.matrix = data.controller.field.rows;
+                    this.controller = data.controller;
+                    this.currentPlayer = data.controller.game.currentPlayerID;
+                    this.numberOfPlayers = this.matrix[0].length;
+                    this.players = this.controller.game.players;
+                }
+            })
             // buildField()
         },
         waitForPlayer(callback) {
@@ -226,6 +248,11 @@ app.component('game', {
                         this.incup = e.data.incup
                         this.stored = e.data.stored
                         this.remainingDices = e.data.remainingDices
+                        this.controller = e.data.controller
+                        if (this.controller) {
+                            this.matrix = this.controller.field.rows;
+                            this.currentPlayer = this.controller.game.currentPlayerID;
+                        }
                     } else if (JSON.parse(e.data).dicecup !== undefined) {
                         console.log("DiceCup Changed");
                         if (JSON.parse(e.data).isDice) {
@@ -239,6 +266,7 @@ app.component('game', {
                             // buildField();
                         }
                     } else if (JSON.parse(e.data).field !== undefined) {
+                        this.matrix = e.data.field.rows;
                         // buildField()
                         /*console.log("Field Changed")*/
                     } else if (JSON.parse(e.data).event === "turnChangedMessageEvent") {
@@ -265,53 +293,128 @@ app.component('game', {
                 }
             };
 
+        },
+        generatePopoverContent() {
+            let content =  "<table class='popover-table'><tr>";
+            for (let row = 0; row < this.matrix.length; row++) {
+                if (row === 6) {
+                    content += "</tr><tr>"
+                }
+                if (this.matrix[row][this.currentPlayer] === "") {
+                    if (row < 6) {
+                        content += `<td><img src='assets/images/${row + 1}.png'/></td>`;
+                    } else if (row === 9 || row === 10 || row === 14) {
+                        content += `<td><div>${this.bottomPart[row]}</div></td>`;
+                    } else if (row === 11 || row === 15) {
+                        content += `<td><span class='material-symbols-outlined'>${this.bottomPart[row]}</span></td>`;
+                    } else if (row === 12 || row === 13) {
+                        content += `<td><img src='assets/images/${this.bottomPart[row]}'/></td>`;
+                    }
+                }
+            }
+            content += "</tr></table>"
+            return content;
         }
-
-
     },
     template:
         `
         <!--  DICEBOARD   -->
         <div class="d-flex justify-content-center">
-        <div class="board">
-        <div class="diceBoard">
-            <div class="cup" style="background: none; animation: none;">
-                <div class="diceInCup" id="diceInCup">
-                    <div v-for="(diceValue, index) in incup" v-bind:key="index" 
-                        v-bind:class="'dice d' + (index + 1) + ' dice_' + diceValue + ' inCup'"
-                        v-bind:value="diceValue" v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}" 
-                        @click="putOut(diceValue)">
-                        
+            <div class="board">
+            <div class="diceBoard">
+                <div class="cup" style="background: none; animation: none;">
+                    <div class="diceInCup" id="diceInCup">
+                        <div v-for="(diceValue, index) in incup" v-bind:key="index" 
+                            v-bind:class="'dice d' + (index + 1) + ' dice_' + diceValue + ' inCup'"
+                            v-bind:value="diceValue" v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}" 
+                            @click="putOut(diceValue)">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>    
+            <div class="actionBox">
+                <img src="assets/images/dicecup_small.png" id="remDice3" v-bind:disabled="remainingDices < 2"/>
+                <img src="assets/images/dicecup_small.png" id="remDice2" v-bind:disabled="remainingDices < 1"/>
+                <img src="assets/images/dicecup_small.png" id="remDice1" v-bind:disabled="remainingDices < 0"/>
+                <button type="button" style="margin-top: 5px" id="allInButton" class="btn btn-dark" 
+                @click="putAllIn" :disabled="!active">
+                    <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+                </button>
+                <button type="button" style="margin-top: 5px;" id="diceButton" class="btn btn-dark"
+                        @click="dice" v-bind:disabled="remainingDices < 0 | !active">
+                    <img style="margin-top: -5px;" width="40px" src="assets/images/flying_dices_small_white.png"/>
+                </button>
+            </div>
+            <div class="diceStorage" id="diceStorage">
+                <div id="diceStorage">
+                    <div v-for="(diceValue, index) in stored" v-bind:key="index" v-on:click="putIn(diceValue)"
+                         v-bind:class="'dice dice_' + diceValue + ' stored'" v-bind:value="diceValue"
+                         v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}">
                     </div>
                 </div>
             </div>
-        </div>    
-        <div class="actionBox">
-            <img src="assets/images/dicecup_small.png" id="remDice3" v-bind:disabled="remainingDices < 2"/>
-            <img src="assets/images/dicecup_small.png" id="remDice2" v-bind:disabled="remainingDices < 1"/>
-            <img src="assets/images/dicecup_small.png" id="remDice1" v-bind:disabled="remainingDices < 0"/>
-            <button type="button" style="margin-top: 5px" id="allInButton" class="btn btn-dark" 
-            @click="putAllIn" :disabled="!active">
-                <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
-            </button>
-            <button type="button" style="margin-top: 5px;" id="diceButton" class="btn btn-dark"
-                    @click="dice" v-bind:disabled="remainingDices < 0 | !active">
-                <img style="margin-top: -5px;" width="40px" src="assets/images/flying_dices_small_white.png"/>
-            </button>
-        </div>
-        <div class="diceStorage" id="diceStorage">
-            <div id="diceStorage">
-                <div v-for="(diceValue, index) in stored" v-bind:key="index" v-on:click="putIn(diceValue)"
-                     v-bind:class="'dice dice_' + diceValue + ' stored'" v-bind:value="diceValue"
-                     v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}">
-                </div>
-            </div>
         </div>
     </div>
+    <div style="" class="col gamecontainer">
+       <div class="game">
+          <div class="table-container">
+             <table class="gameTable" id="gameTable">
+                <thead>
+                   <tr class="main-heading">
+                      <th><button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button></th>
+                      <th>
+                        <button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" 
+                        data-bs-toggle="popover" data-bs-title="Available Options" data-bs-placement="bottom" data-bs-trigger="hover" 
+                        :data-bs-content="generatePopoverContent()">Available Options</button>
+                      </th>
+                      <th v-for="i in this.numberOfPlayers">{{this.players[0][i-1].name}}</th>
+                   </tr>
+                </thead>
+                <tr v-for="row in 19">
+                    <template v-if="row <= 6">
+                        <td><button class="btnAction"><img :src="this.firstColumn[row-1]"></button></td>
+                        <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
+                    </template>
+                    <template v-else-if="(row-1) > 8 && (row-1) < 16">
+                        <td><button class="btnAction">{{this.firstColumn[row-1]}}</button></td>
+                        <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
+                    </template>
+                    <template v-else>
+                         <td>{{this.firstColumn[row-1]}}</td>
+                         <template v-if="row === 8">
+                            <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
+                         </template>
+                         <template v-else>
+                            <td class="secondColumn"><span class="material-symbols-outlined">arrow_right_alt</span></td>
+                         </template>
+                    </template>
+                    <template v-for="col in this.numberOfPlayers">
+                        <template v-if="(col-1) === this.currentPlayer">
+                            <td class="activeCol"><span class="cell">{{this.matrix[row-1][col-1]}}</span></td>
+                        </template>
+                        <template v-else>
+                            <td><span class="cell">{{this.matrix[row-1][col-1]}}</span></td>
+                        </template>
+                    </template>
+                </tr>
+             </table>
+          </div>
+          <script src="/assets/javascripts/kniffel.js" type="text/javascript"></script>
+          <script>
+             $(document).ready(function () {
+                 if (false) {
+                     document.getElementById('actionSave').classList.add('disabled');
+                     document.getElementById('actionUndo').classList.add('disabled');
+                     document.getElementById('actionRedo').classList.add('disabled');
+                     document.getElementById('actionGame').classList.add('disabled');
+                 }
+             });
+          </script>
+       </div>
     </div>
+`
         <!--  FIELD  -->
-    
-        `
 });
 
 app.component('lobby', {
@@ -909,3 +1012,33 @@ function buildTableFromJson(jsonData) {
     $('[data-bs-toggle="popover"]').popover();
     deactivateTableButtons();
 }
+
+$(document).ready(function () {
+    // field popover
+    bootstrap.Popover.Default.allowList.table = [];
+    bootstrap.Popover.Default.allowList.thead = [];
+    bootstrap.Popover.Default.allowList.tbody = [];
+    bootstrap.Popover.Default.allowList.tr = [];
+    bootstrap.Popover.Default.allowList.td = [];
+
+    const thScrollDown = document.getElementById('scrollDown');
+    thScrollDown.onclick = function () {
+        document.querySelector('.table-container').scrollIntoView();
+    }
+});
+
+/*function setNameT(name, value) {
+let cookiesArray = document.cookie.split(';')
+for (let i = 0; i < cookiesArray.length; i++) {
+let cookie = cookiesArray[i].trim();
+if (cookie.startsWith(` ${name}=`)) {
+cookiesArray[i] = `${name}=${value}`
+document.cookie = cookiesArray.join(';')
+return
+}
+}
+document.cookie = `${name}=${value};${document.cookie}`;
+}*/
+
+
+
