@@ -7,7 +7,7 @@ app.component('game', {
             remainingDices: 2,
             stored: [],
             active: false,
-            websocket: undefined,
+            gameSocket: undefined,
             playerID: 0,
             playerName: "",
             isDice: false,
@@ -43,16 +43,31 @@ app.component('game', {
         this.connectGameSocket()
         this.initSocket()
     },
+    updated() {
+        this.getCurrentDiceCup()
+    },
     methods: {
+        getCurrentDiceCup() {
+            $.ajax({url: '/dicecup', method: 'GET', success: (data) => {
+                    this.incup = data.dicecup.incup
+                    this.stored = data.dicecup.stored
+                    this.remainingDices = data.dicecup.remainingDices
+                }})
+
+        },
+        generatePopoverContent() {
+            "BUUH"
+        },
         initSocket() {
-            this.websocket.onopen = function (event) {
+            this.gameSocket.onopen = (event) => {
                 this.waitForPlayer((p) => {
                     const player = JSON.parse(p);
                     this.playerID = player.id;
                     this.playerName = player.name
+                    console.log(this.playerName)
                     const timestamp = player.timestamp;
                     this.onWebSocketOpen();
-                    this.websocket.send(JSON.stringify({
+                    this.gameSocket.send(JSON.stringify({
                         event: "playerJoined",
                         name: this.playerName,
                         id: this.playerID,
@@ -66,13 +81,14 @@ app.component('game', {
             }
         },
         dice() {
+            console.log("AAA")
             $.ajax({
                 url: '/dice',
                 method: 'GET',
                 success: function (data) {
-                    this.incup = data.incup
-                    this.stored = data.stored
-                    this.remainingDices = data.remainingDices
+                    this.incup = data.dicecup.incup
+                    this.stored = data.dicecup.stored
+                    this.remainingDices = data.dicecup.remainingDices
                 },
                 error: function () {
                     console.error('Failed to get dicecup JSON.');
@@ -82,10 +98,10 @@ app.component('game', {
         putIn(diceElement) {
             $.ajax({
                 url: '/in', type: 'GET', data: {
-                    'in': diceElement.getAttribute('value')
+                    'in': diceElement
                 }, success: function (data) {
-                    this.incup = data.incup
-                    this.stored = data.stored
+                    this.incup = data.dicecup.incup
+                    this.stored = data.dicecup.stored
                 },
                 error: function () {
                     console.error('Failed to get dicecup JSON.');
@@ -96,10 +112,10 @@ app.component('game', {
         putOut(diceElement) {
             $.ajax({
                 url: '/out', type: 'GET', data: {
-                    'out': diceElement.getAttribute('value')
+                    'out': diceElement
                 }, success: function (data) {
-                    this.incup = data.incup
-                    this.stored = data.stored
+                    this.incup = data.dicecup.incup
+                    this.stored = data.dicecup.stored
                 },
                 error: function () {
                     console.error('Failed to get dicecup JSON.');
@@ -110,8 +126,8 @@ app.component('game', {
             $.ajax({
                 url: '/in/all', type: 'GET',
                 success: function (data) {
-                    this.diceCup = data.incup
-                    this.diceStorage = data.stored
+                    this.incup = data.dicecup.incup
+                    this.stored = data.dicecup.stored
                 },
                 error: function () {
                     console.error('Failed to get dicecup JSON.');
@@ -125,7 +141,7 @@ app.component('game', {
                 },
                 success: function () {
                     console.log("call nextRound");
-                    this.websocket.send(JSON.stringify({event: "nextRound"}));
+                    this.gameSocket.send(JSON.stringify({event: "nextRound"}));
                 },
                 error: function () {
                     console.error('Failed to write down the result from the last move.');
@@ -155,9 +171,9 @@ app.component('game', {
             // diceCup
             $.ajax({
                 url: '/dicecup', type: 'GET', success: function (data) {
-                    this.incup = data.incup
-                    this.remainingDices = data.remainingDices
-                    this.stored = data.stored
+                    this.incup = data.dicecup.incup
+                    this.remainingDices = data.dicecup.remainingDices
+                    this.stored = data.dicecup.stored
                 },
 
 
@@ -174,7 +190,7 @@ app.component('game', {
             bootstrap.Popover.Default.allowList.td = [];
 
             // field
-            buildField()
+            // buildField()
         },
         waitForPlayer(callback) {
             const player = sessionStorage['player'];
@@ -190,20 +206,20 @@ app.component('game', {
         },
         connectGameSocket() {
 
-            this.websocket = new WebSocket("ws://localhost:9000/websocket");
+            this.gameSocket = new WebSocket("ws://localhost:9000/websocket");
 
-            this.websocket.onclose = function () {
+            this.gameSocket.onclose = function () {
                 console.log('Connection with Websocket Closed!');
             };
 
-            this.websocket.onerror = function (error) {
+            this.gameSocket.onerror = function (error) {
                 console.log('Error in Websocket Occured: ' + error);
             };
 
-            this.websocket.onmessage = function (e) {
+            this.gameSocket.onmessage = (e) => {
                 if (typeof e.data === "string") {
                     if (JSON.parse(e.data).controller !== undefined) {
-                        buildTableFromJson(JSON.parse(e.data));
+                        // buildTableFromJson(JSON.parse(e.data));
                         this.incup = e.data.incup
                         this.stored = e.data.stored
                         this.remainingDices = e.data.remainingDices
@@ -217,14 +233,14 @@ app.component('game', {
                             this.incup = JSON.parse(e.data).dicecup.incup
                             this.remainingDices = JSON.parse(e.data).dicecup.remainingDices
                             this.stored = JSON.parse(e.data).dicecup.stored
-                            buildField();
+                            // buildField();
                         }
                     } else if (JSON.parse(e.data).field !== undefined) {
-                        buildField()
+                        // buildField()
                         /*console.log("Field Changed")*/
                     } else if (JSON.parse(e.data).event === "turnChangedMessageEvent") {
-                        console.log("playerID: " + playerID + "; currentTurn: " + JSON.parse(e.data).currentTurn);
-                        if (playerID !== JSON.parse(e.data).currentTurn) {
+                        console.log("playerID: " + this.playerID + "; currentTurn: " + JSON.parse(e.data).currentTurn);
+                        if (this.playerID !== JSON.parse(e.data).currentTurn) {
                             this.active = false;
                             console.log("deactivate");
                             // deactivateButtons(true);
@@ -234,9 +250,9 @@ app.component('game', {
                             // deactivateButtons(false);
                         }
                         this.remainingDices = 2
-                        buildField();
+                        // buildField();
                     } else if (JSON.parse(e.data).event === "refreshChatsMessageEvent") {
-                        refreshChat()
+                        // refreshChat()
                     } else {
                         /*console.log("Other Change")*/
                     }/* else if (JSON.parse(e.data).game !== undefined) { // not in use yet
@@ -253,127 +269,45 @@ app.component('game', {
     template:
         `
         <!--  DICEBOARD   -->
-        <div class="diceBoard" id="diceBoard">
-            <div class="cup" style="background: url('assets/images/cup.png') no-repeat; animation: none;">
-                <div v-if="inCup" id="diceInCup">
-                    <div v-for="(diceValue, index) in incup"
-                        v-bind:key="index"
-                        class="dice"
-                        v-bind:class="'d' + (index + 1) + ' dice_' + diceValue + ' inCup'"
-                        v-bind:value="diceValue"
-                        v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}" 
-                        v-on:click="putOut(diceValue)">
+        <div class="d-flex justify-content-center">
+        <div class="board">
+        <div class="diceBoard">
+            <div class="cup" style="background: none; animation: none;">
+                <div class="diceInCup" id="diceInCup">
+                    <div v-for="(diceValue, index) in incup" v-bind:key="index" 
+                        v-bind:class="'dice d' + (index + 1) + ' dice_' + diceValue + ' inCup'"
+                        v-bind:value="diceValue" v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}" 
+                        @click="putOut(diceValue)">
                         
-                        
-                    </div>
-                </div>
-                <div class="actionBox">
-                    <img src="assets/images/dicecup_small.png" id="remDice3" v-bind:disabled="remainingDices < 2"/>
-                    <img src="assets/images/dicecup_small.png" id="remDice2" v-bind:disabled="remainingDices < 1"/>
-                    <img src="assets/images/dicecup_small.png" id="remDice1" v-bind:disabled="remainingDices < 0"/>
-                    <button type="button" style="margin-top: 5px" id="allInButton" class="btn btn-dark" 
-                    v-on:click="putAllIn">
-                        <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
-                    </button>
-                    <button type="button" style="margin-top: 5px;" id="diceButton" class="btn btn-dark"
-                            v-on:click="dice" v-bind:disabled="remainingDices < 0">
-                        <img style="margin-top: -5px;" width="40px" src="assets/images/flying_dices_small_white.png"/>
-                    </button>
-                </div>
-                <div class="diceStorage" id="diceStorage">
-                    <div v-if="storage" id="diceStorage">
-                        <div v-for="(diceStorage, index) in locked"
-                             v-bind:key="index"
-                             v-on:click="putIn(diceValue)"
-                             class="dice"
-                             v-bind:class="'d' + (index + 1) + ' dice_' + diceValue + ' stored'"
-                             v-bind:value="diceValue"
-                             v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}"
-                        >
-                        </div>
                     </div>
                 </div>
             </div>
+        </div>    
+        <div class="actionBox">
+            <img src="assets/images/dicecup_small.png" id="remDice3" v-bind:disabled="remainingDices < 2"/>
+            <img src="assets/images/dicecup_small.png" id="remDice2" v-bind:disabled="remainingDices < 1"/>
+            <img src="assets/images/dicecup_small.png" id="remDice1" v-bind:disabled="remainingDices < 0"/>
+            <button type="button" style="margin-top: 5px" id="allInButton" class="btn btn-dark" 
+            @click="putAllIn" :disabled="!active">
+                <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+            </button>
+            <button type="button" style="margin-top: 5px;" id="diceButton" class="btn btn-dark"
+                    @click="dice" v-bind:disabled="remainingDices < 0 | !active">
+                <img style="margin-top: -5px;" width="40px" src="assets/images/flying_dices_small_white.png"/>
+            </button>
         </div>
+        <div class="diceStorage" id="diceStorage">
+            <div id="diceStorage">
+                <div v-for="(diceValue, index) in stored" v-bind:key="index" v-on:click="putIn(diceValue)"
+                     v-bind:class="'dice dice_' + diceValue + ' stored'" v-bind:value="diceValue"
+                     v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}">
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
         <!--  FIELD  -->
-    <div>
-    <table id="gameTable">
-      <thead>
-        <tr class="main-heading">
-          <th>
-            <button type="button" class="btn btn-block" @click="scrollDown">
-              <span class="material-symbols-outlined">expand_content</span>
-            </button>
-          </th>
-          <th>
-            <button
-              id="popoverButton"
-              type="button"
-              class="btn btn-dark"
-              data-bs-html="true"
-              data-bs-container="body"
-              data-bs-toggle="popover"
-              data-bs-title="Available Options"
-              data-bs-placement="bottom"
-              data-bs-trigger="hover"
-              :data-bs-content="generatePopoverContent()"
-            >
-              Available Options
-            </button>
-          </th>
-          <th v-for="player in controller.game.players[0]" :key="player.name">
-            {{ player.name }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, rowIndex) in matrix" :key="rowIndex">
-          <td v-for="(col, colIndex) in matrix[0].length + 2" :key="colIndex">
-            <template v-if="colIndex === 0">
-              <button
-                v-if="rowIndex < 6"
-                class="btnAction"
-                @click="writeTo(rowIndex + 1)"
-                :disabled="matrix[rowIndex][currentPlayer] !== ''"
-              >
-                <img v-if="rowIndex < 6" :src="firstColumn[rowIndex]" />
-              </button>
-              <button
-                v-else-if="rowIndex > 8 && rowIndex < 16"
-                class="btnAction"
-                @click="writeTo(writeDownMappingsForLowerPart[rowIndex - 9])"
-                :disabled="matrix[rowIndex][currentPlayer] !== ''"
-              >
-                {{ firstColumn[rowIndex] }}
-              </button>
-              <span v-else>{{ firstColumn[rowIndex] }}</span>
-            </template>
-            <template v-else-if="colIndex === 1" class="secondColumn">
-              <span
-                v-if="rowIndex === 6 || rowIndex === 8 || rowIndex > 15"
-                class="material-symbols-outlined"
-              >
-                arrow_right_alt
-              </span>
-              <span v-else>{{ secondColumn[rowIndex] }}</span>
-            </template>
-            <template v-else>
-              <span
-                v-if="colIndex === currentPlayer + 2"
-                class="activeCol"
-                class="cell"
-              >
-                {{ matrix[rowIndex][colIndex - 2] }}
-              </span>
-              <span v-else class="cell">
-                {{ matrix[rowIndex][colIndex - 2] }}
-              </span>
-            </template>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    
         `
 });
 
@@ -383,9 +317,7 @@ app.component('lobby', {
             playerID: 0,
             timestamp: 0,
             websocket: undefined,
-            // TODO: Braucht man beides? //
             playersCount: 0,
-            numberOfPlayers: 0,
             playersReady: 0,
             countdown: 60,
             ready: false,
@@ -419,8 +351,8 @@ app.component('lobby', {
         connectWebSocket(playerName) {
             const countdown = document.getElementById("countdown");
             this.websocket = new WebSocket("ws://localhost:9000/lobbyWebsocket");
-
-            this.websocket.onopen =  (event) => {
+            this.playerName = playerName
+            this.websocket.onopen = (event) => {
                 this.websocket.send(JSON.stringify({event: "newPlayer", name: playerName}));
                 /*$.ajax({
                     method: "GET", url: '/isRunning',
@@ -447,7 +379,11 @@ app.component('lobby', {
                     this.countdown = (60 - Math.floor(data.time / 1000)).toString()
                     this.playersCount = data.numberOfPlayers;
                     if ((data.readyCount === this.playersCount && this.playersCount > 1) || data.startGame) {
-                        this.websocket.send(JSON.stringify({event: "startGame", name: this.playerName, playerID: this.playerID}));
+                        this.websocket.send(JSON.stringify({
+                            event: "startGame",
+                            name: this.playerName,
+                            playerID: this.playerID
+                        }));
                     }
                 } else if (data.event === "newPlayerMessageEvent") {
                     this.playerID = data.id;
@@ -455,7 +391,6 @@ app.component('lobby', {
                     this.playersCount = data.numberOfPlayers;
                     this.playersReady = data.readyCount
                 } else if (data.event === "readyMessageEvent") {
-                    console.log(data.readyCount)
                     this.playersReady = data.readyCount
                 } else if (data.event === "newGameMessageEvent") {
                     const playerData = {'id': this.playerID, 'name': this.playerName, 'timestamp': this.timestamp};
@@ -499,23 +434,24 @@ app.component('lobby', {
                     const response = JSON.parse(event.data);
                     resolve(response);
                 }
+
                 this.websocket.addEventListener('message', handleMessage);
             });
         },
         updateGameState() {
-            $.ajax({url: '/isRunning', method: 'GET', success: function (data) {
-                this.isRunning =  data.isRunning
-                }})
+            $.ajax({
+                url: '/isRunning', method: 'GET', success: function (data) {
+                    this.isRunning = data.isRunning
+                }
+            })
         }
     },
     created() {
         this.updateGameState()
-        console.log(this.isRunning)
 
     },
     updated() {
         this.updateGameState()
-        console.log(this.isRunning)
 
     },
     unmounted() {
@@ -534,11 +470,7 @@ app.component('lobby', {
             <div style="text-align: center">
                 <label class="label yourNameLabel" for="yourName">Your Name:</label>
                 <input v-model="yourName" class="input" id="yourName" type="text" placeholder="Your Name here" />
-                <button
-                  :disabled="isJoinButtonDisabled"
-                  type="button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#confirmationDialog"
+                <button :disabled="isJoinButtonDisabled" type="button" data-bs-toggle="modal" data-bs-target="#confirmationDialog"
                   class="startButton btn btn-dark"
                   @click="connectWebSocket(yourName)"
                 >
@@ -636,9 +568,16 @@ app.component('navbar', {
                 }
             })
         },
+        // TODO: undo redo load müssen noch umgebaut werden (load schon angefangen. geht das so überhaupt?)
         load() {
             $.ajax({
                 url: '/load', method: 'GET',
+                success: (data) => {
+                    this.incup = data.controller.dicecup.incup
+                    this.remainingDices = data.controller.dicecup.remainingDices
+                    this.stored = data.controller.dicecup.stored
+                    this.matrix = data.controller.field.rows
+                },
                 error: function () {
                     console.error('Failed to load game.');
                 }
