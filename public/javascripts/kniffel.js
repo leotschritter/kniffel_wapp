@@ -257,6 +257,7 @@ app.component('game', {
                     } else if (JSON.parse(e.data).dicecup !== undefined) {
                         console.log("DiceCup Changed");
                         if (JSON.parse(e.data).isDice) {
+                            this.diceCupAnimationStart();
                             this.incup = JSON.parse(e.data).dicecup.incup
                             this.remainingDices = JSON.parse(e.data).dicecup.remainingDices
                             this.stored = JSON.parse(e.data).dicecup.stored
@@ -315,6 +316,32 @@ app.component('game', {
             }
             content += "</tr></table>"
             return content;
+        },
+        restart() {
+            $.ajax({
+                url: '/restart', type: 'GET', success:  () => {
+                    window.location.href = '/';
+                }
+            });
+        },
+        diceCupAnimationStart() {
+            const animatedElement = document.querySelector('.cup');
+            const diceCupAudio = new Audio('assets/sounds/dice_sound.mp3');
+            animatedElement.addEventListener('animationstart', () => {
+                diceCupAudio.play().then();
+                for (const die of document.getElementById('diceInCup').children) {
+                    die.style.visibility = 'hidden';
+                }
+            });
+            animatedElement.style = "animation: 'auto ease 0s 1 normal none running'; background: url('/assets/images/cup.png')";
+            animatedElement.classList.add('showCup');
+            waitForAnimationEnd(animatedElement).then(() => {
+                animatedElement.style.background = 'none';
+                animatedElement.style.animation = 'none';
+                for (const die of document.getElementById('diceInCup').children) {
+                    die.style.visibility = 'visible';
+                }
+            });
         }
     },
     template:
@@ -323,11 +350,11 @@ app.component('game', {
         <div class="d-flex justify-content-center">
             <div class="board">
             <div class="diceBoard">
-                <div class="cup" style="background: none; animation: none;">
+                <div class="cup" style="background: none">
                     <div class="diceInCup" id="diceInCup">
                         <div v-for="(diceValue, index) in incup" v-bind:key="index" 
                             v-bind:class="'dice d' + (index + 1) + ' dice_' + diceValue + ' inCup'"
-                            v-bind:value="diceValue" v-bind:style="{visibility: 'visible', pointerEvents: active ? 'unset' : 'none'}" 
+                            v-bind:value="diceValue" v-bind:style="{pointerEvents: active ? 'unset' : 'none', visibility: 'visible'}" 
                             @click="putOut(diceValue)">
                             
                         </div>
@@ -363,7 +390,10 @@ app.component('game', {
              <table class="gameTable" id="gameTable">
                 <thead>
                    <tr class="main-heading">
-                      <th><button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button></th>
+                      <th>
+                          <button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button>
+                          <!--button type="button" class="btn btn-block" @click="restart">restart</button-->
+                      </th>
                       <th>
                         <button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" 
                         data-bs-toggle="popover" data-bs-title="Available Options" data-bs-placement="bottom" data-bs-trigger="hover" 
