@@ -180,6 +180,7 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
           /*controller.game.setActorRef((Json.parse(msg) \ "id").as[Int], out)
           out ! Json.obj("event" -> "turnChangedMessageEvent", "currentTurn" -> controller.getGame.getPlayerID).toString*/
           val player = Player((Json.parse(msg) \ "id").as[String], (Json.parse(msg) \ "name").as[String], Option(out), (Json.parse(msg) \ "timestamp").as[Long])
+          println("ACTORREF: " + player.actorRef.get)
           players = players :+ player
           players = players.sortWith((player1, player2) => player1.timeStamp < player2.timeStamp)
           out ! Json.obj("event" -> "turnChangedMessageEvent", "currentTurn" -> players(playersTurn).id).toString
@@ -247,6 +248,7 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
           println((Json.parse(msg) \ "name").as[String] + " joined Lobby")
         } else if ((Json.parse(msg) \ "event").as[String].equals("ready")) {
           readyCount += 1
+          // TODO: do this fo r each player
           out ! Json.obj("event" -> "readyMessageEvent", "readyCount" -> readyCount).toString
         } else if ((Json.parse(msg) \ "event").as[String].equals("closeConnection")) {
           readyCount = if ((Json.parse(msg) \ "ready").as[Boolean]) readyCount - 1 else readyCount

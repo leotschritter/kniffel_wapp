@@ -45,11 +45,6 @@ app.component('game', {
     },
     created() {
         this.connectGameSocket()
-        this.initSocket()
-    },
-    updated() {
-        // this.getCurrentDiceCup()
-        // this.getCurrentField()
     },
     methods: {
         getCurrentDiceCup() {
@@ -73,29 +68,7 @@ app.component('game', {
               }
           })
         },
-        initSocket() {
-            this.gameSocket.onopen = (event) => {
-                this.waitForPlayer((p) => {
-                    const player = JSON.parse(p);
-                    this.playerID = player.id;
-                    this.playerName = player.name
-                    console.log(this.playerName)
-                    const timestamp = player.timestamp;
-                    this.onWebSocketOpen();
-                    this.gameSocket.send(JSON.stringify({
-                        event: "playerJoined",
-                        name: this.playerName,
-                        id: this.playerID,
-                        timestamp: timestamp
-                    }));
-                    console.log(this.playerID)
-                    if (this.playerID === 0) {
-                        this.active = true;
-                    }
-                });
-                console.log("Connected to Websocket");
-            }
-        },
+
         dice() {
             console.log("AAA")
             $.ajax({
@@ -155,7 +128,13 @@ app.component('game', {
                 url: '/write', type: 'GET', data: {
                     'to': index
                 },
-                success: function () {
+                success:  (data) => {
+                    this.matrix = data.controller.field.rows;
+                    this.controller = data.controller;
+                    this.currentPlayer = data.controller.game.currentPlayerID;
+                    this.numberOfPlayers = this.matrix[0].length;
+                    this.players = this.controller.game.players;
+                    console.log(this.players)
                     console.log("call nextRound");
                     this.gameSocket.send(JSON.stringify({event: "nextRound"}));
                 },
@@ -186,7 +165,7 @@ app.component('game', {
 
             // diceCup
             $.ajax({
-                url: '/dicecup', type: 'GET', success: function (data) {
+                url: '/dicecup', type: 'GET', success:  (data) => {
                     this.incup = data.dicecup.incup
                     this.remainingDices = data.dicecup.remainingDices
                     this.stored = data.dicecup.stored
@@ -232,6 +211,29 @@ app.component('game', {
         connectGameSocket() {
 
             this.gameSocket = new WebSocket("ws://localhost:9000/websocket");
+
+            this.gameSocket.onopen = (event) => {
+                this.waitForPlayer((p) => {
+                    const player = JSON.parse(p);
+                    this.playerID = player.id;
+                    this.playerName = player.name
+                    console.log(this.playerName)
+                    const timestamp = player.timestamp;
+                    this.onWebSocketOpen();
+                    this.gameSocket.send(JSON.stringify({
+                        event: "playerJoined",
+                        name: this.playerName,
+                        id: this.playerID,
+                        timestamp: timestamp
+                    }));
+                    console.log(this.playerID)
+                    if (this.playerID === 0) {
+                        this.active = true;
+                    }
+                });
+                console.log("Connected to Websocket");
+            }
+
 
             this.gameSocket.onclose = function () {
                 console.log('Connection with Websocket Closed!');
@@ -373,11 +375,11 @@ app.component('game', {
                 </thead>
                 <tr v-for="row in 19">
                     <template v-if="row <= 6">
-                        <td><button class="btnAction"><img :src="this.firstColumn[row-1]"></button></td>
+                        <td><button class="btnAction" @click="writeTo(row)" :disabled="!this.active"><img :src="this.firstColumn[row-1]"></button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else-if="(row-1) > 8 && (row-1) < 16">
-                        <td><button class="btnAction">{{this.firstColumn[row-1]}}</button></td>
+                        <td><button class="btnAction" @click="writeTo(writeDownMappingsForLowerPart[row-10])" :disabled="!this.active">{{this.firstColumn[row-1]}}</button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else>
@@ -400,21 +402,9 @@ app.component('game', {
                 </tr>
              </table>
           </div>
-          <script src="/assets/javascripts/kniffel.js" type="text/javascript"></script>
-          <script>
-             $(document).ready(function () {
-                 if (false) {
-                     document.getElementById('actionSave').classList.add('disabled');
-                     document.getElementById('actionUndo').classList.add('disabled');
-                     document.getElementById('actionRedo').classList.add('disabled');
-                     document.getElementById('actionGame').classList.add('disabled');
-                 }
-             });
-          </script>
        </div>
     </div>
 `
-        <!--  FIELD  -->
 });
 
 app.component('lobby', {
@@ -490,6 +480,9 @@ app.component('lobby', {
                             name: this.playerName,
                             playerID: this.playerID
                         }));
+
+
+
                     }
                 } else if (data.event === "newPlayerMessageEvent") {
                     this.playerID = data.id;
@@ -500,6 +493,7 @@ app.component('lobby', {
                     this.playersReady = data.readyCount
                 } else if (data.event === "newGameMessageEvent") {
                     const playerData = {'id': this.playerID, 'name': this.playerName, 'timestamp': this.timestamp};
+                    this.players = data.players
                     this.setPlayerInSessionStorage(playerData, () => {
                         if (data.isInitiator) {
                             fetch('/new?players=' + data.players).then(() => {
@@ -1013,6 +1007,7 @@ function buildTableFromJson(jsonData) {
     deactivateTableButtons();
 }
 
+/*
 $(document).ready(function () {
     // field popover
     bootstrap.Popover.Default.allowList.table = [];
@@ -1026,6 +1021,7 @@ $(document).ready(function () {
         document.querySelector('.table-container').scrollIntoView();
     }
 });
+*/
 
 /*function setNameT(name, value) {
 let cookiesArray = document.cookie.split(';')
