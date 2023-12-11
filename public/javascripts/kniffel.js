@@ -335,9 +335,9 @@ app.component('game', {
                 </div>
             </div>    
             <div class="actionBox">
-                <img src="assets/images/dicecup_small.png" id="remDice3" v-bind:disabled="remainingDices < 2"/>
-                <img src="assets/images/dicecup_small.png" id="remDice2" v-bind:disabled="remainingDices < 1"/>
-                <img src="assets/images/dicecup_small.png" id="remDice1" v-bind:disabled="remainingDices < 0"/>
+                <img src="assets/images/dicecup_small.png" id="remDice3" v-bind:style="remainingDices < 2 ? 'opacity: 0.3' : 'opacity: 1'"/>
+                <img src="assets/images/dicecup_small.png" id="remDice2" v-bind:style="remainingDices < 1 ? 'opacity: 0.3' : 'opacity: 1'"/>
+                <img src="assets/images/dicecup_small.png" id="remDice1" v-bind:style="remainingDices < 0 ? 'opacity: 0.3' : 'opacity: 1'"/>
                 <button type="button" style="margin-top: 5px" id="allInButton" class="btn btn-dark" 
                 @click="putAllIn" :disabled="!active">
                     <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
