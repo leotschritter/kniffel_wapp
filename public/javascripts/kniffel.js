@@ -68,7 +68,6 @@ app.component('game', {
               }
           })
         },
-
         dice() {
             console.log("AAA")
             $.ajax({
@@ -480,9 +479,6 @@ app.component('lobby', {
                             name: this.playerName,
                             playerID: this.playerID
                         }));
-
-
-
                     }
                 } else if (data.event === "newPlayerMessageEvent") {
                     this.playerID = data.id;
@@ -491,9 +487,10 @@ app.component('lobby', {
                     this.playersReady = data.readyCount
                 } else if (data.event === "readyMessageEvent") {
                     this.playersReady = data.readyCount
+                } else if (data.event === "closeConnectionMessageEvent") {
+                    $('#confirmationDialog').modal('hide');
                 } else if (data.event === "newGameMessageEvent") {
                     const playerData = {'id': this.playerID, 'name': this.playerName, 'timestamp': this.timestamp};
-                    this.players = data.players
                     this.setPlayerInSessionStorage(playerData, () => {
                         if (data.isInitiator) {
                             fetch('/new?players=' + data.players).then(() => {
@@ -544,17 +541,18 @@ app.component('lobby', {
                     this.isRunning = data.isRunning
                 }
             })
+        },
+        leaveLobby() {
+            this.websocket.send(JSON.stringify({event: "closeConnection", playerID: this.playerID, ready: this.ready}));
+        },
+        openConfirmationDialog() {
+            $('#leaveLobbyConfirmationDialog').modal('show')
         }
     },
     created() {
-        this.updateGameState()
-
+        this.updateGameState();
     },
-    updated() {
-        this.updateGameState()
-
-    },
-    unmounted() {
+    beforeDestroy() {
         this.closeSocketConnection().then(() => {
             return confirm();
         })
@@ -616,7 +614,7 @@ app.component('lobby', {
                         <span v-if="ready" class="material-symbols-outlined">check</span>
                             Ready
                     </button>
-                    <button type="button" class="btn btn-dark" id="leaveLobby">Leave <span class="material-symbols-outlined">
+                    <button type="button" class="btn btn-dark" id="leaveLobby" @click="openConfirmationDialog">Leave <span class="material-symbols-outlined">
                         exit_to_app
                     </span></button>
                 </div>
@@ -634,8 +632,7 @@ app.component('lobby', {
                     <p>Are you sure you want to leave?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal" id="btnConfirm"
-                    v-on:click="closeSocketConnection">Yes</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal" id="btnConfirm" @click="leaveLobby">Yes</button>
                     <button type="button" class="btn btn-dark" data-bs-dismiss="modal" id="no">No</button>
                 </div>
             </div>
@@ -1021,7 +1018,7 @@ $(document).ready(function () {
         document.querySelector('.table-container').scrollIntoView();
     }
 });
-*/
+ */
 
 /*function setNameT(name, value) {
 let cookiesArray = document.cookie.split(';')

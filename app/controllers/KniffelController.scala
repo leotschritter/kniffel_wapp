@@ -177,11 +177,9 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
         out ! controller.toJson.toString
         println("Sent Json to Client " + msg)
         if ((Json.parse(msg) \ "event").as[String].equals("playerJoined")) {
-          /*controller.game.setActorRef((Json.parse(msg) \ "id").as[Int], out)
-          out ! Json.obj("event" -> "turnChangedMessageEvent", "currentTurn" -> controller.getGame.getPlayerID).toString*/
-          val player = Player((Json.parse(msg) \ "id").as[String], (Json.parse(msg) \ "name").as[String], Option(out), (Json.parse(msg) \ "timestamp").as[Long])
-          println("ACTORREF: " + player.actorRef.get)
-          players = players :+ player
+          players = players.map { player => if (player.id == (Json.parse(msg) \ "id").as[String]) { player.copy(actorRef = Option(out), timeStamp = (Json.parse(msg) \ "timestamp").as[Long])} else { player }}
+          /*val player = Player((Json.parse(msg) \ "id").as[String], (Json.parse(msg) \ "name").as[String], Option(out), (Json.parse(msg) \ "timestamp").as[Long])
+          players = players :+ player*/
           players = players.sortWith((player1, player2) => player1.timeStamp < player2.timeStamp)
           out ! Json.obj("event" -> "turnChangedMessageEvent", "currentTurn" -> players(playersTurn).id).toString
           println((Json.parse(msg) \ "name").as[String] + " joined Game")
@@ -248,13 +246,14 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
           println((Json.parse(msg) \ "name").as[String] + " joined Lobby")
         } else if ((Json.parse(msg) \ "event").as[String].equals("ready")) {
           readyCount += 1
-          // TODO: do this fo r each player
+          // TODO: do this for each player
           out ! Json.obj("event" -> "readyMessageEvent", "readyCount" -> readyCount).toString
         } else if ((Json.parse(msg) \ "event").as[String].equals("closeConnection")) {
           readyCount = if ((Json.parse(msg) \ "ready").as[Boolean]) readyCount - 1 else readyCount
-          System.out.println((Json.parse(msg) \ "playerID").as[String])
+          System.out.println("close connection for " + (Json.parse(msg) \ "playerID").as[String])
           players = players.filter(p => !p.id.contains((Json.parse(msg) \ "playerID").as[String]))
           numberOfPlayers -= 1
+          out ! Json.obj("event" -> "closeConnectionMessageEvent").toString
         } else if ((Json.parse(msg) \ "event").as[String].equals("startGame")) {
           if (players.map(p => p.id).indexOf((Json.parse(msg) \ "playerID").as[String]) == 0) {
             out ! Json.obj("event" -> "newGameMessageEvent", "players" -> players.map(p => p.name).mkString(","), "isInitiator" -> true).toString
