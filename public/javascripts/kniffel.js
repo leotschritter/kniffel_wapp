@@ -342,6 +342,12 @@ app.component('game', {
                     die.style.visibility = 'visible';
                 }
             });
+        },
+        zoomIntoField() {
+            const thScrollDown = document.getElementById('scrollDown');
+            thScrollDown.onclick = function () {
+                document.querySelector('.table-container').scrollIntoView();
+            }
         }
     },
     template:
@@ -391,8 +397,10 @@ app.component('game', {
                 <thead>
                    <tr class="main-heading">
                       <th>
-                          <button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button>
-                          <!--button type="button" class="btn btn-block" @click="restart">restart</button-->
+                          <button type="button" id="scrollDown" class="btn btn-block" @click="zoomIntoField">
+                            <span class="material-symbols-outlined">expand_content</span>
+                          </button>
+                          <button type="button" class="btn btn-block" @click="restart">restart</button>
                       </th>
                       <th>
                         <button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" 
