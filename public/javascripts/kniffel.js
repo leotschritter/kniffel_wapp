@@ -45,6 +45,7 @@ app.component('game', {
     },
     created() {
         this.connectGameSocket()
+
     },
     methods: {
         getCurrentDiceCup() {
@@ -69,7 +70,6 @@ app.component('game', {
           })
         },
         dice() {
-            console.log("AAA")
             $.ajax({
                 url: '/dice',
                 method: 'GET',
@@ -101,7 +101,7 @@ app.component('game', {
             $.ajax({
                 url: '/out', type: 'GET', data: {
                     'out': diceElement
-                }, success: function (data) {
+                }, success: (data) => {
                     this.incup = data.dicecup.incup
                     this.stored = data.dicecup.stored
                 },
@@ -113,7 +113,7 @@ app.component('game', {
         putAllIn() {
             $.ajax({
                 url: '/in/all', type: 'GET',
-                success: function (data) {
+                success: (data) => {
                     this.incup = data.dicecup.incup
                     this.stored = data.dicecup.stored
                 },
@@ -127,7 +127,7 @@ app.component('game', {
                 url: '/write', type: 'GET', data: {
                     'to': index
                 },
-                success:  (data) => {
+                success: (data) => {
                     this.matrix = data.controller.field.rows;
                     this.controller = data.controller;
                     this.currentPlayer = data.controller.game.currentPlayerID;
@@ -282,7 +282,7 @@ app.component('game', {
                             // deactivateButtons(false);
                         }
                         this.remainingDices = 2
-                        // buildField();
+                        this.getCurrentField()
                     } else if (JSON.parse(e.data).event === "refreshChatsMessageEvent") {
                         // refreshChat()
                     } else {
@@ -374,11 +374,11 @@ app.component('game', {
                 </thead>
                 <tr v-for="row in 19">
                     <template v-if="row <= 6">
-                        <td><button class="btnAction" @click="writeTo(row)" :disabled="!this.active"><img :src="this.firstColumn[row-1]"></button></td>
+                        <td><button class="btnAction" @click="writeTo(row)" :disabled="(!this.active)||matrix[row-1][currentPlayer]!==''"><img :src="this.firstColumn[row-1]"></button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else-if="(row-1) > 8 && (row-1) < 16">
-                        <td><button class="btnAction" @click="writeTo(writeDownMappingsForLowerPart[row-10])" :disabled="!this.active">{{this.firstColumn[row-1]}}</button></td>
+                        <td><button class="btnAction" @click="writeTo(writeDownMappingsForLowerPart[row-10])" :disabled="(!this.active)||matrix[row-1][currentPlayer]!==''">{{this.firstColumn[row-1]}}</button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else>
@@ -651,9 +651,6 @@ app.component('navbar', {
     created() {
         this.actionActive = this.isGameRoute()
     },
-    updated() {
-        this.actionActive = this.isGameRoute()
-    },
     methods: {
         isGameRoute() {
             return window.location.href === "/kniffel";
@@ -713,7 +710,7 @@ app.component('navbar', {
                         <li class="nav-item">
                             <a id="actionGame" class="nav-link" href="/kniffel">Game</a>
                         </li>
-                        <li id="actions" style="display: none" class="nav-item dropdown" v-if="isGameRoute">
+                        <li id="actions" style="display: none" class="nav-item dropdown" v-if="actionActive">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Action
                             </a>
@@ -750,21 +747,27 @@ app.component('chat', {
         this.chatActive = this.isGameRoute()
     },
     methods: {
-        isGameRoute() {
-            console.log("here")
-            return window.location.href === '/kniffel';
+        getChatUrl() {
+            $.ajax({url:'/chatid', method: 'GET', success: (data) =>
+                this.chatUrl = `http://85.215.67.144/${data}/messages`
+            })
+        },
+        toggleShowChat() {
+          this.showChat = !this.showChat
         },
         refreshChat() {
-            const listOfMessages = document.getElementById("list");
+            if (this.chatUrl === '') {
+                this.getChatUrl()
+            }
             // for future authorization
             /*let username = "chatUser";
             let password = "";
             let credentials = username + ":" + password;
             let authToken = "Basic " + btoa(credentials);*/
             $.ajax({
-                method: "GET", dataType: "json", url: getCookie("chatUrl"),
+                method: "GET", dataType: "json", url: this.chatUrl,
                 success: function (data) {
-                    listOfMessages.innerHTML = "";
+                    console.log('HERE: ' + data.messages)
                     this.messages = data.messages;
                     messages.forEach((message) => {
                         const content = message.content;
@@ -779,10 +782,9 @@ app.component('chat', {
                 }
             });
         }
-
     },
     template: `
-        <div style="display: none" class="chatContainer" id="chatContainer">
+        <div v-if="showChat" class="chatContainer" id="chatContainer">
             <div>
                 <div class="col-6">
                     <div id="chatroom">
@@ -792,9 +794,9 @@ app.component('chat', {
                         <form action="#" id="comment-form">
                             <div class="form-group">
                                 <label for="your-message">Your comment</label>
-                                <textarea type="text" name="content" id="your-message" class="form-control" placeholder="Here is my message.."></textarea>
+                                <textarea type="text" name="content" id="your-message" class="form-control" placeholder="Here is my message.." v-model="message"></textarea>
                             </div>
-                            <input style="margin-top: 10px" type="submit" value="Send" class="btn btn-light" id="submit">
+                            <input style="margin-top: 10px" type="submit" value="Send" class="btn btn-light" id="submit" @click="$emit(post, message)">
                         </form>
 
                         <div id="messages">
@@ -811,7 +813,7 @@ app.component('chat', {
                 </div>
             </div>
         </div>
-        <button class="btn btn-dark" id="chatButton" @click="">
+        <button class="btn btn-dark" id="chatButton" @click="toggleShowChat">
             <span class="material-symbols-outlined">chat</span>
         </button>
    
@@ -819,31 +821,6 @@ app.component('chat', {
 })
 
 app.mount('#container');
-
-
-function buildField() {
-    $.ajax({
-        url: '/field', type: 'GET', success: function (data) {
-            buildTableFromJson(data)
-        }, error: function () {
-            console.error('Failed to build Table from JSON.');
-        }
-    })
-}
-
-
-function deactivateTableButtons() {
-    if (active)
-        return;
-    const table = document.getElementById('gameTable');
-    const trCollection = table.getElementsByTagName('TR')
-    for (let i = 1; i < trCollection.length; i++) {
-        const btnCollection = trCollection[i].getElementsByTagName('BUTTON');
-        for (const btn of btnCollection) {
-            btn.disabled = true;
-        }
-    }
-}
 
 function waitForAnimationEnd(element) {
     return new Promise(resolve => {
@@ -853,185 +830,3 @@ function waitForAnimationEnd(element) {
         });
     });
 }
-
-
-
-
-const postMessage = () => {
-    const comment = document.getElementById("your-message");
-    // for future authorization
-    /*let username = "chatUser";
-    let password = "";
-    let credentials = username + ":" + password;
-    let authToken = "Basic " + btoa(credentials);*/
-
-    const myMessage = {author: JSON.parse(sessionStorage['player']).name, content: comment.value};
-    $.ajax({
-        type: "POST", url: getCookie("chatUrl"),
-        data: JSON.stringify(myMessage),
-        success: function (data) {
-            const message = document.getElementById('your-message');
-            message.value = '';
-            this.websocket.send(JSON.stringify({event: "refreshChats"}));
-        },
-        error: function (err) {
-            console.error("Failed sending message: %o", err);
-        }
-    });
-};
-
-/*function setNameT(name, value) {
-let cookiesArray = document.cookie.split(';')
-for (let i = 0; i < cookiesArray.length; i++) {
-let cookie = cookiesArray[i].trim();
-if (cookie.startsWith(` ${name}=`)) {
-cookiesArray[i] = `${name}=${value}`
-document.cookie = cookiesArray.join(';')
-return
-}
-}
-document.cookie = `${name}=${value};${document.cookie}`;
-}*/
-
-
-function buildTableFromJson(jsonData) {
-    const controller = jsonData.controller;
-    const matrix = jsonData.controller.field.rows;
-    const currentPlayer = jsonData.controller.game.currentPlayerID;
-
-    const gameTable = document.getElementById('gameTable');
-    gameTable.innerHTML = '';
-
-    const thead = document.createElement('thead');
-    const trHeading = document.createElement('tr');
-    const thScrollDown = document.createElement('th');
-    const thPopoverButton = document.createElement('th');
-
-    trHeading.className = "main-heading";
-    thScrollDown.innerHTML = '<button type="button" id="scrollDown" class="btn btn-block"><span class="material-symbols-outlined">expand_content</span></button>';
-    thPopoverButton.innerHTML = '<button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" ' +
-        'data-bs-toggle="popover" data-bs-title="Available Options" data-bs-placement="bottom" data-bs-trigger="hover" ' +
-        '' + 'data-bs-content="' + ("<table class='popover-table'><tr>" + (new Array(19).fill().map((_, row) => {
-            if (row === 6) {
-                return '</tr><tr>';
-            }
-            if (matrix[row][currentPlayer] === '') {
-                if (row < 6) {
-                    return `<td><img src='assets/images/${row + 1}.png'/></td>`;
-                } else if (row === 9 || row === 10 || row === 14) {
-                    return `<td><div>${bottomPart[row]}</div></td>`;
-                } else if (row === 11 || row === 15) {
-                    return `<td><span class='material-symbols-outlined'>${bottomPart[row]}</span></td>`;
-                } else if (row === 12 || row === 13) {
-                    return `<td><img src='assets/images/${bottomPart[row]}'/></td>`;
-                }
-            }
-        })).toString().replaceAll(",", "") + '</tr></table>').toString() + '\"' + '>Available Options</button>'
-    ;
-
-    thScrollDown.onclick = function () {
-        document.querySelector('.table-container').scrollIntoView();
-    }
-
-
-    trHeading.appendChild(thScrollDown);
-    trHeading.appendChild(thPopoverButton);
-
-    for (let col = 0; col < matrix[0].length; col++) {
-        const thPlayer = document.createElement('th');
-        thPlayer.innerHTML = controller.game.players[0][col].name;
-        trHeading.appendChild(thPlayer);
-    }
-
-    thead.appendChild(trHeading);
-    gameTable.appendChild(thead);
-
-
-    for (let row = 0; row < matrix.length; row++) {
-        const tr = document.createElement('tr');
-
-        for (let col = 0; col < matrix[0].length + 2; col++) {
-            const td = document.createElement('td');
-
-            if (col === 0) {
-                if (row < 6) {
-                    const button = document.createElement('button');
-                    button.className = 'btnAction';
-                    button.innerHTML = `<img src="${firstColumn[row]}" />`;
-                    if (matrix[row][currentPlayer] !== '') {
-                        button.setAttribute("disabled", "disabled");
-                    }
-                    button.addEventListener('click', function () {
-                        writeTo(row + 1)
-                    });
-                    td.appendChild(button);
-                } else if (row > 8 && row < 16) {
-                    const button = document.createElement('button');
-                    button.className = 'btnAction';
-                    button.innerHTML = `${firstColumn[row]}`;
-                    if (matrix[row][currentPlayer] !== '') {
-                        button.setAttribute("disabled", "disabled");
-                    }
-                    button.addEventListener('click', function () {
-                        writeTo(writeDownMappingsForLowerPart[row - 9])
-                    });
-                    td.appendChild(button);
-                } else {
-
-                    td.innerHTML = `${firstColumn[row]}`;
-                }
-            } else if (col === 1) {
-                td.className = "secondColumn"
-                if (row === 6 || row === 8 || row > 15) {
-                    td.innerHTML = `<span class="material-symbols-outlined">arrow_right_alt</span>`
-                } else {
-                    td.innerHTML = `${secondColumn[row]}`
-                }
-
-            } else {
-                if (col === currentPlayer + 2) {
-                    td.className = 'activeCol';
-                }
-                td.innerHTML = `<span class="cell">${matrix[row][col - 2]}</span>`;
-            }
-
-            tr.appendChild(td);
-        }
-
-        gameTable.appendChild(tr);
-    }
-    $('[data-bs-toggle="popover"]').popover();
-    deactivateTableButtons();
-}
-
-/*
-$(document).ready(function () {
-    // field popover
-    bootstrap.Popover.Default.allowList.table = [];
-    bootstrap.Popover.Default.allowList.thead = [];
-    bootstrap.Popover.Default.allowList.tbody = [];
-    bootstrap.Popover.Default.allowList.tr = [];
-    bootstrap.Popover.Default.allowList.td = [];
-
-    const thScrollDown = document.getElementById('scrollDown');
-    thScrollDown.onclick = function () {
-        document.querySelector('.table-container').scrollIntoView();
-    }
-});
- */
-
-/*function setNameT(name, value) {
-let cookiesArray = document.cookie.split(';')
-for (let i = 0; i < cookiesArray.length; i++) {
-let cookie = cookiesArray[i].trim();
-if (cookie.startsWith(` ${name}=`)) {
-cookiesArray[i] = `${name}=${value}`
-document.cookie = cookiesArray.join(';')
-return
-}
-}
-document.cookie = `${name}=${value};${document.cookie}`;
-}*/
-
-
-
