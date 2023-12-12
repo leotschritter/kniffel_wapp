@@ -40,12 +40,16 @@ app.component('game', {
                 13: "big_street.png",
                 14: "5X",
                 15: "support"
-            }
+            },
+            showChat: false,
+            messageContent: '',
+            chatMessages: [],
+            chatUrl: ''
         }
     },
     created() {
         this.connectGameSocket()
-
+        this.getChatUrl()
     },
     methods: {
         getCurrentDiceCup() {
@@ -143,25 +147,6 @@ app.component('game', {
             })
         },
         onWebSocketOpen() {
-            // navigation
-            // TODO: Kann das weg? Wird grad in app.component('navbar'...) im template als on-click definiert.
-
-            /*
-                        document.getElementById('actions').style.display = "unset";
-
-                        document.getElementById('actionSave').addEventListener('click', function () {
-                            save()
-                        });
-                        document.getElementById('actionLoad').addEventListener('click', function () {
-                            load()
-                        });
-                        document.getElementById('actionUndo').addEventListener('click', function () {
-                            undo()
-                        });
-                        document.getElementById('actionRedo').addEventListener('click', function () {
-                            redo()
-                        });*/
-
             // diceCup
             $.ajax({
                 url: '/dicecup', type: 'GET', success:  (data) => {
@@ -169,20 +154,16 @@ app.component('game', {
                     this.remainingDices = data.dicecup.remainingDices
                     this.stored = data.dicecup.stored
                 },
-
-
                 error: function () {
                     console.error('Failed to get dicecup JSON.');
                 }
             });
-
             // field popover
             bootstrap.Popover.Default.allowList.table = [];
             bootstrap.Popover.Default.allowList.thead = [];
             bootstrap.Popover.Default.allowList.tbody = [];
             bootstrap.Popover.Default.allowList.tr = [];
             bootstrap.Popover.Default.allowList.td = [];
-
             // field
             $.ajax({
                 url: '/field', type: 'GET', success: (data) => {
@@ -193,7 +174,6 @@ app.component('game', {
                     this.players = this.controller.game.players;
                 }
             })
-            // buildField()
         },
         waitForPlayer(callback) {
             const player = sessionStorage['player'];
@@ -285,7 +265,7 @@ app.component('game', {
                         this.remainingDices = 2
                         this.getCurrentField()
                     } else if (JSON.parse(e.data).event === "refreshChatsMessageEvent") {
-                        // refreshChat()
+                        this.refreshChat()
                     } else {
                         /*console.log("Other Change")*/
                     }/* else if (JSON.parse(e.data).game !== undefined) { // not in use yet
@@ -348,6 +328,62 @@ app.component('game', {
             thScrollDown.onclick = function () {
                 document.querySelector('.table-container').scrollIntoView();
             }
+        }, sendChatMessage() {
+            if (this.chatUrl === '') {
+                this.getChatUrl()
+            }
+
+            // for future authorization
+            /*let username = "chatUser";
+            let password = "";
+            let credentials = username + ":" + password;
+            let authToken = "Basic " + btoa(credentials);*/
+
+            const myMessage = { author: this.playerName, content: this.messageContent };
+            $.ajax({
+                url: this.chatUrl, method: 'POST',
+                data: JSON.stringify(myMessage),
+                success: () => {
+                    this.gameSocket.send(JSON.stringify({event: "refreshChats"}));
+                },
+                error: function (err) {
+                    console.error("Failed sending message: %o", err);
+                }
+            });
+        },
+        getChatUrl() {
+            $.ajax({url:'/chatid', method: 'GET', success: (data) => {
+                console.log('Success: ' + data)
+                    this.chatUrl = "http://85.215.67.144/"+data +"/messages"
+                }, error: () => {
+                console.error("Couldn't recieve CHAT-URL from backend")}
+            } )
+        },
+        toggleShowChat() {
+            this.showChat = !this.showChat
+        },
+        refreshChat() {
+            if (this.chatUrl === '') {
+                this.getChatUrl()
+            }
+            // for future authorization
+            /*let username = "chatUser";
+            let password = "";
+            let credentials = username + ":" + password;
+            let authToken = "Basic " + btoa(credentials);*/
+            $.ajax({
+                method: "GET", dataType: "json", url: this.chatUrl,
+                success:  (data) => {
+                    this.chatMessages = data.messages;
+                    this.messageContent = ''
+                },
+                error: function (err) {
+                    console.error("Failed reloading messages: %o", err);
+                }
+            });
+        },
+        calculateMinutesAgo(date) {
+            return Math.round((new Date() - new Date(date)) / 60000)
         }
     },
     template:
@@ -412,11 +448,11 @@ app.component('game', {
                 </thead>
                 <tr v-for="row in 19">
                     <template v-if="row <= 6">
-                        <td><button class="btnAction" @click="writeTo(row)" :disabled="(!this.active)||matrix[row-1][currentPlayer]!==''"><img :src="this.firstColumn[row-1]"></button></td>
+                        <td><button class="btnAction" @click="writeTo(row)" :disabled="(!this.active)||matrix!==[]&&matrix[row-1][currentPlayer]!==''"><img :src="this.firstColumn[row-1]"></button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else-if="(row-1) > 8 && (row-1) < 16">
-                        <td><button class="btnAction" @click="writeTo(writeDownMappingsForLowerPart[row-10])" :disabled="(!this.active)||matrix[row-1][currentPlayer]!==''">{{this.firstColumn[row-1]}}</button></td>
+                        <td><button class="btnAction" @click="writeTo(writeDownMappingsForLowerPart[row-10])" :disabled="(!this.active)||matrix !== []&&matrix[row-1][currentPlayer]!==''">{{this.firstColumn[row-1]}}</button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else>
@@ -441,6 +477,39 @@ app.component('game', {
           </div>
        </div>
     </div>
+    
+        <div v-if="showChat" class="chatContainer" id="chatContainer">
+            <div>
+                <div class="col-6">
+                    <div id="chatroom">
+                        <button id="chatClose" style="float: right" type="button" class="btn-close" aria-label="Close" @click="toggleShowChat"></button>
+                        <h1>Chat-Room</h1>
+
+                        <form action="#" id="comment-form">
+                            <div class="form-group">
+                                <label for="your-message">Your comment</label>
+                                <textarea type="text" name="content" id="your-message" class="form-control" placeholder="Here is my message.." v-model="messageContent"></textarea>
+                            </div>
+                            <button type="button" style="margin-top: 10px" class="btn btn-light" id="submit" @click="sendChatMessage">Send</button>
+                        </form>
+
+                        <div id="messages">
+                            <ul class="list-unstyled" id="list">
+                                <li v-for="chatMessage in chatMessages">
+                                    {{ chatMessage.content }} (posted <span class="date">{{ calculateMinutesAgo(chatMessage.created_at) }} minutes ago</span>) by {{ chatMessage.author }}
+                                </li>
+                            </ul>
+                            <button class="btn btn-light">
+                                <span class="material-symbols-outlined">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+        <button class="btn btn-dark" id="chatButton" @click="toggleShowChat">
+            <span class="material-symbols-outlined">chat</span>
+        </button>    
 `
 });
 
@@ -706,102 +775,5 @@ app.component('navbar', {
             </div>
         </nav>
     `
-})
-;
-
-
-app.component('chat', {
-    data() {
-        return {
-            chatActive: false,
-            messages: [],
-            showChat: false
-        }
-    },
-    updated() {
-        this.chatActive = this.isGameRoute()
-    },
-    methods: {
-        getChatUrl() {
-            $.ajax({url:'/chatid', method: 'GET', success: (data) =>
-                this.chatUrl = `http://85.215.67.144/${data}/messages`
-            })
-        },
-        toggleShowChat() {
-          this.showChat = !this.showChat
-        },
-        refreshChat() {
-            if (this.chatUrl === '') {
-                this.getChatUrl()
-            }
-            // for future authorization
-            /*let username = "chatUser";
-            let password = "";
-            let credentials = username + ":" + password;
-            let authToken = "Basic " + btoa(credentials);*/
-            $.ajax({
-                method: "GET", dataType: "json", url: this.chatUrl,
-                success: function (data) {
-                    console.log('HERE: ' + data.messages)
-                    this.messages = data.messages;
-                    messages.forEach((message) => {
-                        const content = message.content;
-                        const author = message.author;
-                        const minutesAgo = Math.round((new Date() - new Date(message.created_at)) / 60000);
-                        const fullMessage = `<li>${content} (posted <span class="date">${minutesAgo} minutes ago</span>) by ${author}</li>`;
-                        listOfMessages.insertAdjacentHTML("afterbegin", fullMessage);
-                    });
-                },
-                error: function (err) {
-                    console.error("Failed reloading messages: %o", err);
-                }
-            });
-        }
-    },
-    template: `
-        <div v-if="showChat" class="chatContainer" id="chatContainer">
-            <div>
-                <div class="col-6">
-                    <div id="chatroom">
-                        <button id="chatClose" style="float: right" type="button" class="btn-close" aria-label="Close"></button>
-                        <h1>Chat-Room</h1>
-
-                        <form action="#" id="comment-form">
-                            <div class="form-group">
-                                <label for="your-message">Your comment</label>
-                                <textarea type="text" name="content" id="your-message" class="form-control" placeholder="Here is my message.." v-model="message"></textarea>
-                            </div>
-                            <input style="margin-top: 10px" type="submit" value="Send" class="btn btn-light" id="submit" @click="$emit(post, message)">
-                        </form>
-
-                        <div id="messages">
-                            <ul class="list-unstyled" id="list">
-                                <li v-for="message in messages" :key="message.id">
-                                    {{ message.content }} (posted <span class="date">{{ calculateMinutesAgo(message.created_at) }} minutes ago</span>) by {{ message.author }}
-                                </li>
-                            </ul>
-                            <button class="btn btn-light" @click="refreshChat">
-                                <span class="material-symbols-outlined">refresh</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button class="btn btn-dark" id="chatButton" @click="toggleShowChat">
-            <span class="material-symbols-outlined">chat</span>
-        </button>
-   
-    `
-})
-
+});
 app.mount('#container');
-
-function waitForAnimationEnd(element) {
-    return new Promise(resolve => {
-        element.addEventListener('animationend', function handler() {
-            element.removeEventListener('animationend', handler);
-            resolve();
-        });
-    });
-}
