@@ -664,59 +664,6 @@ app.component('lobby', {
 });
 
 app.component('navbar', {
-    data() {
-        return {
-            isRunning: false,
-            actionActive: false
-        }
-    },
-    created() {
-        this.actionActive = this.isGameRoute()
-    },
-    methods: {
-        isGameRoute() {
-            return window.location.href === "/kniffel";
-        },
-        save() {
-            $.ajax({
-                url: '/save', method: 'GET',
-                error: function () {
-                    console.error('Failed to save game.');
-                }
-            })
-        },
-        // TODO: undo redo load müssen noch umgebaut werden (load schon angefangen. geht das so überhaupt?)
-        load() {
-            $.ajax({
-                url: '/load', method: 'GET',
-                success: (data) => {
-                    this.incup = data.controller.dicecup.incup
-                    this.remainingDices = data.controller.dicecup.remainingDices
-                    this.stored = data.controller.dicecup.stored
-                    this.matrix = data.controller.field.rows
-                },
-                error: function () {
-                    console.error('Failed to load game.');
-                }
-            });
-        },
-        undo() {
-            $.ajax({
-                url: '/undo', method: 'GET',
-                error: function () {
-                    console.error('Failed to undo the last move.');
-                }
-            });
-        },
-        redo() {
-            $.ajax({
-                url: '/redo', method: 'GET',
-                error: function () {
-                    console.error('Failed to redo the previous move.');
-                }
-            });
-        }
-    },
     template: `
          <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
@@ -732,18 +679,7 @@ app.component('navbar', {
                         <li class="nav-item">
                             <a id="actionGame" class="nav-link" href="/kniffel">Game</a>
                         </li>
-                        <li id="actions" style="display: none" class="nav-item dropdown" v-if="actionActive">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Action
-                            </a>
-                            <ul class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a id="actionLoad" v-bind:disabled="!isRunning" v-on:click="load" class="dropdown-item" href="/kniffel">Load</a></li>
-                                <li><a id="actionSave" v-bind:disabled="!isRunning" v-on:click="save" class="dropdown-item" href="/kniffel">Save</a></li>
-                                <li><a id="actionUndo" v-bind:disabled="!isRunning" v-on:click="undo" class="dropdown-item" href="/kniffel">Undo</a></li>
-                                <li><a id="actionRedo" v-bind:disabled="!isRunning" v-on:click="redo" class="dropdown-item" href="/kniffel">Redo</a></li>
-                            </ul>
-                        </li>
+                        
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
@@ -762,7 +698,8 @@ app.component('chat', {
     data() {
         return {
             chatActive: false,
-            messages: []
+            messages: [],
+            showChat: false
         }
     },
     updated() {
