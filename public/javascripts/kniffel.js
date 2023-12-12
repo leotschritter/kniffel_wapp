@@ -44,8 +44,7 @@ app.component('game', {
         }
     },
     created() {
-        this.connectGameSocket()
-
+        this.connectGameSocket();
     },
     methods: {
         getCurrentDiceCup() {
@@ -175,13 +174,6 @@ app.component('game', {
                     console.error('Failed to get dicecup JSON.');
                 }
             });
-
-            // field popover
-            bootstrap.Popover.Default.allowList.table = [];
-            bootstrap.Popover.Default.allowList.thead = [];
-            bootstrap.Popover.Default.allowList.tbody = [];
-            bootstrap.Popover.Default.allowList.tr = [];
-            bootstrap.Popover.Default.allowList.td = [];
 
             // field
             $.ajax({
@@ -335,7 +327,7 @@ app.component('game', {
             });
             animatedElement.style = "animation: 'auto ease 0s 1 normal none running'; background: url('/assets/images/cup.png')";
             animatedElement.classList.add('showCup');
-            waitForAnimationEnd(animatedElement).then(() => {
+            this.waitForAnimationEnd(animatedElement).then(() => {
                 animatedElement.style.background = 'none';
                 animatedElement.style.animation = 'none';
                 for (const die of document.getElementById('diceInCup').children) {
@@ -348,6 +340,14 @@ app.component('game', {
             thScrollDown.onclick = function () {
                 document.querySelector('.table-container').scrollIntoView();
             }
+        },
+        waitForAnimationEnd(element) {
+            return new Promise(resolve => {
+                element.addEventListener('animationend', function handler() {
+                    element.removeEventListener('animationend', handler);
+                    resolve();
+                });
+            });
         }
     },
     template:
@@ -454,7 +454,6 @@ app.component('lobby', {
             playersReady: 0,
             countdown: 60,
             ready: false,
-            isRunning: false,
             yourName: ''
         }
 
@@ -573,27 +572,12 @@ app.component('lobby', {
                 this.websocket.addEventListener('message', handleMessage);
             });
         },
-        updateGameState() {
-            $.ajax({
-                url: '/isRunning', method: 'GET', success: function (data) {
-                    this.isRunning = data.isRunning
-                }
-            })
-        },
         leaveLobby() {
             this.websocket.send(JSON.stringify({event: "closeConnection", playerID: this.playerID, ready: this.ready}));
         },
         openConfirmationDialog() {
             $('#leaveLobbyConfirmationDialog').modal('show')
         }
-    },
-    created() {
-        this.updateGameState();
-    },
-    beforeDestroy() {
-        this.closeSocketConnection().then(() => {
-            return confirm();
-        })
     },
     template: `
     <div class="col startGame">
@@ -860,11 +844,32 @@ app.component('chat', {
 
 app.mount('#container');
 
-function waitForAnimationEnd(element) {
-    return new Promise(resolve => {
-        element.addEventListener('animationend', function handler() {
-            element.removeEventListener('animationend', handler);
-            resolve();
-        });
-    });
+let popoverActivated = false
+function waitForPopover() {
+    setTimeout(() => {
+        if (popoverActivated) {
+            bootstrap.Popover.Default.allowList.table = [];
+            bootstrap.Popover.Default.allowList.thead = [];
+            bootstrap.Popover.Default.allowList.tbody = [];
+            bootstrap.Popover.Default.allowList.tr = [];
+            bootstrap.Popover.Default.allowList.td = [];
+            return;
+        }
+        const popover = document.getElementById('popoverButton');
+        if (popover) {
+            new bootstrap.Popover(popover, {
+                sanitizeHtml: (input) => {
+                    const doc = new DOMParser().parseFromString(input, 'text/html');
+                    doc.querySelectorAll('table, thead, tbody, tr, td').forEach((el) => el.remove());
+                    return doc.body.innerHTML;
+                }
+            });
+            popoverActivated = true;
+        }
+        waitForPopover();
+    }, 100);
 }
+$(document).ready(function () {
+    $('[data-bs-toggle="popover"]').popover();
+    waitForPopover();
+});
