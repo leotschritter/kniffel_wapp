@@ -16,6 +16,7 @@ app.component('game', {
             currentPlayer: 0,
             numberOfPlayers: 0,
             players: [],
+            popoverContent: "",
             firstColumn: [
                 "assets/images/3_mal_1.png", "assets/images/3_mal_2.png", "assets/images/3_mal_3.png",
                 "assets/images/3_mal_4.png", "assets/images/3_mal_5.png", "assets/images/3_mal_6.png", "total", "bonus from 63",
@@ -70,6 +71,7 @@ app.component('game', {
                   this.currentPlayer = data.controller.game.currentPlayerID;
                   this.numberOfPlayers = this.matrix[0].length;
                   this.players = this.controller.game.players;
+                  this.popoverContent =  this.generatePopoverContent();
               }
           })
         },
@@ -137,6 +139,7 @@ app.component('game', {
                     this.currentPlayer = data.controller.game.currentPlayerID;
                     this.numberOfPlayers = this.matrix[0].length;
                     this.players = this.controller.game.players;
+                    this.popoverContent = this.generatePopoverContent()
                     console.log(this.players)
                     console.log("call nextRound");
                     this.gameSocket.send(JSON.stringify({event: "nextRound"}));
@@ -228,6 +231,7 @@ app.component('game', {
                         if (this.controller) {
                             this.matrix = this.controller.field.rows;
                             this.currentPlayer = this.controller.game.currentPlayerID;
+                            this.popoverContent = this.generatePopoverContent();
                         }
                     } else if (JSON.parse(e.data).dicecup !== undefined) {
                         console.log("DiceCup Changed");
@@ -244,6 +248,7 @@ app.component('game', {
                         }
                     } else if (JSON.parse(e.data).field !== undefined) {
                         this.matrix = e.data.field.rows;
+                        this.popoverContent =  this.generatePopoverContent();
                         // buildField()
                         /*console.log("Field Changed")*/
                     } else if (JSON.parse(e.data).event === "turnChangedMessageEvent") {
@@ -444,18 +449,18 @@ app.component('game', {
                       <th>
                         <button id="popoverButton" type="button" class="btn btn-dark" data-bs-html="true" data-bs-container="body" 
                         data-bs-toggle="popover" data-bs-title="Available Options" data-bs-placement="bottom" data-bs-trigger="hover" 
-                        :data-bs-content="generatePopoverContent()">Available Options</button>
+                        v-bind:data-bs-content="popoverContent">Available Options</button>
                       </th>
                       <th v-for="i in this.numberOfPlayers">{{this.players[0][i-1].name}}</th>
                    </tr>
                 </thead>
                 <tr v-for="row in 19">
                     <template v-if="row <= 6">
-                        <td><button class="btnAction" @click="writeTo(row)" :disabled="(!this.active)||matrix!==[]&&matrix[row-1][currentPlayer]!==''"><img :src="this.firstColumn[row-1]"></button></td>
+                        <td><button class="btnAction" @click="writeTo(row)" :disabled="(!this.active)||matrix.length > 0&&matrix[row-1][currentPlayer]!==''"><img :src="this.firstColumn[row-1]"></button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else-if="(row-1) > 8 && (row-1) < 16">
-                        <td><button class="btnAction" @click="writeTo(writeDownMappingsForLowerPart[row-10])" :disabled="(!this.active)||matrix !== []&&matrix[row-1][currentPlayer]!==''">{{this.firstColumn[row-1]}}</button></td>
+                        <td><button class="btnAction" @click="writeTo(writeDownMappingsForLowerPart[row-10])" :disabled="(!this.active)||matrix.length > 0&&matrix[row-1][currentPlayer]!==''">{{this.firstColumn[row-1]}}</button></td>
                         <td class="secondColumn">{{this.secondColumn[row-1]}}</td>
                     </template>
                     <template v-else>
