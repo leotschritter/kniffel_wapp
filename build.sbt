@@ -6,11 +6,11 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-scalaVersion := "2.13.12"
+scalaVersion := "2.12.18"
 
 libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0-RC2" % Test
-libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.1.1"
+libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
+libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "3.0.0"
 // WebJars Dependency for jQuery
 libraryDependencies += "org.webjars" % "jquery" % "3.6.0"
 PlayKeys.devSettings += "play.server.websocket.periodic-keep-alive-max-idle" -> "10 seconds"
