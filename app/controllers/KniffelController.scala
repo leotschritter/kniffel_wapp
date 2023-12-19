@@ -143,6 +143,10 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
     Ok(chatId)
   }
 
+  def getSuggestions: Action[AnyContent] = Action {
+    Ok(Json.toJsObject(controller.getSuggestions))
+  }
+
   def socket: WebSocket = WebSocket.accept[String, String] { request =>
     ActorFlow.actorRef { out =>
       println("Connect received")
@@ -189,7 +193,7 @@ class KniffelController @Inject()(cc: ControllerComponents)(implicit system: Act
           }*/
           playersTurn = (playersTurn + 1) % players.length
           for (player <- players) {
-            println("id: " + player.id);
+            println("id: " + player.id)
             player.actorRef.get ! Json.obj("event" -> "turnChangedMessageEvent", "currentTurn" -> players(playersTurn).id).toString
           }
         } else if ((Json.parse(msg) \ "event").as[String].equals("refreshChats")) {
