@@ -27,4 +27,6 @@ trait IDiceCup {
   def isRunning: Boolean
 
   def toJson: JsObject
+
+  def getSuggestions: ListMap[Int, Int]
 }

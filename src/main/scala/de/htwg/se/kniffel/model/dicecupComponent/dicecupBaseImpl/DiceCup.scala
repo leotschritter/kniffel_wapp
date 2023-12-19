@@ -1,11 +1,10 @@
 package de.htwg.se.kniffel
 package model.dicecupComponent.dicecupBaseImpl
 
-import model.dicecupComponent._
+import de.htwg.se.kniffel.model.dicecupComponent._
 import play.api.libs.json.{JsNumber, JsObject, Json}
 
 import scala.collection.immutable.ListMap
-import scala.util.Random
 
 case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends IDiceCup {
   def this() = this(List.fill(0)(0), List.fill(0)(0), 2)
@@ -71,6 +70,19 @@ case class DiceCup(locked: List[Int], inCup: List[Int], remDices: Int) extends I
       case _ => 0
     }
   }
+
+  private def suggestionsUpperPart: ListMap[Int, Int] = {
+    (9 to 15).map(n => n -> getResult(n)).to(ListMap)
+  }
+
+  private def suggestionsLowerPart: ListMap[Int, Int] = {
+    (0 to 5).map(n => n -> getResult(n)).to(ListMap)
+  }
+
+  override def getSuggestions: ListMap[Int, Int] = {
+    suggestionsUpperPart.concat(suggestionsLowerPart)
+  }
+
 
   def indexOfField: ListMap[String, Int] =
     ListMap("1" -> 0, "2" -> 1, "3" -> 2, "4" -> 3, "5" -> 4, "6" -> 5,

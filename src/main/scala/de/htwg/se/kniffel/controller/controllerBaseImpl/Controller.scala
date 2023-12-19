@@ -2,18 +2,20 @@ package de.htwg.se.kniffel
 package controller.controllerBaseImpl
 
 import com.google.inject.Inject
-import controller.{ControllerChanged, DiceCupChanged, IController, KniffelShutdown}
-import model.Move
-import model.dicecupComponent.IDiceCup
-import model.dicecupComponent.dicecupBaseImpl.DiceCup
-import model.fieldComponent.IField
-import model.fieldComponent.fieldBaseImpl.{Field, Matrix}
-import model.fileIOComponent.IFileIO
-import model.fileIOComponent.fileIOJsonImpl.FileIO
-import model.gameComponent.IGame
-import model.gameComponent.gameBaseImpl.{Game, Player}
-import util.UndoManager
+import de.htwg.se.kniffel.controller.{ControllerChanged, DiceCupChanged, IController, KniffelShutdown}
+import de.htwg.se.kniffel.model.Move
+import de.htwg.se.kniffel.model.dicecupComponent.IDiceCup
+import de.htwg.se.kniffel.model.dicecupComponent.dicecupBaseImpl.DiceCup
+import de.htwg.se.kniffel.model.fieldComponent.IField
+import de.htwg.se.kniffel.model.fieldComponent.fieldBaseImpl.{Field, Matrix}
+import de.htwg.se.kniffel.model.fileIOComponent.IFileIO
+import de.htwg.se.kniffel.model.fileIOComponent.fileIOJsonImpl.FileIO
+import de.htwg.se.kniffel.model.gameComponent.IGame
+import de.htwg.se.kniffel.model.gameComponent.gameBaseImpl.{Game, Player}
+import de.htwg.se.kniffel.util.UndoManager
 import play.api.libs.json.{JsObject, Json}
+
+import scala.collection.immutable.ListMap
 
 class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: IGame, var file: IFileIO) extends IController {
 
@@ -120,5 +122,9 @@ class Controller @Inject()(var field: IField, var diceCup: IDiceCup, var game: I
         this.getDicecup.toJson
           .deepMerge(this.getField.toJson)
           .deepMerge(this.getGame.toJson))
+  }
+
+  override def getSuggestions: ListMap[Int, Int] = {
+    diceCup.getSuggestions
   }
 }

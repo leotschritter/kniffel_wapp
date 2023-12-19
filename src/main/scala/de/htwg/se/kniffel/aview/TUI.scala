@@ -4,7 +4,7 @@ package aview
 import com.google.inject.Inject
 import de.htwg.se.kniffel.controller.IController
 import de.htwg.se.kniffel.model.Move
-import de.htwg.se.kniffel.util.{Event, Observer}
+import de.htwg.se.kniffel.util.Event
 
 import scala.io.StdIn.readLine
 import scala.swing.Reactor
@@ -50,7 +50,7 @@ class TUI @Inject()(controller: IController) extends Reactor {
           case Success(f) => val posAndDesc = list.tail.head
             val index: Option[Int] = controller.getDicecup.indexOfField.get(posAndDesc)
             if (index.isDefined && controller.canWrite(controller.getGame.getPlayerID, index.get)) {
-              Some(Move(controller.getDicecup.getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
+              Some(Move(controller.getDicecup.  getResult(index.get).toString, controller.getGame.getPlayerID, index.get))
             } else {
               println("Falsche Eingabe!")
               None

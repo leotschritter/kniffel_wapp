@@ -1,13 +1,13 @@
 package de.htwg.se.kniffel
 package controller
 
-import model.fieldComponent.IField
-import model.gameComponent.IGame
-import util.Observable
-import model.dicecupComponent.IDiceCup
-import model.Move
+import de.htwg.se.kniffel.model.Move
+import de.htwg.se.kniffel.model.dicecupComponent.IDiceCup
+import de.htwg.se.kniffel.model.fieldComponent.IField
+import de.htwg.se.kniffel.model.gameComponent.IGame
 import play.api.libs.json.JsObject
 
+import scala.collection.immutable.ListMap
 import scala.swing.Publisher
 
 trait IController extends Publisher {
@@ -50,6 +50,8 @@ trait IController extends Publisher {
   def newGame(players: List[String]): Unit
 
   def toJson: JsObject
+
+  def getSuggestions: ListMap[Int, Int]
 }
 
 import scala.swing.event.Event
