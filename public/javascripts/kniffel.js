@@ -187,7 +187,7 @@ app.component('game', {
         },
         connectGameSocket() {
 
-            this.gameSocket = new WebSocket("ws://85.215.67.144:9000/websocket");
+            this.gameSocket = new WebSocket("ws://localhost:9000/websocket");
 
             this.gameSocket.onopen = (event) => {
                 this.waitForPlayer((p) => {
@@ -559,7 +559,7 @@ app.component('lobby', {
         },
         connectWebSocket(playerName) {
             const countdown = document.getElementById("countdown");
-            this.websocket = new WebSocket("ws://85.215.67.144:9000/lobbyWebsocket");
+            this.websocket = new WebSocket("ws://localhost:9000/lobbyWebsocket");
             this.playerName = playerName
             this.websocket.onopen = (event) => {
                 this.websocket.send(JSON.stringify({event: "newPlayer", name: playerName}));
