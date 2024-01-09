@@ -43,6 +43,8 @@ GET         /isRunning      controllers.KniffelController.isRunning()
 
 GET         /chatid         controllers.KniffelController.getChatId
 
+GET         /suggestions    controllers.KniffelController.getSuggestions
+
 GET         /websocket      controllers.KniffelController.socket
 
 GET         /lobbyWebsocket controllers.KniffelController.lobbySocket
